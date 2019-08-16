@@ -1,0 +1,18 @@
+<resources>
+    <string name="app_name">DivideFacil</string>
+    <string name="texto_btn_Concluir">Concluir</string>
+    <string name="texto_tela_Inicial">Quem está no rolê?</string>
+    <string name="texto_btn_AdicionarPessoa">Adicionar Pessoa</string>
+    <string name="valor_conta">Total: R$00,00</string>
+    <string name="valor_10_por_cento">Valor 10%: R$00,00</string>
+    <string name="texto_btn_TelaPessoas">Adicionar pessoa</string>
+    <string name="texto_btn_AdicionarComida">Adicionar Produto</string>
+    <string name="texto_btn_FecharConta">Fechar conta</string>
+    <string name="nome_pessoa">Nome Pessoa</string>
+    <string name="texto_btn_Pagar">Pagar valor pessoal</string>
+    <string name="login">Login</string>
+    <string name="e_mail">e-mail</string>
+    <string name="senha">Senha</string>
+    <string name="texto_btn_cadastro">novo cadastro</string>
+    <string name="texto_btn_entrar">entrar</string>
+</resources>

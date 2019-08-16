@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "1023305664205",
+    "firebase_url": "https://dividefacil-554e1.firebaseio.com",
+    "project_id": "dividefacil-554e1",
+    "storage_bucket": "dividefacil-554e1.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1023305664205:android:93afbf73332ecc8f",
+        "android_client_info": {
+          "package_name": "com.example.octaq.dividefacil"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1023305664205-18577p1nccb8i65vj3lb75jqsirc4k4m.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.octaq.dividefacil",
+            "certificate_hash": "4846929b7d9a44c4084dfbfcda170f76c7f2c130"
+          }
+        },
+        {
+          "client_id": "1023305664205-sfeqqvcpdik9p091ono57pgvvraqntkl.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCjGyEUNteS-OQyK4r1d0pKTLRZXllJgWA"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1023305664205-sfeqqvcpdik9p091ono57pgvvraqntkl.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
