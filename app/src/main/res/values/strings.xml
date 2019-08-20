@@ -13,6 +13,6 @@
     <string name="login">Login</string>
     <string name="e_mail">e-mail</string>
     <string name="senha">Senha</string>
-    <string name="texto_btn_cadastro">novo cadastro</string>
+    <string name="texto_btn_cadastro">Não tenho cadastro</string>
     <string name="texto_btn_entrar">entrar</string>
 </resources>
