@@ -9,6 +9,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.InputType;
 import android.text.method.PasswordTransformationMethod;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
 import android.widget.Button;
@@ -16,10 +17,19 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
+import com.google.android.gms.auth.api.signin.GoogleSignIn;
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
+import com.google.android.gms.auth.api.signin.GoogleSignInClient;
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
+import com.google.android.gms.common.SignInButton;
+import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.auth.GoogleAuthProvider;
 
 public class TelaLogin extends AppCompatActivity {
 
@@ -28,6 +38,12 @@ public class TelaLogin extends AppCompatActivity {
     EditText senha;
     Button concluirLogin;
     Button novoCadastro;
+
+    //Variáveis para o logIn no firebase pelo Google
+    GoogleSignInClient mGoogleSignInClient;
+    SignInButton signInButton;
+    int RC_SIGN_IN;
+    private FirebaseAuth mAuth;
 
     public final static String EXTRA_UID = "com.example.octaq.dividefacil.UID";
 
@@ -38,10 +54,18 @@ public class TelaLogin extends AppCompatActivity {
 
         email = findViewById(R.id.textEmail);
         senha = findViewById(R.id.textSenha);
-
         concluirLogin = findViewById(R.id.btn_Login);
         novoCadastro = findViewById(R.id.btn_NovoCadastro);
-        final FirebaseAuth mAuth = FirebaseAuth.getInstance();
+
+        //Inicializa os objetos necessários para utilizar o logIn no firebase pelo google
+        GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                .requestIdToken(getString(R.string.default_web_client_id))
+                .requestEmail()
+                .build();
+        mGoogleSignInClient = GoogleSignIn.getClient(this, gso);
+        signInButton = findViewById(R.id.google_sign_in_button);
+        RC_SIGN_IN = 1;
+        mAuth = FirebaseAuth.getInstance();
 
         novoCadastro.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -95,7 +119,7 @@ public class TelaLogin extends AppCompatActivity {
                                                 if (task.isSuccessful()) {
 
                                                     Toast toast = Toast.makeText(TelaLogin.this, "Novo usuário criado com sucesso!",Toast.LENGTH_SHORT);
-                                                    toast.setGravity(Gravity.CENTER_HORIZONTAL | Gravity.CENTER_VERTICAL, 0, 0);
+                                                    toast.setGravity(Gravity.CENTER_HORIZONTAL | Gravity.BOTTOM, 0, 0);
                                                     toast.show();
 
                                                     //Copia os dados do novo usuário para a tela de login
@@ -104,19 +128,19 @@ public class TelaLogin extends AppCompatActivity {
                                                 } else {
                                                     // If sign in fails, display a message to the user.
                                                     Toast toast = Toast.makeText(TelaLogin.this, "Falha ao criar  novo usuário",Toast.LENGTH_SHORT);
-                                                    toast.setGravity(Gravity.CENTER_HORIZONTAL | Gravity.CENTER_VERTICAL, 0, 0);
+                                                    toast.setGravity(Gravity.CENTER_HORIZONTAL | Gravity.BOTTOM, 0, 0);
                                                     toast.show();
                                                 }
                                             }
                                         });
                             }else{
                                 Toast toast = Toast.makeText(TelaLogin.this, "As senhas devem ser iguais",Toast.LENGTH_SHORT);
-                                toast.setGravity(Gravity.CENTER_HORIZONTAL | Gravity.CENTER_VERTICAL, 0, 0);
+                                toast.setGravity(Gravity.CENTER_HORIZONTAL | Gravity.BOTTOM, 0, 0);
                                 toast.show();
                             }
                         }else{
                             Toast toast = Toast.makeText(TelaLogin.this, "Insira uma senha com no minimo 6 caractéres",Toast.LENGTH_SHORT);
-                            toast.setGravity(Gravity.CENTER_HORIZONTAL | Gravity.CENTER_VERTICAL, 0, 0);
+                            toast.setGravity(Gravity.CENTER_HORIZONTAL | Gravity.BOTTOM, 0, 0);
                             toast.show();
                         }
                     }
@@ -147,13 +171,12 @@ public class TelaLogin extends AppCompatActivity {
                             public void onComplete(@NonNull Task<AuthResult> task) {
                                 if (task.isSuccessful()) {
 
-                                    Intent it  = new Intent(TelaLogin.this, TelaInicial.class);
-
+                                    Intent it  = new Intent(TelaLogin.this, TelaPrincipal.class);
                                     startActivity(it);
-
+                                    finish();
                                 } else {
                                     Toast toast = Toast.makeText(TelaLogin.this, "E-mail ou senha incorretos", Toast.LENGTH_SHORT);
-                                    toast.setGravity(Gravity.CENTER_HORIZONTAL | Gravity.CENTER_VERTICAL, 0, 0);
+                                    toast.setGravity(Gravity.CENTER_HORIZONTAL | Gravity.BOTTOM, 0, 0);
                                     toast.show();
                                 }
                             }
@@ -161,12 +184,75 @@ public class TelaLogin extends AppCompatActivity {
             }
         });
 
+        signInButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent signInIntent = mGoogleSignInClient.getSignInIntent();
+                startActivityForResult(signInIntent, RC_SIGN_IN);
+            }
+        });
+
+
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        // Result returned from launching the Intent from GoogleSignInClient.getSignInIntent(...);
+        if (requestCode == RC_SIGN_IN) {
+            //Pegaos dados do  retorno
+            Task<GoogleSignInAccount> task = GoogleSignIn.getSignedInAccountFromIntent(data);
+            try {
+                // pega a conta de usuário selecionada e pasa para a função de LogIn
+                GoogleSignInAccount account = task.getResult(ApiException.class);
+                firebaseAuthWithGoogle(account);
+            } catch (ApiException e) {
+                // Google Sign In failed, update UI appropriately
+                Toast toast = Toast.makeText(TelaLogin.this, e.toString(), Toast.LENGTH_SHORT);
+                toast.setGravity(Gravity.CENTER_HORIZONTAL | Gravity.BOTTOM, 0, 0);
+                toast.show();
+            }
+        }else{
+            Toast toast = Toast.makeText(TelaLogin.this, "Ocorreu uma falha ao entrar com sua conta Google. Por favor, tente novamente!", Toast.LENGTH_SHORT);
+            toast.setGravity(Gravity.CENTER_HORIZONTAL | Gravity.BOTTOM, 0, 0);
+            toast.show();
+        }
+    }
+
+    private void firebaseAuthWithGoogle(GoogleSignInAccount account) {
+
+
+        AuthCredential credential = GoogleAuthProvider.getCredential(account.getIdToken(), null);
+        mAuth.signInWithCredential(credential)
+                .addOnCompleteListener(TelaLogin.this, new OnCompleteListener<AuthResult>() {
+                    @Override
+                    public void onComplete(@NonNull Task<AuthResult> task) {
+                        if (task.isSuccessful()) {
+                            Intent it  = new Intent(TelaLogin.this, TelaPrincipal.class);
+                            startActivity(it);
+                            finish();
+                        } else {
+                            // If sign in fails, display a message to the user.
+                            Toast toast = Toast.makeText(TelaLogin.this, "Ocorreu uma falha ao entrar com sua conta Google. Por favor, tente novamente!", Toast.LENGTH_SHORT);
+                            toast.setGravity(Gravity.CENTER_HORIZONTAL | Gravity.BOTTOM, 0, 0);
+                            toast.show();
+                        }
+                    }
+                });
+    }
+    @Override
+    public void onStart() {
+        super.onStart();
+        // Check if user is signed in (non-null) and update UI accordingly.
+        FirebaseUser currentUser = mAuth.getCurrentUser();
+        //updateUI(currentUser);
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        FirebaseAuth.getInstance().signOut();
+        //FirebaseAuth.getInstance().signOut();
     }
 
 }

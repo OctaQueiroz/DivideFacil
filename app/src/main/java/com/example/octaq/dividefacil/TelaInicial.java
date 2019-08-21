@@ -114,6 +114,7 @@ public class TelaInicial extends AppCompatActivity {
                     if(dados.size()>0){
                         Intent it = new Intent(TelaInicial.this, TelaConta.class);
                         startActivity(it);
+                        finish();
                     }
 
                 }else{
@@ -128,7 +129,7 @@ public class TelaInicial extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        FirebaseAuth.getInstance().signOut();
+        //FirebaseAuth.getInstance().signOut();
     }
 
     private void dialogoCadastroPessoa() {

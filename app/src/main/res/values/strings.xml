@@ -15,4 +15,5 @@
     <string name="senha">Senha</string>
     <string name="texto_btn_cadastro">Não tenho cadastro</string>
     <string name="texto_btn_entrar">entrar</string>
+    <string name="title_activity_tela_principal">TelaPrincipal</string>
 </resources>
