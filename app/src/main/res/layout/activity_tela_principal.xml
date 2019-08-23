@@ -26,21 +26,6 @@
         app:title="Meus Rolês"
         app:titleTextColor="#FFFF" />
 
-    <ListView
-        android:layout_width="317dp"
-        android:layout_height="531dp"
-        android:layout_below="@+id/toolbar"
-        android:layout_alignParentStart="true"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentEnd="true"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentBottom="true"
-        android:layout_marginStart="3dp"
-        android:layout_marginLeft="3dp"
-        android:layout_marginTop="1dp"
-        android:layout_marginEnd="0dp"
-        android:layout_marginRight="0dp"
-        android:layout_marginBottom="0dp" />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fab_novo_role"
@@ -55,5 +40,23 @@
         android:layout_marginBottom="36dp"
         android:background="@color/colorPrimary"
         android:clickable="true"
+        android:focusable="true"
         app:srcCompat="@drawable/ic_mais" />
+
+    <ListView
+        android:id="@+id/lv_historico_roles"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/toolbar"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentBottom="true"
+        android:layout_marginStart="0dp"
+        android:layout_marginLeft="0dp"
+        android:layout_marginTop="55dp"
+        android:layout_marginEnd="0dp"
+        android:layout_marginRight="0dp"
+        android:layout_marginBottom="0dp" />
 </RelativeLayout>

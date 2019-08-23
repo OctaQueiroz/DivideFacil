@@ -1,110 +1,85 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".TelaPessoa"
+    tools:context=".TelaConta"
     android:orientation="vertical">
-
-
-    <TextView
-        android:id="@+id/nomePessoaTelaPessoa"
-        android:layout_width="match_parent"
-        android:layout_height="50dp"
-        android:background="@color/colorPrimary"
-        android:paddingLeft="16dp"
-        android:paddingTop="5dp"
-        android:text="@string/nome_pessoa"
-        android:textColor="@android:color/white"
-        android:textSize="30sp" />
-
-    <ListView
-        android:id="@+id/listaAlimentosTelaPessoa"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_weight="1">
-    </ListView>
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
         android:background="@color/colorPrimary">
 
         <TextView
-            android:id="@+id/tv_valor_pessoa"
+            android:id="@+id/tv_valor"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:background="@color/colorPrimary"
-            android:paddingTop="10dp"
-            android:paddingBottom="10dp"
-            android:text="Valor pessoal:"
+            android:paddingTop="5dp"
+            android:text="Valor total:"
             android:textAlignment="center"
             android:textAppearance="?android:attr/textAppearanceMedium"
             android:textColor="@android:color/white" />
 
         <TextView
-            android:id="@+id/tv_valor_10_pessoa"
+            android:id="@+id/tv_valor_10"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:background="@color/colorPrimary"
-            android:paddingTop="10dp"
-            android:paddingBottom="10dp"
-            android:text="Valor com 10%"
+            android:paddingTop="5dp"
+            android:text="Valor com 10%:"
             android:textAlignment="center"
             android:textAppearance="?android:attr/textAppearanceMedium"
             android:textColor="@android:color/white" />
     </LinearLayout>
-
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:paddingBottom="5dp"
-        android:orientation="horizontal"
-        android:background="@color/colorPrimary">
+        android:background="@color/colorPrimary"
+        android:paddingBottom="5dp">
 
         <TextView
-            android:id="@+id/valorTotalPessoal"
+            android:id="@+id/valorTotal"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:background="@color/colorPrimary"
-            android:paddingTop="10dp"
-            android:paddingBottom="10dp"
+            android:paddingTop="5dp"
             android:text="@string/valor_conta"
             android:textAlignment="center"
             android:textAppearance="?android:attr/textAppearanceMedium"
             android:textColor="@android:color/white" />
 
         <TextView
-            android:id="@+id/valor10PorCentoPessoal"
+            android:id="@+id/valor10PorCento"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:background="@color/colorPrimary"
-            android:paddingTop="10dp"
-            android:paddingBottom="10dp"
+            android:paddingTop="5dp"
             android:text="@string/valor_10_por_cento"
             android:textAlignment="center"
             android:textAppearance="?android:attr/textAppearanceMedium"
             android:textColor="@android:color/white" />
     </LinearLayout>
-    <LinearLayout
+
+    <ListView
+        android:id="@+id/listaPessoasTelaConta"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@color/colorPrimary"
-        android:orientation="vertical">
-        <Button
-            android:id="@+id/btn_finalizarContaPessoal"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
+        android:layout_height="0dp"
+        android:layout_weight="1">
 
-            android:text="@string/texto_btn_Pagar" />
+    </ListView>
 
-    </LinearLayout>
+    <ImageView
+        android:id="@+id/imageView3"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        app:srcCompat="?attr/colorAccent" />
 
 </LinearLayout>
+

@@ -22,8 +22,11 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.gson.Gson;
 
 import java.util.ArrayList;
+
+import static com.example.octaq.dividefacil.TelaLogin.EXTRA_UID;
 
 
 public class TelaInicial extends AppCompatActivity {
@@ -46,6 +49,8 @@ public class TelaInicial extends AppCompatActivity {
     ArrayList <Pessoa> dados;
     FirebaseAuth mAuth;
     FirebaseUser currentUser;
+    Gson gson;
+    TransicaoDados objTr;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,21 +62,29 @@ public class TelaInicial extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
+        String extra;
+        gson = new Gson();
 
         mAuth = FirebaseAuth.getInstance();
         currentUser = mAuth.getCurrentUser();
+
+        Intent it = getIntent();
+        extra = it.getStringExtra(EXTRA_UID);
+        objTr = gson.fromJson(extra, TransicaoDados.class);
 
         banco = FirebaseDatabase.getInstance();
         referencia = banco.getReference();
 
         //Carregando a list view sempre com os dados do banco
-        referencia.child(currentUser.getUid()).child(currentUser.getUid()).addValueEventListener(new ValueEventListener() {
+        referencia.child(currentUser.getUid()).child(objTr.role.idDadosRole).child(objTr.role.idDadosPessoas).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 dados = new ArrayList<>();
                 for(DataSnapshot dadosDataSnapshot: dataSnapshot.getChildren()){
                     Pessoa pessoaCadastrada = dadosDataSnapshot.getValue(Pessoa.class);
-                    dados.add(pessoaCadastrada);
+                    if(!pessoaCadastrada.fechouConta){
+                        dados.add(pessoaCadastrada);
+                    }
                 }
 
                 nomeParticipantes = new String[dados.size()];
@@ -113,6 +126,8 @@ public class TelaInicial extends AppCompatActivity {
                 if(dados != null){
                     if(dados.size()>0){
                         Intent it = new Intent(TelaInicial.this, TelaConta.class);
+                        String extra = gson.toJson(objTr);
+                        it.putExtra(EXTRA_UID, extra);
                         startActivity(it);
                         finish();
                     }
@@ -157,8 +172,8 @@ public class TelaInicial extends AppCompatActivity {
                 //Adicionando novo cadastro ao banco de dados
                 Pessoa novoParticipante = new Pessoa();
                 novoParticipante.nome = nomePessoa.getText().toString();
-                novoParticipante.id = referencia.child(currentUser.getUid()).child(currentUser.getUid()).push().getKey();
-                referencia.child(currentUser.getUid()).child(currentUser.getUid()).child(novoParticipante.id).setValue(novoParticipante);
+                novoParticipante.id = referencia.child(currentUser.getUid()).child(objTr.role.idDadosRole).child(objTr.role.idDadosPessoas).push().getKey();
+                referencia.child(currentUser.getUid()).child(objTr.role.idDadosRole).child(objTr.role.idDadosPessoas).child(novoParticipante.id).setValue(novoParticipante);
             }
         });
 

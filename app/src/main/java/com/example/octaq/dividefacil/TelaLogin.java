@@ -255,4 +255,29 @@ public class TelaLogin extends AppCompatActivity {
         //FirebaseAuth.getInstance().signOut();
     }
 
+    @Override
+    public void onBackPressed() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+
+        //Define o título do diálogo
+        builder.setTitle("Aviso");
+
+        builder.setMessage("Deseja sair do App?");
+
+        builder.setPositiveButton("Sim", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface arg0, int arg1) {
+                finish();
+            }
+        });
+
+        builder.setNegativeButton("Não", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+            }
+        });
+
+        AlertDialog alerta = builder.create();
+        alerta.show();
+    }
+
 }

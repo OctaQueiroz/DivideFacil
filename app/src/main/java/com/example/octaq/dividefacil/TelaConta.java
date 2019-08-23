@@ -25,6 +25,7 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.gson.Gson;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;
@@ -64,6 +65,8 @@ public class TelaConta extends AppCompatActivity {
     Double valorTotalConta, valorTotalContaComAcrescimo;
     FirebaseAuth mAuth;
     FirebaseUser currentUser;
+    Gson gson;
+    TransicaoDados objTr;
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -80,6 +83,14 @@ public class TelaConta extends AppCompatActivity {
         referencia = banco.getReference();
         mAuth = FirebaseAuth.getInstance();
         currentUser = mAuth.getCurrentUser();
+
+        //Pega os dados referentes ao role atual
+        String extra;
+        gson = new Gson();
+
+        Intent it = getIntent();
+        extra = it.getStringExtra(EXTRA_UID);
+        objTr = gson.fromJson(extra, TransicaoDados.class);
 
         //Inicializando variáveis
         btnAdicionaPessoa = findViewById(R.id.btn_NovaPessoa);
@@ -112,9 +123,8 @@ public class TelaConta extends AppCompatActivity {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 //Chama a tela de pessoa, passando o id do usuário selecionado e
-
-                String extra = dados.get(position).id;
-                //extra[1] = currentUser.getUid();
+                objTr.pessoa = dados.get(position);
+                String extra = gson.toJson(objTr);
                 Intent it = new Intent(TelaConta.this, TelaPessoa.class);
                 it.putExtra(EXTRA_UID, extra);
                 startActivity(it);
@@ -122,7 +132,7 @@ public class TelaConta extends AppCompatActivity {
         });
 
         //Carregando a list view sempre com os dados  de pessoa do banco
-        referencia.child(currentUser.getUid()).child(currentUser.getUid()).addValueEventListener(new ValueEventListener() {
+        referencia.child(currentUser.getUid()).child(objTr.role.idDadosRole).child(objTr.role.idDadosPessoas).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 dados = new ArrayList<>();
@@ -131,7 +141,9 @@ public class TelaConta extends AppCompatActivity {
 
                 for(DataSnapshot dadosDataSnapshot: dataSnapshot.getChildren()){
                     Pessoa pessoaCadastrada = dadosDataSnapshot.getValue(Pessoa.class);
-                    dados.add(pessoaCadastrada);
+                    if (!pessoaCadastrada.fechouConta){
+                        dados.add(pessoaCadastrada);
+                    }
                 }
 
                 nomeParticipantes = new String[dados.size()];
@@ -143,8 +155,13 @@ public class TelaConta extends AppCompatActivity {
 
                 valorTotalContaComAcrescimo += valorTotalConta*1.1;
 
-                valorFinalConta.setText("Valor Total: R$"+df.format(valorTotalConta));
-                valorFinalContaComAcrescimo.setText("Valor com 10%: R$"+df.format(valorTotalContaComAcrescimo));
+                if(valorTotalConta != 0.0){
+                    valorFinalConta.setText("R$"+df.format(valorTotalConta));
+                    valorFinalContaComAcrescimo.setText("R$"+df.format(valorTotalContaComAcrescimo));
+                }else{
+                    valorFinalConta.setText("R$00,00");
+                    valorFinalContaComAcrescimo.setText("R$00,00");
+                }
 
                 //Inicializa array list, list view e cria um adapter para ela
                 ListView lv = findViewById(R.id.listaPessoasTelaConta);
@@ -193,8 +210,8 @@ public class TelaConta extends AppCompatActivity {
                 //Adicionando novo cadastro ao banco de dados
                 Pessoa novoParticipante = new Pessoa();
                 novoParticipante.nome = nomePessoa.getText().toString();
-                novoParticipante.id = referencia.child(currentUser.getUid()).child(currentUser.getUid()).push().getKey();
-                referencia.child(currentUser.getUid()).child(currentUser.getUid()).child(novoParticipante.id).setValue(novoParticipante);
+                novoParticipante.id = referencia.child(currentUser.getUid()).child(objTr.role.idDadosRole).child(objTr.role.idDadosPessoas).push().getKey();
+                referencia.child(currentUser.getUid()).child(objTr.role.idDadosRole).child(objTr.role.idDadosPessoas).child(novoParticipante.id).setValue(novoParticipante);
             }
         });
 
@@ -281,7 +298,7 @@ public class TelaConta extends AppCompatActivity {
                                             novoAlimento.valor = valorPorPessoa;
                                             dados.get(i).valorTotal+=valorPorPessoa;
                                             dados.get(i).historicoAlimentos.add(novoAlimento);
-                                            referencia.child(currentUser.getUid()).child(currentUser.getUid()).child(dados.get(i).id).setValue(dados.get(i));
+                                            referencia.child(currentUser.getUid()).child(objTr.role.idDadosRole).child(objTr.role.idDadosPessoas).child(dados.get(i).id).setValue(dados.get(i));
                                             nomes[i] = "";//Impede que uma mesma pessoa  seja contada mais de uma vez
                                         }
                                     }
@@ -330,10 +347,14 @@ public class TelaConta extends AppCompatActivity {
             public void onClick(DialogInterface arg0, int arg1) {
 
                 //Apaga todos os dados da tabela
-                referencia.child(currentUser.getUid()).child(currentUser.getUid()).removeValue();
+                objTr.role.fechou = true;
+                referencia.child(currentUser.getUid()).child(objTr.role.idDadosRole).child(objTr.role.idDadosRole).setValue(objTr.role);
                 Toast toast = Toast.makeText(TelaConta.this, "Conta finalizada com sucesso!", Toast.LENGTH_SHORT);
                 toast.setGravity(Gravity.CENTER_HORIZONTAL | Gravity.CENTER_VERTICAL, 0, 0);
                 toast.show();
+
+                Intent it  = new Intent(TelaConta.this, TelaPrincipal.class);
+                startActivity(it);
                 finish();
             }
         });

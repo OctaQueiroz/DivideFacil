@@ -27,7 +27,7 @@ import java.text.DecimalFormat;
 
 import static com.example.octaq.dividefacil.TelaLogin.EXTRA_UID;
 
-public class TelaPessoa extends AppCompatActivity {
+public class TelaPessoaVisualizacao extends AppCompatActivity {
 
     //Para administrar a list view
     String[] nomeAlimentos;
@@ -37,7 +37,6 @@ public class TelaPessoa extends AppCompatActivity {
     DatabaseReference referencia;
     Double valorTotalComAcrescimo;
     Pessoa pessoaSelecionada;
-    AlertDialog alerta;
     FirebaseUser currentUser;
     FirebaseAuth mAuth;
 
@@ -46,14 +45,13 @@ public class TelaPessoa extends AppCompatActivity {
     TextView valorPessoalComAcrescimo;
     TextView nome;
     DecimalFormat df = new DecimalFormat("#,###.00");
-    Button btnfecharConta;
     Gson gson;
     TransicaoDados objTr;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_tela_pessoa);
+        setContentView(R.layout.activity_tela_pessoa_visualizacao);
 
         mAuth = FirebaseAuth.getInstance();
         currentUser = mAuth.getCurrentUser();
@@ -65,7 +63,6 @@ public class TelaPessoa extends AppCompatActivity {
         extra = it.getStringExtra(EXTRA_UID);
         objTr = gson.fromJson(extra, TransicaoDados.class);
 
-        btnfecharConta = findViewById(R.id.btn_finalizarContaPessoal);
         valorPessoalFinal = findViewById(R.id.valorTotalPessoal);
         valorPessoalComAcrescimo = findViewById(R.id.valor10PorCentoPessoal);
         nome = findViewById(R.id.nomePessoaTelaPessoa);
@@ -81,7 +78,7 @@ public class TelaPessoa extends AppCompatActivity {
                     pessoaSelecionada = new Pessoa();
 
                     for(DataSnapshot dadosDataSnapshot: dataSnapshot.getChildren()){
-                        if(dadosDataSnapshot.getValue(Pessoa.class).id.equals(objTr.pessoa.id)){
+                        if(dadosDataSnapshot.getKey().equals(objTr.pessoa.id)){
                             pessoaSelecionada = dadosDataSnapshot.getValue(Pessoa.class);
                         }
                     }
@@ -93,6 +90,7 @@ public class TelaPessoa extends AppCompatActivity {
                     nome.setText(pessoaSelecionada.nome);
 
                     valorTotalComAcrescimo += pessoaSelecionada.valorTotal*1.1;
+
                     if(pessoaSelecionada.valorTotal != 0.0){
                         valorPessoalFinal.setText("R$"+df.format(pessoaSelecionada.valorTotal));
                         valorPessoalComAcrescimo.setText("R$"+df.format(valorTotalComAcrescimo));
@@ -103,7 +101,7 @@ public class TelaPessoa extends AppCompatActivity {
                     //Inicializa array list, list view e cria um adapter para ela
                     ListView lv = findViewById(R.id.listaAlimentosTelaPessoa);
 
-                    AdapterListaAlimento adapterAlimento = new AdapterListaAlimento(pessoaSelecionada.historicoAlimentos, TelaPessoa.this);
+                    AdapterListaAlimento adapterAlimento = new AdapterListaAlimento(pessoaSelecionada.historicoAlimentos, TelaPessoaVisualizacao.this);
 
                     lv.setAdapter(adapterAlimento);
                 }catch (Exception ex){
@@ -116,46 +114,6 @@ public class TelaPessoa extends AppCompatActivity {
 
             }
         });
-        btnfecharConta.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                dialogoFinalizaConta();
-            }
-        });
-    }
 
-
-    private void dialogoFinalizaConta() {
-
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-
-        //Define o título do diálogo
-        builder.setTitle("Finalização de conta");
-
-        builder.setMessage("Ao finalizar a conta pessoal, é entendido que o valor foi pago. Todos os dados da conta pessoal serão apagados, deseja prosseguir?");
-
-        builder.setPositiveButton("Confirmar Finalização", new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface arg0, int arg1) {
-
-                //Apaga todos os dados da tabela
-                pessoaSelecionada.fechouConta = true;
-                referencia.child(currentUser.getUid()).child(objTr.role.idDadosRole).child(objTr.role.idDadosPessoas).child(pessoaSelecionada.id).setValue(pessoaSelecionada);
-
-                Toast toast = Toast.makeText(TelaPessoa.this, "Conta pessoal finalizada e apagada com sucesso!", Toast.LENGTH_LONG);
-                toast.setGravity(Gravity.CENTER_HORIZONTAL | Gravity.CENTER_VERTICAL, 0, 0);
-                toast.show();
-
-                finish();
-            }
-        });
-
-        builder.setNegativeButton("Cancelar", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-            }
-        });
-
-        alerta = builder.create();
-        alerta.show();
     }
 }
