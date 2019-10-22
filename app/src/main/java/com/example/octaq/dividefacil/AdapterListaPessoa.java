@@ -47,7 +47,11 @@ public class AdapterListaPessoa extends BaseAdapter {
         TextView campo2 = view.findViewById(R.id.textView_campo2);
 
         campo1.setText(lista.get(position).nome);
-        campo2.setText("Valor Total: R$"+df.format(lista.get(position).valorTotal));
+        if(lista.get(position).valorTotal > 0.0){
+            campo2.setText("Valor Total: R$"+df.format(lista.get(position).valorTotal));
+        }else{
+            campo2.setText("Valor Total: R$00.00");
+        }
 
         return view;
 

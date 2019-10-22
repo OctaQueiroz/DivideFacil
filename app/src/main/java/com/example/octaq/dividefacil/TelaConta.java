@@ -1,5 +1,6 @@
 package com.example.octaq.dividefacil;
 
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -18,12 +19,8 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.google.gson.Gson;
 
@@ -31,6 +28,7 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 
 import static com.example.octaq.dividefacil.TelaLogin.EXTRA_UID;
+import static com.example.octaq.dividefacil.TelaLogin.referencia;
 
 public class TelaConta extends AppCompatActivity {
 
@@ -60,29 +58,15 @@ public class TelaConta extends AppCompatActivity {
 
     //Controlando o banco de dados
     ArrayList <Pessoa> dados;
-    FirebaseDatabase banco;
-    DatabaseReference referencia;
-    Double valorTotalConta, valorTotalContaComAcrescimo;
-    FirebaseAuth mAuth;
-    FirebaseUser currentUser;
+    ArrayList <Pessoa> dadosSemAlteracao;
+    Double valorTotalContaComAcrescimo;
     Gson gson;
     TransicaoDados objTr;
+    ProgressDialog dialog;
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_tela_conta);
-
-    }
-
-    @Override
-    protected void onStart() {
-        super.onStart();
-
-        //Conectando o Firebase
-        banco = FirebaseDatabase.getInstance();
-        referencia = banco.getReference();
-        mAuth = FirebaseAuth.getInstance();
-        currentUser = mAuth.getCurrentUser();
 
         //Pega os dados referentes ao role atual
         String extra;
@@ -91,6 +75,8 @@ public class TelaConta extends AppCompatActivity {
         Intent it = getIntent();
         extra = it.getStringExtra(EXTRA_UID);
         objTr = gson.fromJson(extra, TransicaoDados.class);
+
+        //dialog = ProgressDialog.show(TelaConta.this, "", "Carregando os dados dos integrantes do Rolê...", true);
 
         //Inicializando variáveis
         btnAdicionaPessoa = findViewById(R.id.btn_NovaPessoa);
@@ -130,13 +116,23 @@ public class TelaConta extends AppCompatActivity {
                 startActivity(it);
             }
         });
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
 
         //Carregando a list view sempre com os dados  de pessoa do banco
-        referencia.child(currentUser.getUid()).child(objTr.role.idDadosRole).child(objTr.role.idDadosPessoas).addValueEventListener(new ValueEventListener() {
+        referencia.child(objTr.userUid).child(objTr.role.idDadosRole).child(objTr.role.idDadosPessoas).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+
+                //dialog.show();
+
                 dados = new ArrayList<>();
-                valorTotalConta = 0.0;
+                dadosSemAlteracao = new ArrayList<>();
+
+                //valorTotalConta = 0.0;
                 valorTotalContaComAcrescimo = 0.0;
 
                 for(DataSnapshot dadosDataSnapshot: dataSnapshot.getChildren()){
@@ -144,19 +140,31 @@ public class TelaConta extends AppCompatActivity {
                     if (!pessoaCadastrada.fechouConta){
                         dados.add(pessoaCadastrada);
                     }
+                    dadosSemAlteracao.add(pessoaCadastrada);
                 }
 
                 nomeParticipantes = new String[dados.size()];
 
+                //Reseta os valores do role antes de serem usados para que não se acumulem de multiplas chamadas
+                objTr.role.valorRoleFechado = 0.0;
+                objTr.role.valorRoleAberto = 0.0;
+
+                //Guarda o valor apenas de quem ainda não fechou a conta pessoal
                 for(int i = 0; i<dados.size();i++){
                     nomeParticipantes[i] = dados.get(i).nome;
-                    valorTotalConta+=dados.get(i).valorTotal;
+                    objTr.role.valorRoleAberto+=dados.get(i).valorTotal;
                 }
+                //Guarda  o valor total da conta, incluindo as pessoas que ja fecharam suas contas individuais
+                for(int i = 0; i<dadosSemAlteracao.size();i++){
+                    objTr.role.valorRoleFechado+=dadosSemAlteracao.get(i).valorTotal;
+                }
+                //Guarda no banco os dados atualizados do role
+                referencia.child(objTr.userUid).child(objTr.role.idDadosRole).child(objTr.role.idDadosRole).setValue(objTr.role);
 
-                valorTotalContaComAcrescimo += valorTotalConta*1.1;
+                valorTotalContaComAcrescimo += objTr.role.valorRoleAberto*1.1;
 
-                if(valorTotalConta != 0.0){
-                    valorFinalConta.setText("R$"+df.format(valorTotalConta));
+                if(objTr.role.valorRoleAberto != 0.0){
+                    valorFinalConta.setText("R$"+df.format(objTr.role.valorRoleAberto));
                     valorFinalContaComAcrescimo.setText("R$"+df.format(valorTotalContaComAcrescimo));
                 }else{
                     valorFinalConta.setText("R$00,00");
@@ -169,6 +177,8 @@ public class TelaConta extends AppCompatActivity {
                 AdapterListaPessoa adapterPessoa = new AdapterListaPessoa(dados,TelaConta.this);
 
                 lv.setAdapter(adapterPessoa);
+
+                //dialog.dismiss();
             }
 
             @Override
@@ -206,13 +216,19 @@ public class TelaConta extends AppCompatActivity {
         builder.setPositiveButton("Confirmar Cadastro", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface arg0, int arg1) {
 
-
-                //Adicionando novo cadastro ao banco de dados
-                Pessoa novoParticipante = new Pessoa();
-                novoParticipante.nome = nomePessoa.getText().toString();
-                novoParticipante.id = referencia.child(currentUser.getUid()).child(objTr.role.idDadosRole).child(objTr.role.idDadosPessoas).push().getKey();
-                referencia.child(currentUser.getUid()).child(objTr.role.idDadosRole).child(objTr.role.idDadosPessoas).child(novoParticipante.id).setValue(novoParticipante);
+                if(nomePessoa.getText().toString().equals("")){
+                    Toast toast = Toast.makeText(TelaConta.this, "O nome do integrante não pode ser nulo!", Toast.LENGTH_SHORT);
+                    toast.setGravity(Gravity.CENTER_HORIZONTAL | Gravity.CENTER_VERTICAL, 0, 0);
+                    toast.show();
+                }else {
+                    //Adicionando novo cadastro ao banco de dados
+                    Pessoa novoParticipante = new Pessoa();
+                    novoParticipante.nome = nomePessoa.getText().toString();
+                    novoParticipante.id = referencia.child(objTr.userUid).child(objTr.role.idDadosRole).child(objTr.role.idDadosPessoas).push().getKey();
+                    referencia.child(objTr.userUid).child(objTr.role.idDadosRole).child(objTr.role.idDadosPessoas).child(novoParticipante.id).setValue(novoParticipante);
+                }
             }
+
         });
 
         builder.setNegativeButton("Cancelar", new DialogInterface.OnClickListener() {
@@ -258,7 +274,7 @@ public class TelaConta extends AppCompatActivity {
 
         //Declara os  vetores de controle de quem será escolhido para participar na conta
         nomes = nomeParticipantes;
-        //vetor boolean para identificar quem foi e quem não foi selecionado
+        //Vetor boolean para identificar quem foi e quem não foi selecionado
         checados = new boolean[nomes.length];
 
         //Configura as checkboxes
@@ -298,7 +314,7 @@ public class TelaConta extends AppCompatActivity {
                                             novoAlimento.valor = valorPorPessoa;
                                             dados.get(i).valorTotal+=valorPorPessoa;
                                             dados.get(i).historicoAlimentos.add(novoAlimento);
-                                            referencia.child(currentUser.getUid()).child(objTr.role.idDadosRole).child(objTr.role.idDadosPessoas).child(dados.get(i).id).setValue(dados.get(i));
+                                            referencia.child(objTr.userUid).child(objTr.role.idDadosRole).child(objTr.role.idDadosPessoas).child(dados.get(i).id).setValue(dados.get(i));
                                             nomes[i] = "";//Impede que uma mesma pessoa  seja contada mais de uma vez
                                         }
                                     }
@@ -348,7 +364,7 @@ public class TelaConta extends AppCompatActivity {
 
                 //Apaga todos os dados da tabela
                 objTr.role.fechou = true;
-                referencia.child(currentUser.getUid()).child(objTr.role.idDadosRole).child(objTr.role.idDadosRole).setValue(objTr.role);
+                referencia.child(objTr.userUid).child(objTr.role.idDadosRole).child(objTr.role.idDadosRole).setValue(objTr.role);
                 Toast toast = Toast.makeText(TelaConta.this, "Conta finalizada com sucesso!", Toast.LENGTH_SHORT);
                 toast.setGravity(Gravity.CENTER_HORIZONTAL | Gravity.CENTER_VERTICAL, 0, 0);
                 toast.show();
@@ -369,5 +385,9 @@ public class TelaConta extends AppCompatActivity {
         alerta.show();
     }
 
-
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        finish();
+    }
 }

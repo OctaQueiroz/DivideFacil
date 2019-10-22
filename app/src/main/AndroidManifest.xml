@@ -3,6 +3,9 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="com.example.octaq.dividefacil">
 
+    <uses-permission android:name="android.permission.GET_ACCOUNTS" />
+    <uses-permission android:name="android.permission.INTERNET" />
+
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
@@ -11,7 +14,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.AppCompat.Light.NoActionBar"
         tools:ignore="GoogleAppIndexingWarning">
-        <activity android:name=".TelaPessoaVisualizacao"></activity>
+
         <activity
             android:name=".TelaSplash"
             android:theme="@style/TelaCheia">
@@ -39,9 +42,11 @@
         <activity
             android:name=".TelaContaVisualizacao"
             android:screenOrientation="portrait" />
+        <activity
+            android:name=".TelaPessoaVisualizacao"
+            android:screenOrientation="portrait" />
     </application>
-    <uses-permission android:name="android.permission.GET_ACCOUNTS" />
 
-    <uses-permission android:name="android.permission.INTERNET" />
+
 
 </manifest>

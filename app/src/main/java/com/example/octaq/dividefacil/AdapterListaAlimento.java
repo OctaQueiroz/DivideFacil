@@ -47,7 +47,12 @@ public class AdapterListaAlimento extends BaseAdapter {
         TextView campo2 = view.findViewById(R.id.textView_campo2);
 
         campo1.setText(lista.get(position).nome);
-        campo2.setText("Valor: R$"+df.format(lista.get(position).valor));
+        if(lista.get(position).valor > 0.0){
+            campo2.setText("Valor: R$"+df.format(lista.get(position).valor));
+        }else{
+            campo2.setText("Valor: R$00,00");
+        }
+
 
         return view;
 

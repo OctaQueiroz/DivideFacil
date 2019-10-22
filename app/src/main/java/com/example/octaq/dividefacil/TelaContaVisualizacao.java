@@ -1,22 +1,15 @@
 package com.example.octaq.dividefacil;
 
-import android.content.Context;
-import android.content.DialogInterface;
+
 import android.content.Intent;
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
-import android.text.InputType;
-import android.view.Gravity;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.Button;
-import android.widget.EditText;
-import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -116,9 +109,7 @@ public class TelaContaVisualizacao extends AppCompatActivity {
 
                 for(DataSnapshot dadosDataSnapshot: dataSnapshot.getChildren()){
                     Pessoa pessoaCadastrada = dadosDataSnapshot.getValue(Pessoa.class);
-                    if (!pessoaCadastrada.fechouConta){
-                        dados.add(pessoaCadastrada);
-                    }
+                    dados.add(pessoaCadastrada);
                 }
 
                 nomeParticipantes = new String[dados.size()];
@@ -151,5 +142,11 @@ public class TelaContaVisualizacao extends AppCompatActivity {
 
             }
         });
+    }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        finish();
     }
 }

@@ -5,7 +5,8 @@ public class Role {
     public String idDadosRole;
     public String nome;
     public String dia;
-    public double valor;
+    public double valorRoleAberto;
+    public double valorRoleFechado;
     public boolean fechou;
 
     public Role(){
@@ -13,7 +14,8 @@ public class Role {
         idDadosRole = "";
         nome = "";
         dia = "";
-        valor = 0.0;
+        valorRoleAberto = 0.0;
+        valorRoleFechado = 0.0;
         fechou = false;
     }
     public Role(String idDadosRole, String idDadosPessoas, String nome, String dia){
@@ -21,7 +23,8 @@ public class Role {
         this.idDadosPessoas = idDadosPessoas;
         this.nome = nome;
         this.dia = dia;
-        this.valor = 0.0;
+        this.valorRoleAberto = 0.0;
+        this.valorRoleFechado = 0.0;
         fechou = false;
     }
 }

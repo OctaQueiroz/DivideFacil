@@ -1,5 +1,6 @@
 package com.example.octaq.dividefacil;
 
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -9,7 +10,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.InputType;
 import android.text.method.PasswordTransformationMethod;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
 import android.widget.Button;
@@ -28,8 +28,9 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GoogleAuthProvider;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 
 public class TelaLogin extends AppCompatActivity {
 
@@ -43,9 +44,15 @@ public class TelaLogin extends AppCompatActivity {
     GoogleSignInClient mGoogleSignInClient;
     SignInButton signInButton;
     int RC_SIGN_IN;
-    private FirebaseAuth mAuth;
+    ProgressDialog dialog;
 
     public final static String EXTRA_UID = "com.example.octaq.dividefacil.UID";
+
+    //Variávei para conexão com o Firebase
+    public final static FirebaseDatabase banco = FirebaseDatabase.getInstance();
+    public final static DatabaseReference referencia = banco.getReference();
+    public final static FirebaseAuth mAuth = FirebaseAuth.getInstance();
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -65,7 +72,6 @@ public class TelaLogin extends AppCompatActivity {
         mGoogleSignInClient = GoogleSignIn.getClient(this, gso);
         signInButton = findViewById(R.id.google_sign_in_button);
         RC_SIGN_IN = 1;
-        mAuth = FirebaseAuth.getInstance();
 
         novoCadastro.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -241,20 +247,6 @@ public class TelaLogin extends AppCompatActivity {
                     }
                 });
     }
-    @Override
-    public void onStart() {
-        super.onStart();
-        // Check if user is signed in (non-null) and update UI accordingly.
-        FirebaseUser currentUser = mAuth.getCurrentUser();
-        //updateUI(currentUser);
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        //FirebaseAuth.getInstance().signOut();
-    }
-
     @Override
     public void onBackPressed() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);

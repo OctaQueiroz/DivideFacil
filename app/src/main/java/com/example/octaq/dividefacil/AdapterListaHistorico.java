@@ -5,6 +5,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import java.text.DecimalFormat;
@@ -47,16 +48,31 @@ public class AdapterListaHistorico extends BaseAdapter {
         TextView valor = view.findViewById(R.id.tv_valor_historico);
         TextView status = view.findViewById(R.id.tv_status_historico);
         TextView data = view.findViewById(R.id.tv_data_historico);
+        ImageView deletar = view.findViewById(R.id.iv_delete);
 
         nome.setText(lista.get(position).nome);
-        valor.setText("Valor: R$"+df.format(lista.get(position).valor));
+        if(lista.get(position).fechou){
+            if(lista.get(position).valorRoleFechado > 0.0){
+                valor.setText("Valor: R$"+df.format(lista.get(position).valorRoleFechado));
+            }else{
+                valor.setText("Valor: R$00,00");
+            }
+        }else{
+            if(lista.get(position).valorRoleAberto > 0.0){
+                valor.setText("Valor: R$"+df.format(lista.get(position).valorRoleAberto));
+            }else{
+                valor.setText("Valor: R$00,00");
+            }
+        }
+
+
         if(lista.get(position).fechou){
             status.setText("Conta fechada");
         }else{
             status.setText("Conta aberta");
         }
         data.setText(lista.get(position).dia);
-
+        deletar.setTag(position);
         return view;
 
     }

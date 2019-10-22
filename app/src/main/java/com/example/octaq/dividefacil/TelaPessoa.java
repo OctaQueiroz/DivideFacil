@@ -13,12 +13,8 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.google.gson.Gson;
 
@@ -26,6 +22,7 @@ import java.text.DecimalFormat;
 
 
 import static com.example.octaq.dividefacil.TelaLogin.EXTRA_UID;
+import static com.example.octaq.dividefacil.TelaLogin.referencia;
 
 public class TelaPessoa extends AppCompatActivity {
 
@@ -33,13 +30,9 @@ public class TelaPessoa extends AppCompatActivity {
     String[] nomeAlimentos;
 
     //Controlando o banco de dados
-    FirebaseDatabase banco;
-    DatabaseReference referencia;
     Double valorTotalComAcrescimo;
     Pessoa pessoaSelecionada;
     AlertDialog alerta;
-    FirebaseUser currentUser;
-    FirebaseAuth mAuth;
 
     //Controlando dados mostrados na tela
     TextView valorPessoalFinal;
@@ -55,9 +48,6 @@ public class TelaPessoa extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_tela_pessoa);
 
-        mAuth = FirebaseAuth.getInstance();
-        currentUser = mAuth.getCurrentUser();
-
         gson = new Gson();
 
         String extra;
@@ -70,11 +60,7 @@ public class TelaPessoa extends AppCompatActivity {
         valorPessoalComAcrescimo = findViewById(R.id.valor10PorCentoPessoal);
         nome = findViewById(R.id.nomePessoaTelaPessoa);
 
-        //Conectando o Firebase
-        banco = FirebaseDatabase.getInstance();
-        referencia = banco.getReference();
-
-        referencia.child(currentUser.getUid()).child(objTr.role.idDadosRole).child(objTr.role.idDadosPessoas).addValueEventListener(new ValueEventListener() {
+        referencia.child(objTr.userUid).child(objTr.role.idDadosRole).child(objTr.role.idDadosPessoas).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 try {
@@ -139,7 +125,7 @@ public class TelaPessoa extends AppCompatActivity {
 
                 //Apaga todos os dados da tabela
                 pessoaSelecionada.fechouConta = true;
-                referencia.child(currentUser.getUid()).child(objTr.role.idDadosRole).child(objTr.role.idDadosPessoas).child(pessoaSelecionada.id).setValue(pessoaSelecionada);
+                referencia.child(objTr.userUid).child(objTr.role.idDadosRole).child(objTr.role.idDadosPessoas).child(pessoaSelecionada.id).setValue(pessoaSelecionada);
 
                 Toast toast = Toast.makeText(TelaPessoa.this, "Conta pessoal finalizada e apagada com sucesso!", Toast.LENGTH_LONG);
                 toast.setGravity(Gravity.CENTER_HORIZONTAL | Gravity.CENTER_VERTICAL, 0, 0);

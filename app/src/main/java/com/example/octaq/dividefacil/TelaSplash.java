@@ -20,14 +20,18 @@ public class TelaSplash extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_tela_splash);
         FirebaseAuth mAuth = FirebaseAuth.getInstance();
-        FirebaseUser currentUser = mAuth.getCurrentUser();
-        login(currentUser);
+        final FirebaseUser currentUser = mAuth.getCurrentUser();
+
+        Handler handle = new Handler();
+        handle.postDelayed(new Runnable() {
+            @Override public void run() {
+                login(currentUser);
+            }
+        }, 2000);
+
     }
 
     private void login(FirebaseUser usuario){
-        //GoogleSignInAccount account = GoogleSignIn.getLastSignedInAccount(this);
-        //FirebaseAuth.getInstance().signOut();
-
         if (usuario != null){
             Intent it  = new Intent(TelaSplash.this, TelaPrincipal.class);
             startActivity(it);
