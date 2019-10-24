@@ -45,6 +45,7 @@
         <activity
             android:name=".TelaPessoaVisualizacao"
             android:screenOrientation="portrait" />
+
     </application>
 
 

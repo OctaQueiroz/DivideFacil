@@ -8,6 +8,7 @@ public class Role {
     public double valorRoleAberto;
     public double valorRoleFechado;
     public boolean fechou;
+    public boolean excluido;
 
     public Role(){
         idDadosPessoas = "";
@@ -17,6 +18,7 @@ public class Role {
         valorRoleAberto = 0.0;
         valorRoleFechado = 0.0;
         fechou = false;
+        excluido = false;
     }
     public Role(String idDadosRole, String idDadosPessoas, String nome, String dia){
         this.idDadosRole = idDadosRole;
@@ -26,5 +28,6 @@ public class Role {
         this.valorRoleAberto = 0.0;
         this.valorRoleFechado = 0.0;
         fechou = false;
+        excluido = false;
     }
 }

@@ -13,8 +13,6 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.google.gson.Gson;
 
@@ -112,7 +110,11 @@ public class TelaPrincipal extends AppCompatActivity {
                 for(DataSnapshot dadosDataSnapshot: dataSnapshot.getChildren()){
                     String roleCadastrado = dadosDataSnapshot.getKey();
                     Role roleAtualizado = dadosDataSnapshot.child(roleCadastrado).getValue(Role.class);
-                    roles.add(roleAtualizado);
+                    if(roleAtualizado!= null) {
+                        if (!roleAtualizado.excluido) {
+                            roles.add(roleAtualizado);
+                        }
+                    }
                 }
 
                 //Cria um adapter para a list View
@@ -195,9 +197,9 @@ public class TelaPrincipal extends AppCompatActivity {
                 public void onClick(DialogInterface arg0, int arg1) {
                     int tag = (Integer) view.getTag();
                     Role roleTemp = roles.get(tag);
-
-                    referencia.child(objTr.userUid).child(roleTemp.idDadosRole).child(roleTemp.idDadosRole).removeValue();
-                    referencia.child(objTr.userUid).child(roleTemp.idDadosRole).child(roleTemp.idDadosPessoas).removeValue();
+                    roleTemp.excluido =true;
+                    referencia.child(objTr.userUid).child(roleTemp.idDadosRole).child(roleTemp.idDadosRole).setValue(roleTemp);
+                    //referencia.child(objTr.userUid).child(roleTemp.idDadosRole).child(roleTemp.idDadosPessoas).removeValue();
                 }
             });
 
