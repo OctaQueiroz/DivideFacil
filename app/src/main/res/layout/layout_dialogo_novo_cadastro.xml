@@ -2,7 +2,9 @@
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android" android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:paddingLeft="10dp"
+    android:paddingRight="10dp">
 
 
     <EditText
@@ -10,8 +12,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:ems="10"
-        android:inputType="textPersonName"
-        android:hint="Email" />
+        android:inputType="textEmailAddress"
+        android:hint="@string/palavra_email" />
 
     <EditText
         android:id="@+id/edit_Senha1"
@@ -20,7 +22,7 @@
         android:ems="10"
         android:password="true"
         android:inputType="textPersonName"
-        android:hint="Senha" />
+        android:hint="@string/palavra_senha" />
 
     <EditText
         android:id="@+id/edit_Senha2"
@@ -29,6 +31,6 @@
         android:ems="10"
         android:password="true"
         android:inputType="textPersonName"
-        android:hint="Senha" />
+        android:hint="@string/palavra_repetir_senha" />
 
 </LinearLayout>

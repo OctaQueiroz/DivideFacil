@@ -16,7 +16,7 @@
         android:layout_marginLeft="10dp"
         android:layout_marginTop="6dp"
         android:layout_marginBottom="6dp"
-        android:text="Nome"
+        android:text="@string/palavra_nome"
         android:textAppearance="?android:attr/textAppearanceMedium" />
 
     <TextView
@@ -30,8 +30,9 @@
         android:layout_marginLeft="10dp"
         android:layout_marginTop="3dp"
         android:layout_marginBottom="6dp"
-        android:text="Dia"
-        android:textAppearance="?android:attr/textAppearanceSmall" />
+        android:text="@string/palavra_dia"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:fontFamily="@font/cabin"/>
 
     <TextView
         android:id="@+id/tv_status_historico"
@@ -44,8 +45,9 @@
         android:layout_marginLeft="10dp"
         android:layout_marginTop="3dp"
         android:layout_marginBottom="6dp"
-        android:text="Status"
-        android:textAppearance="?android:attr/textAppearanceSmall" />
+        android:text="@string/palavra_status"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:fontFamily="@font/cabin"/>
 
     <TextView
         android:id="@+id/tv_valor_historico"
@@ -58,8 +60,9 @@
         android:layout_marginBottom="6dp"
         android:layout_toStartOf="@+id/iv_delete"
         android:layout_toLeftOf="@+id/iv_delete"
-        android:text="Valor"
-        android:textAppearance="?android:attr/textAppearanceMedium" />
+        android:text="@string/palavra_valor"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:fontFamily="@font/cabin"/>
 
     <ImageView
         android:id="@+id/imageView2"

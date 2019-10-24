@@ -28,9 +28,6 @@
             android:name=".TelaPrincipal"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".TelaInicial"
-            android:screenOrientation="portrait" />
-        <activity
             android:name=".TelaConta"
             android:screenOrientation="portrait" />
         <activity

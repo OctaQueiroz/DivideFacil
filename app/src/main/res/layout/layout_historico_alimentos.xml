@@ -14,6 +14,7 @@
         android:id="@+id/btn_AdicionaAlimento"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Adicionar novo alimento à lista" />
+        android:text="@string/botao_adicionar_alimento"
+        android:fontFamily="@font/cabin"/>
 
 </LinearLayout>

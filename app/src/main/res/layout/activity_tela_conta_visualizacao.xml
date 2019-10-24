@@ -19,10 +19,11 @@
             android:layout_weight="1"
             android:background="@color/colorPrimary"
             android:paddingTop="5dp"
-            android:text="Valor total:"
+            android:text="@string/valor_conta"
             android:textAlignment="center"
             android:textAppearance="?android:attr/textAppearanceMedium"
-            android:textColor="@android:color/white" />
+            android:textColor="@android:color/white"
+            android:fontFamily="@font/cabin"/>
 
         <TextView
             android:id="@+id/tv_valor_10"
@@ -31,10 +32,11 @@
             android:layout_weight="1"
             android:background="@color/colorPrimary"
             android:paddingTop="5dp"
-            android:text="Valor com 10%:"
+            android:text="@string/valor_10_por_cento"
             android:textAlignment="center"
             android:textAppearance="?android:attr/textAppearanceMedium"
-            android:textColor="@android:color/white" />
+            android:textColor="@android:color/white"
+            android:fontFamily="@font/cabin"/>
     </LinearLayout>
     <LinearLayout
         android:layout_width="match_parent"
@@ -49,10 +51,11 @@
             android:layout_weight="1"
             android:background="@color/colorPrimary"
             android:paddingTop="5dp"
-            android:text="@string/valor_conta"
+            android:text="@string/valor_padrao"
             android:textAlignment="center"
             android:textAppearance="?android:attr/textAppearanceMedium"
-            android:textColor="@android:color/white" />
+            android:textColor="@android:color/white"
+            android:fontFamily="@font/cabin"/>
 
         <TextView
             android:id="@+id/valor10PorCento"
@@ -61,10 +64,11 @@
             android:layout_weight="1"
             android:background="@color/colorPrimary"
             android:paddingTop="5dp"
-            android:text="@string/valor_10_por_cento"
+            android:text="@string/valor_padrao"
             android:textAlignment="center"
             android:textAppearance="?android:attr/textAppearanceMedium"
-            android:textColor="@android:color/white" />
+            android:textColor="@android:color/white"
+            android:fontFamily="@font/cabin"/>
     </LinearLayout>
 
     <ListView
@@ -79,7 +83,7 @@
         android:id="@+id/imageView3"
         android:layout_width="match_parent"
         android:layout_height="50dp"
-        app:srcCompat="?attr/colorAccent" />
+        app:srcCompat="@color/colorPrimary" />
 
 </LinearLayout>
 

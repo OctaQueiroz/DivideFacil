@@ -1,19 +1,30 @@
 <resources>
-    <string name="app_name">DivideFacil</string>
+    <string name="app_name">ShareIt</string>
     <string name="texto_btn_Concluir">Continuar</string>
     <string name="texto_tela_Inicial">Quem está no rolê?</string>
     <string name="texto_btn_AdicionarPessoa">Adicionar Pessoa</string>
-    <string name="valor_conta">Total: R$00,00</string>
-    <string name="valor_10_por_cento">Valor 10%: R$00,00</string>
-    <string name="texto_btn_TelaPessoas">Adicionar pessoa</string>
-    <string name="texto_btn_AdicionarComida">Adicionar Produto</string>
-    <string name="texto_btn_FecharConta">Fechar conta</string>
+    <string name="valor_conta">Valor total:</string>
+    <string name="valor_10_por_cento">Total com 10%</string>
+    <string name="valor_padrao">R$00,00</string>
+    <string name="valor_conta_pessoal">Valor pessoal:</string>
+    <string name="valor_10_por_cento_pessoal">Pessoal com 10%</string>
+    <string name="texto_btn_TelaPessoas">Nova pessoa</string>
+    <string name="texto_btn_AdicionarComida">Novo produto</string>
+    <string name="texto_btn_FecharConta">Finalizar conta</string>
     <string name="nome_pessoa">Nome Pessoa</string>
     <string name="texto_btn_Pagar">Pagar valor pessoal</string>
     <string name="login">Login</string>
     <string name="e_mail">e-mail</string>
     <string name="senha">Senha</string>
     <string name="texto_btn_cadastro">Não tenho cadastro</string>
-    <string name="texto_btn_entrar">entrar</string>
+    <string name="texto_btn_entrar">Entrar</string>
     <string name="title_activity_tela_principal">TelaPrincipal</string>
+    <string name="palavra_nome">Nome</string>
+    <string name="palavra_valor">Valor</string>
+    <string name="palavra_dia">Dia</string>
+    <string name="palavra_status">Status</string>
+    <string name="botao_adicionar_alimento">Adicionar novo alimento à lista</string>
+    <string name="palavra_email">E-mail</string>
+    <string name="palavra_senha">Senha</string>
+    <string name="palavra_repetir_senha">Repita a senha</string>
 </resources>

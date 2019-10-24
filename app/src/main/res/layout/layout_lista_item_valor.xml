@@ -10,10 +10,11 @@ android:layout_height="match_parent" >
     android:layout_height="wrap_content"
     android:layout_alignParentLeft="true"
     android:layout_marginBottom="6dp"
-    android:layout_marginLeft="6dp"
+    android:layout_marginLeft="8dp"
     android:layout_marginTop="6dp"
-    android:text="Nome"
-    android:textAppearance="?android:attr/textAppearanceMedium"/>
+    android:text="@string/palavra_nome"
+    android:textAppearance="?android:attr/textAppearanceMedium"
+    android:fontFamily="@font/cabin"/>
 
 <TextView
     android:id="@+id/textView_campo2"
@@ -21,9 +22,10 @@ android:layout_height="match_parent" >
     android:layout_height="wrap_content"
     android:layout_alignParentRight="true"
     android:layout_marginBottom="6dp"
-    android:layout_marginRight="6dp"
+    android:layout_marginRight="8dp"
     android:layout_marginTop="6dp"
-    android:text="Valor"
-    android:textAppearance="?android:attr/textAppearanceMedium" />
+    android:text="@string/palavra_valor"
+    android:textAppearance="?android:attr/textAppearanceMedium"
+    android:fontFamily="@font/cabin"/>
 
 </RelativeLayout>

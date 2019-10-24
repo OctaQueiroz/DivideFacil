@@ -11,6 +11,7 @@ import android.os.Bundle;
 import android.text.InputType;
 import android.text.method.PasswordTransformationMethod;
 import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -84,8 +85,9 @@ public class TelaLogin extends AppCompatActivity {
                 //Criando o Layout para que possam ser colocados 2 Edit Texts no Diálogo
                 Context context = TelaLogin.this;
                 LinearLayout layout = new LinearLayout(context);
-                layout.setOrientation(LinearLayout.VERTICAL);
 
+                layout.setOrientation(LinearLayout.VERTICAL);
+                layout.setPadding(50,0,50,0);
                 //Inicializa os Edit texts que serão  chamados no diálogo
                 final EditText novoEmail = new EditText(TelaLogin.this);
                 final EditText senha1 = new EditText(TelaLogin.this);
@@ -95,7 +97,6 @@ public class TelaLogin extends AppCompatActivity {
                 novoEmail.setInputType(InputType.TYPE_CLASS_TEXT);
                 senha1.setTransformationMethod(PasswordTransformationMethod.getInstance());
                 senha2.setTransformationMethod(PasswordTransformationMethod.getInstance());
-
                 //Seta as dicas de cada Edit text criado
                 novoEmail.setHint("Email");
                 senha1.setHint("Senha");
@@ -112,6 +113,8 @@ public class TelaLogin extends AppCompatActivity {
                 builder.setTitle("Novo cadastro");
 
                 builder.setView(layout);
+
+
 
                 builder.setPositiveButton("Concluir cadastro", new DialogInterface.OnClickListener() {
                     @Override

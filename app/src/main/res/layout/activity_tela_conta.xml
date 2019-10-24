@@ -18,10 +18,11 @@
             android:layout_weight="1"
             android:background="@color/colorPrimary"
             android:paddingTop="5dp"
-            android:text="Valor total:"
+            android:text="@string/valor_conta"
             android:textAlignment="center"
             android:textAppearance="?android:attr/textAppearanceMedium"
-            android:textColor="@android:color/white" />
+            android:textColor="@android:color/white"
+            android:fontFamily="@font/cabin"/>
 
         <TextView
             android:id="@+id/tv_valor_10"
@@ -30,10 +31,11 @@
             android:layout_weight="1"
             android:background="@color/colorPrimary"
             android:paddingTop="5dp"
-            android:text="Valor com 10%:"
+            android:text="@string/valor_10_por_cento"
             android:textAlignment="center"
             android:textAppearance="?android:attr/textAppearanceMedium"
-            android:textColor="@android:color/white" />
+            android:textColor="@android:color/white"
+            android:fontFamily="@font/cabin"/>
     </LinearLayout>
     <LinearLayout
         android:layout_width="match_parent"
@@ -48,10 +50,11 @@
             android:layout_weight="1"
             android:background="@color/colorPrimary"
             android:paddingTop="5dp"
-            android:text="@string/valor_conta"
+            android:text="@string/valor_padrao"
             android:textAlignment="center"
             android:textAppearance="?android:attr/textAppearanceMedium"
-            android:textColor="@android:color/white" />
+            android:textColor="@android:color/white"
+            android:fontFamily="@font/cabin"/>
 
         <TextView
             android:id="@+id/valor10PorCento"
@@ -60,10 +63,11 @@
             android:layout_weight="1"
             android:background="@color/colorPrimary"
             android:paddingTop="5dp"
-            android:text="@string/valor_10_por_cento"
+            android:text="@string/valor_padrao"
             android:textAlignment="center"
             android:textAppearance="?android:attr/textAppearanceMedium"
-            android:textColor="@android:color/white" />
+            android:textColor="@android:color/white"
+            android:fontFamily="@font/cabin"/>
     </LinearLayout>
 
     <ListView
@@ -83,15 +87,25 @@
         <Button
             android:id="@+id/btn_NovaPessoa"
             android:layout_width="match_parent"
-            android:layout_height="fill_parent"
+            android:layout_height="40dp"
             android:layout_weight="1"
-            android:text="@string/texto_btn_TelaPessoas" />
+            android:text="@string/texto_btn_TelaPessoas"
+            android:fontFamily="@font/cabin"
+            android:layout_margin="5dp"
+            android:textColor="@color/colorPrimary"
+            android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+            android:background="@drawable/button_shape_round_border_white" />
         <Button
             android:id="@+id/btn_CadastroAlimento"
             android:layout_width="match_parent"
-            android:layout_height="fill_parent"
+            android:layout_height="40dp"
             android:layout_weight="1"
-            android:text="@string/texto_btn_AdicionarComida"/>
+            android:text="@string/texto_btn_AdicionarComida"
+            android:fontFamily="@font/cabin"
+            android:layout_margin="5dp"
+            android:textColor="@color/colorPrimary"
+            android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+            android:background="@drawable/button_shape_round_border_white" />
         
     </LinearLayout>
     <LinearLayout
@@ -102,10 +116,15 @@
 
         <Button
             android:id="@+id/btn_FecharConta"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="160dp"
+            android:layout_height="40dp"
             android:layout_gravity="center_horizontal"
-            android:text="@string/texto_btn_FecharConta" />
+            android:layout_margin="5dp"
+            android:text="@string/texto_btn_FecharConta"
+            android:fontFamily="@font/cabin"
+            android:textColor="@color/colorPrimary"
+            android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+            android:background="@drawable/button_shape_round_border_white" />
     </LinearLayout>
 
 </LinearLayout>

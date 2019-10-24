@@ -17,7 +17,8 @@
         android:paddingTop="5dp"
         android:text="@string/nome_pessoa"
         android:textColor="@android:color/white"
-        android:textSize="30sp" />
+        android:textSize="30sp"
+        android:fontFamily="@font/cabin"/>
 
     <ListView
         android:id="@+id/listaAlimentosTelaPessoa"
@@ -40,10 +41,11 @@
             android:background="@color/colorPrimary"
             android:paddingTop="10dp"
             android:paddingBottom="10dp"
-            android:text="Valor pessoal:"
+            android:text="@string/valor_padrao"
             android:textAlignment="center"
             android:textAppearance="?android:attr/textAppearanceMedium"
-            android:textColor="@android:color/white" />
+            android:textColor="@android:color/white"
+            android:fontFamily="@font/cabin"/>
 
         <TextView
             android:id="@+id/tv_valor_10_pessoa"
@@ -53,10 +55,11 @@
             android:background="@color/colorPrimary"
             android:paddingTop="10dp"
             android:paddingBottom="10dp"
-            android:text="Valor com 10%"
+            android:text="@string/valor_padrao"
             android:textAlignment="center"
             android:textAppearance="?android:attr/textAppearanceMedium"
-            android:textColor="@android:color/white" />
+            android:textColor="@android:color/white"
+            android:fontFamily="@font/cabin"/>
     </LinearLayout>
 
     <LinearLayout
@@ -74,10 +77,11 @@
             android:background="@color/colorPrimary"
             android:paddingTop="10dp"
             android:paddingBottom="10dp"
-            android:text="@string/valor_conta"
+            android:text="@string/valor_conta_pessoal"
             android:textAlignment="center"
             android:textAppearance="?android:attr/textAppearanceMedium"
-            android:textColor="@android:color/white" />
+            android:textColor="@android:color/white"
+            android:fontFamily="@font/cabin"/>
 
         <TextView
             android:id="@+id/valor10PorCentoPessoal"
@@ -87,10 +91,11 @@
             android:background="@color/colorPrimary"
             android:paddingTop="10dp"
             android:paddingBottom="10dp"
-            android:text="@string/valor_10_por_cento"
+            android:text="@string/valor_10_por_cento_pessoal"
             android:textAlignment="center"
             android:textAppearance="?android:attr/textAppearanceMedium"
-            android:textColor="@android:color/white" />
+            android:textColor="@android:color/white"
+            android:fontFamily="@font/cabin"/>
     </LinearLayout>
 
 
