@@ -1,7 +1,6 @@
 package com.example.octaq.dividefacil;
 
 import java.util.ArrayList;
-import java.util.List;
 
 public class TipoDeDespesa {
 

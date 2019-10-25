@@ -16,7 +16,6 @@ public class AdapterParaListaDeTipoDeDespesa extends BaseAdapter {
 
     List<String> lista;
     Context context;
-    DecimalFormat df = new DecimalFormat("#,###.00");
 
     public AdapterParaListaDeTipoDeDespesa(List<String> lista, Context context){
         this.lista = lista;
