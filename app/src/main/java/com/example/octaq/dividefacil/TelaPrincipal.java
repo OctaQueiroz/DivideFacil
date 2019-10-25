@@ -1,8 +1,12 @@
 package com.example.octaq.dividefacil;
 
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Typeface;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
@@ -20,6 +24,8 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.core.content.ContextCompat;
+import androidx.core.content.res.ResourcesCompat;
 
 import android.text.InputType;
 import android.view.Gravity;
@@ -27,9 +33,11 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.Toast;
 
@@ -45,12 +53,12 @@ import static com.example.octaq.dividefacil.TelaLogin.referencia;
 public class TelaPrincipal extends AppCompatActivity {
 
     //Para administrar a list view
-    List<Role> roles;
-    TransicaoDados objTr;
+    List<Despesa> despesas;
+    TransicaoDeDadosEntreActivities objTr;
     ImageView deletar;
     ProgressDialog dialog;
 
-    //Variáveis do dialogo para criar novo role
+    //Variáveis do dialogo para criar novo despesa
     EditText nomeRole;
     AlertDialog alerta;
     ListView lv;
@@ -59,13 +67,16 @@ public class TelaPrincipal extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_tela_principal);
 
-        objTr = new TransicaoDados();
+        Window window = this.getWindow();
+        window.setStatusBarColor(ContextCompat.getColor(TelaPrincipal.this,R.color.colorPrimaryDark));
+
+        objTr = new TransicaoDeDadosEntreActivities();
 
         //pega o id do usuário atual, para ser utilizado
         objTr.userUid = mAuth.getCurrentUser().getUid();
 
         dialog = ProgressDialog.show(TelaPrincipal.this, "",
-                "Carregando seus Rolês...", true);
+                "Carregando suas Despesas...", true);
 
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -84,19 +95,26 @@ public class TelaPrincipal extends AppCompatActivity {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 //Chama a tela de pessoa, passando o id do usuário selecionado e os  meios dde comunicação com o banco
-                objTr.role = roles.get(position);
-                Gson gson = new Gson();
-                String extra = gson.toJson(objTr);
-                if(!objTr.role.fechou){
-                    Intent it = new Intent(TelaPrincipal.this, TelaConta.class);
-                    it.putExtra(EXTRA_UID, extra);
-                    startActivityForResult(it, 2);
+                if(isOnline(TelaPrincipal.this)){
+                    try{
+                        objTr.despesa = despesas.get(position);
+                        Gson gson = new Gson();
+                        String extra = gson.toJson(objTr);
+                        if(!objTr.despesa.fechou){
+                            Intent it = new Intent(TelaPrincipal.this, TelaDespesa.class);
+                            it.putExtra(EXTRA_UID, extra);
+                            startActivityForResult(it, 2);
+                        }else{
+                            Intent it = new Intent(TelaPrincipal.this, TelaDespesaVisualizacao.class);
+                            it.putExtra(EXTRA_UID, extra);
+                            startActivityForResult(it, 2);
+                        }
+                    }catch (Exception e){
+                       //Lidar com problemas de conexão
+                    }
                 }else{
-                    Intent it = new Intent(TelaPrincipal.this, TelaContaVisualizacao.class);
-                    it.putExtra(EXTRA_UID, extra);
-                    startActivityForResult(it, 2);
+                    //Lidar com problemas de conexão
                 }
-
             }
         });
         //Carregando a list view sempre com os dados do banco
@@ -106,21 +124,28 @@ public class TelaPrincipal extends AppCompatActivity {
 
                 dialog.show();
 
-                roles = new ArrayList<>();
-                for(DataSnapshot dadosDataSnapshot: dataSnapshot.getChildren()){
-                    String roleCadastrado = dadosDataSnapshot.getKey();
-                    Role roleAtualizado = dadosDataSnapshot.child(roleCadastrado).getValue(Role.class);
-                    if(roleAtualizado!= null) {
-                        if (!roleAtualizado.excluido) {
-                            roles.add(roleAtualizado);
+                despesas = new ArrayList<>();
+                if(isOnline(TelaPrincipal.this)){
+                    try{
+                        for(DataSnapshot dadosDataSnapshot: dataSnapshot.getChildren()){
+                            String despesaCadastrada = dadosDataSnapshot.getKey();
+                            Despesa despesaAtualizado = dadosDataSnapshot.child(despesaCadastrada).getValue(Despesa.class);
+                            if(despesaAtualizado != null) {
+                                if (!despesaAtualizado.excluido) {
+                                    despesas.add(despesaAtualizado);
+                                }
+                            }
                         }
+                    }catch (Exception e){
+                        //Lidar com erro de conexao
                     }
+                }else{
+                    //Lidar com erro de conexao
                 }
-
                 //Cria um adapter para a list View
-                AdapterListaHistorico adapterListaHistorico = new AdapterListaHistorico(roles, TelaPrincipal.this);
+                AdapterParaListaDeDespesa adapterParaListaDeDespesa = new AdapterParaListaDeDespesa(despesas, TelaPrincipal.this);
 
-                lv.setAdapter(adapterListaHistorico);
+                lv.setAdapter(adapterParaListaDeDespesa);
                 dialog.dismiss();
             }
 
@@ -154,7 +179,7 @@ public class TelaPrincipal extends AppCompatActivity {
             if(resultCode == RESULT_OK){
                 Gson gson = new Gson();
                 String resultado = data.getStringExtra(EXTRA_UID);
-                this.objTr = gson.fromJson(resultado, TransicaoDados.class);
+                this.objTr = gson.fromJson(resultado, TransicaoDeDadosEntreActivities.class);
             }
         }
     }
@@ -191,15 +216,22 @@ public class TelaPrincipal extends AppCompatActivity {
             //Define o título do diálogo
             builder.setTitle("Apagar");
 
-            builder.setMessage("Deseja remover permanentemente o Rolê do seu histórico?");
+            builder.setMessage("Deseja remover essa despesa do seu histórico?");
 
             builder.setPositiveButton("Sim", new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface arg0, int arg1) {
                     int tag = (Integer) view.getTag();
-                    Role roleTemp = roles.get(tag);
-                    roleTemp.excluido =true;
-                    referencia.child(objTr.userUid).child(roleTemp.idDadosRole).child(roleTemp.idDadosRole).setValue(roleTemp);
-                    //referencia.child(objTr.userUid).child(roleTemp.idDadosRole).child(roleTemp.idDadosPessoas).removeValue();
+                    Despesa despesaTemp = despesas.get(tag);
+                    despesaTemp.excluido =true;
+                    if(isOnline(TelaPrincipal.this)){
+                        try{
+                            referencia.child(objTr.userUid).child(despesaTemp.idDadosRole).child(despesaTemp.idDadosRole).setValue(despesaTemp);
+                        }catch (Exception e){
+                            //Lidar com erro de conexão
+                        }
+                    }else{
+                        //Lidar com erro de conexao
+                    }
                 }
             });
 
@@ -225,14 +257,20 @@ public class TelaPrincipal extends AppCompatActivity {
 
         builder.setPositiveButton("Sim", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface arg0, int arg1) {
-
-                //Este metodo desconecta a conta google do usuário do fire base
-                revokeAccess();
-                FirebaseAuth.getInstance().signOut();
-                Intent it  = new Intent(TelaPrincipal.this, TelaLogin.class);
-                startActivity(it);
-                finish();
-
+                if(isOnline(TelaPrincipal.this)){
+                    try{
+                        //Este metodo desconecta a conta google do usuário do fire base
+                        revokeAccess();
+                        FirebaseAuth.getInstance().signOut();
+                        Intent it  = new Intent(TelaPrincipal.this, TelaLogin.class);
+                        startActivity(it);
+                        finish();
+                    }catch (Exception e){
+                        //Lidar com erro de conexao
+                    }
+                }else{
+                    //Lidar com erro de conexao
+                }
             }
         });
 
@@ -265,6 +303,11 @@ public class TelaPrincipal extends AppCompatActivity {
 
     private void dialogoCadastroRole() {
 
+        LinearLayout layout = new LinearLayout(TelaPrincipal.this);
+
+        layout.setOrientation(LinearLayout.VERTICAL);
+        layout.setPadding(60,30,60,0);
+
         //Inicializa o Edit text que será  chamado no diálogo
         nomeRole = new EditText(TelaPrincipal.this);
 
@@ -272,20 +315,23 @@ public class TelaPrincipal extends AppCompatActivity {
         nomeRole.setInputType(InputType.TYPE_CLASS_TEXT);
 
         //Seta as dicas de cada Edit text criado
-        nomeRole.setHint("Insira o nome do Rolê");
+        nomeRole.setHint("Insira o nome da despesa");
+        nomeRole.setTypeface(ResourcesCompat.getFont(this, R.font.cabin));
 
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        layout.addView(nomeRole);
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AlertDialogCustom);
 
         //Define o título do diálogo
-        builder.setTitle("Criar novo Rolê");
-
+        builder.setTitle("Criar nova Despesa");
+        builder.setIcon(R.drawable.ic_add_income);
         //Coloca a view criada no diálogo
-        builder.setView(nomeRole);
+        builder.setView(layout);
 
-        builder.setPositiveButton("Criar novo Rolê", new DialogInterface.OnClickListener() {
+        builder.setPositiveButton("Avançar", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface arg0, int arg1) {
-                if(nomeRole.getText().equals("")){
-                    Toast toast = Toast.makeText(TelaPrincipal.this, "Não é possível criar um Rolê sem nome", Toast.LENGTH_SHORT);
+                if(nomeRole.getText().toString().equals("")){
+                    Toast toast = Toast.makeText(TelaPrincipal.this, "Não é possível criar uma Despesa sem nome", Toast.LENGTH_SHORT);
                     toast.setGravity(Gravity.CENTER_HORIZONTAL | Gravity.CENTER_VERTICAL, 0, 0);
                     toast.show();
                 }else{
@@ -295,15 +341,15 @@ public class TelaPrincipal extends AppCompatActivity {
                     Date data = new Date();
                     String dataFormatada = formataData.format(data);
 
-                    //objTr = new TransicaoDados();
+                    //objTr = new TransicaoDeDadosEntreActivities();
 
-                    objTr.role = new Role();
+                    objTr.despesa = new Despesa();
                     objTr.pessoa = new Pessoa();
 
                     //seta previamente dados sobre o rolê
 
-                    objTr.role.dia = dataFormatada;
-                    objTr.role.nome = nomeRole.getText().toString();
+                    objTr.despesa.dia = dataFormatada;
+                    objTr.despesa.nome = nomeRole.getText().toString();
 
                     dialogoCadastroPessoa();
 
@@ -324,53 +370,70 @@ public class TelaPrincipal extends AppCompatActivity {
 
     private void dialogoCadastroPessoa() {
 
+        LinearLayout layout = new LinearLayout(TelaPrincipal.this);
+
+        layout.setOrientation(LinearLayout.VERTICAL);
+        layout.setPadding(60,30,60,0);
+
         //Inicializa o Edit text que será  chamado no diálogo
         final EditText nomePessoa = new EditText(TelaPrincipal.this);
 
         //Seta o tipo de entrada aceitada pelo Edit Text
         nomePessoa.setInputType(InputType.TYPE_CLASS_TEXT);
 
+        nomePessoa.setTypeface(ResourcesCompat.getFont(this, R.font.cabin));
         //Seta as dicas de cada Edit text criado
-        nomePessoa.setHint("Insira ao menos um integrante para o rolê");
+        nomePessoa.setHint("Insira ao menos um integrante");
 
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        layout.addView(nomePessoa);
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(this,R.style.AlertDialogCustom);
 
         //Define o título do diálogo
-        builder.setTitle("Cadastro de nova Pessoa");
+        builder.setTitle("Cadastro de novo  integrante");
+        builder.setIcon(R.drawable.ic_add_person);
 
         //Coloca a view criada no diálogo
-        builder.setView(nomePessoa);
+        builder.setView(layout);
 
-        builder.setPositiveButton("Confirmar Cadastro", new DialogInterface.OnClickListener() {
+        builder.setPositiveButton("Avançar", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface arg0, int arg1) {
                 if(nomePessoa.getText().toString().equals("")){
                     Toast toast = Toast.makeText(TelaPrincipal.this, "O nome do integrante não pode ser nulo!", Toast.LENGTH_SHORT);
                     toast.setGravity(Gravity.CENTER_HORIZONTAL | Gravity.CENTER_VERTICAL, 0, 0);
                     toast.show();
                 }else {
-                    //Cria o rolê no banco e adiciona o novo integrante.
-                    //Isso é  feito para evitar que rolês sejam criados sem nenhum integrante, caso o usuario chegue até essa tela e feche o app
+                    if(isOnline(TelaPrincipal.this)){
+                        try {
+                            //Cria o despesa no banco e adiciona o novo integrante.
+                            //Isso é  feito para evitar que rolês sejam criados sem nenhum integrante, caso o usuario chegue até essa tela e feche o app
 
-                    String idRole = referencia.child(objTr.userUid).push().getKey();
-                    String idPessoas = referencia.child(objTr.userUid).push().getKey();
+                            String idRole = referencia.child(objTr.userUid).push().getKey();
+                            String idPessoas = referencia.child(objTr.userUid).push().getKey();
 
-                    //Termina de setar os dados faltantes e cadastra o rolê  junto do integrante incial ao banco
+                            //Termina de setar os dados faltantes e cadastra o rolê  junto do integrante incial ao banco
 
-                    objTr.role.idDadosRole = idRole;
-                    objTr.role.idDadosPessoas = idPessoas;
+                            objTr.despesa.idDadosRole = idRole;
+                            objTr.despesa.idDadosPessoas = idPessoas;
 
-                    referencia.child(objTr.userUid).child(objTr.role.idDadosRole).child(objTr.role.idDadosRole).setValue(objTr.role);
+                            referencia.child(objTr.userUid).child(objTr.despesa.idDadosRole).child(objTr.despesa.idDadosRole).setValue(objTr.despesa);
 
-                    Pessoa novoParticipante = new Pessoa();
-                    novoParticipante.nome = nomePessoa.getText().toString();
-                    novoParticipante.id = referencia.child(objTr.userUid).child(objTr.role.idDadosRole).child(objTr.role.idDadosPessoas).push().getKey();
-                    referencia.child(objTr.userUid).child(objTr.role.idDadosRole).child(objTr.role.idDadosPessoas).child(novoParticipante.id).setValue(novoParticipante);
+                            Pessoa novoParticipante = new Pessoa();
+                            novoParticipante.nome = nomePessoa.getText().toString();
+                            novoParticipante.id = referencia.child(objTr.userUid).child(objTr.despesa.idDadosRole).child(objTr.despesa.idDadosPessoas).push().getKey();
+                            referencia.child(objTr.userUid).child(objTr.despesa.idDadosRole).child(objTr.despesa.idDadosPessoas).child(novoParticipante.id).setValue(novoParticipante);
 
-                    Gson gson = new Gson();
-                    String extra = gson.toJson(objTr);
-                    Intent it = new Intent(TelaPrincipal.this, TelaConta.class);
-                    it.putExtra(EXTRA_UID, extra);
-                    startActivityForResult(it, 2);
+                            Gson gson = new Gson();
+                            String extra = gson.toJson(objTr);
+                            Intent it = new Intent(TelaPrincipal.this, TelaDespesa.class);
+                            it.putExtra(EXTRA_UID, extra);
+                            startActivityForResult(it, 2);
+                        }catch (Exception e){
+                            //Lidar  com o erro de conexão
+                        }
+                    }else{
+                        //Lidar com o erro de conexão
+                    }
                 }
             }
         });
@@ -384,5 +447,14 @@ public class TelaPrincipal extends AppCompatActivity {
         alerta = builder.create();
 
         alerta.show();
+    }
+
+    public static boolean isOnline(Context context) {
+        ConnectivityManager administradorDeConexao = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo informacoesDeConexao = administradorDeConexao.getActiveNetworkInfo();
+        if (informacoesDeConexao != null && informacoesDeConexao.isConnected())
+            return true;
+        else
+            return false;
     }
 }

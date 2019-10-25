@@ -10,13 +10,13 @@ import android.widget.TextView;
 import java.text.DecimalFormat;
 import java.util.List;
 
-public class AdapterListaPessoa extends BaseAdapter {
+public class AdapterParaListaDePessoa extends BaseAdapter {
 
     List<Pessoa> lista;
     Context context;
     DecimalFormat df = new DecimalFormat("#,###.00");
 
-    public AdapterListaPessoa(List<Pessoa> lista, Context context){
+    public AdapterParaListaDePessoa(List<Pessoa> lista, Context context){
         this.lista = lista;
         this.context = context;
     }
@@ -40,7 +40,7 @@ public class AdapterListaPessoa extends BaseAdapter {
         LayoutInflater mInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
         // cria uma view com o layout  do seu item
-        view = mInflater.inflate(R.layout.layout_lista_item_valor, null);
+        view = mInflater.inflate(R.layout.layout_lista_item_de_gasto, null);
 
         // Atribuição normal dos campos de uma view
         TextView campo1 = view.findViewById(R.id.textView_campo1);

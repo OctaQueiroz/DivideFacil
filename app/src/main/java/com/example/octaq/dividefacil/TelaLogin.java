@@ -7,12 +7,17 @@ import android.content.Intent;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
+
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.text.InputType;
 import android.text.method.PasswordTransformationMethod;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.Window;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
@@ -32,6 +37,8 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.GoogleAuthProvider;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+
+import java.net.UnknownHostException;
 
 public class TelaLogin extends AppCompatActivity {
 
@@ -60,6 +67,9 @@ public class TelaLogin extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_tela_login);
 
+        Window window = this.getWindow();
+        window.setStatusBarColor(ContextCompat.getColor(TelaLogin.this,R.color.colorPrimaryDark));
+
         email = findViewById(R.id.textEmail);
         senha = findViewById(R.id.textSenha);
         concluirLogin = findViewById(R.id.btn_Login);
@@ -74,6 +84,8 @@ public class TelaLogin extends AppCompatActivity {
         signInButton = findViewById(R.id.google_sign_in_button);
         RC_SIGN_IN = 1;
 
+
+
         novoCadastro.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -83,7 +95,7 @@ public class TelaLogin extends AppCompatActivity {
                 AlertDialog alerta;
 
                 //Criando o Layout para que possam ser colocados 2 Edit Texts no Diálogo
-                Context context = TelaLogin.this;
+                final Context context = TelaLogin.this;
                 LinearLayout layout = new LinearLayout(context);
 
                 layout.setOrientation(LinearLayout.VERTICAL);
@@ -119,39 +131,47 @@ public class TelaLogin extends AppCompatActivity {
                 builder.setPositiveButton("Concluir cadastro", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        if(senha1.getText().toString().length() > 5){
-                            if(senha1.getText().toString().equals(senha2.getText().toString())){
-                                mAuth.createUserWithEmailAndPassword(novoEmail.getText().toString(), senha1.getText().toString())
-                                        .addOnCompleteListener(TelaLogin.this, new OnCompleteListener<AuthResult>() {
-                                            @Override
-                                            public void onComplete(@NonNull Task<AuthResult> task) {
-                                                if (task.isSuccessful()) {
+                    if(isOnline(context)){
+                        try{
+                            if(senha1.getText().toString().length() > 5){
+                                if(senha1.getText().toString().equals(senha2.getText().toString())){
+                                    mAuth.createUserWithEmailAndPassword(novoEmail.getText().toString(), senha1.getText().toString())
+                                            .addOnCompleteListener(TelaLogin.this, new OnCompleteListener<AuthResult>() {
+                                                @Override
+                                                public void onComplete(@NonNull Task<AuthResult> task) {
+                                                    if (task.isSuccessful()) {
 
-                                                    Toast toast = Toast.makeText(TelaLogin.this, "Novo usuário criado com sucesso!",Toast.LENGTH_SHORT);
-                                                    toast.setGravity(Gravity.CENTER_HORIZONTAL | Gravity.BOTTOM, 0, 0);
-                                                    toast.show();
+                                                        Toast toast = Toast.makeText(TelaLogin.this, "Novo usuário criado com sucesso!",Toast.LENGTH_SHORT);
+                                                        toast.setGravity(Gravity.CENTER_HORIZONTAL | Gravity.BOTTOM, 0, 0);
+                                                        toast.show();
 
-                                                    //Copia os dados do novo usuário para a tela de login
-                                                    email.setText(novoEmail.getText().toString());
-                                                    senha.setText(senha1.getText().toString());
-                                                } else {
-                                                    // If sign in fails, display a message to the user.
-                                                    Toast toast = Toast.makeText(TelaLogin.this, "Falha ao criar  novo usuário",Toast.LENGTH_SHORT);
-                                                    toast.setGravity(Gravity.CENTER_HORIZONTAL | Gravity.BOTTOM, 0, 0);
-                                                    toast.show();
+                                                        //Copia os dados do novo usuário para a tela de login
+                                                        email.setText(novoEmail.getText().toString());
+                                                        senha.setText(senha1.getText().toString());
+                                                    } else {
+                                                        // If sign in fails, display a message to the user.
+                                                        Toast toast = Toast.makeText(TelaLogin.this, "Falha ao criar  novo usuário",Toast.LENGTH_SHORT);
+                                                        toast.setGravity(Gravity.CENTER_HORIZONTAL | Gravity.BOTTOM, 0, 0);
+                                                        toast.show();
+                                                    }
                                                 }
-                                            }
-                                        });
+                                            });
+                                }else{
+                                    Toast toast = Toast.makeText(TelaLogin.this, "As senhas devem ser iguais",Toast.LENGTH_SHORT);
+                                    toast.setGravity(Gravity.CENTER_HORIZONTAL | Gravity.BOTTOM, 0, 0);
+                                    toast.show();
+                                }
                             }else{
-                                Toast toast = Toast.makeText(TelaLogin.this, "As senhas devem ser iguais",Toast.LENGTH_SHORT);
+                                Toast toast = Toast.makeText(TelaLogin.this, "Insira uma senha com no minimo 6 caractéres",Toast.LENGTH_SHORT);
                                 toast.setGravity(Gravity.CENTER_HORIZONTAL | Gravity.BOTTOM, 0, 0);
                                 toast.show();
                             }
-                        }else{
-                            Toast toast = Toast.makeText(TelaLogin.this, "Insira uma senha com no minimo 6 caractéres",Toast.LENGTH_SHORT);
-                            toast.setGravity(Gravity.CENTER_HORIZONTAL | Gravity.BOTTOM, 0, 0);
-                            toast.show();
+                        }catch (Exception e){
+                            //Lidar com erro de conexão aqui
                         }
+                    }else{
+                        //Lidar com problemas de conexão
+                    }
                     }
                 });
 
@@ -171,25 +191,33 @@ public class TelaLogin extends AppCompatActivity {
         concluirLogin.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                if (isOnline(TelaLogin.this)){
+                    try{
+                        FirebaseAuth.getInstance().signOut();
 
-                FirebaseAuth.getInstance().signOut();
+                        mAuth.signInWithEmailAndPassword(email.getText().toString(), senha.getText().toString())
+                                .addOnCompleteListener(TelaLogin.this, new OnCompleteListener<AuthResult>() {
+                                    @Override
+                                    public void onComplete(@NonNull Task<AuthResult> task) {
+                                        if (task.isSuccessful()) {
 
-                mAuth.signInWithEmailAndPassword(email.getText().toString(), senha.getText().toString())
-                        .addOnCompleteListener(TelaLogin.this, new OnCompleteListener<AuthResult>() {
-                            @Override
-                            public void onComplete(@NonNull Task<AuthResult> task) {
-                                if (task.isSuccessful()) {
+                                            Intent it  = new Intent(TelaLogin.this, TelaPrincipal.class);
+                                            startActivity(it);
+                                            finish();
+                                        } else {
+                                            Toast toast = Toast.makeText(TelaLogin.this, "E-mail ou senha incorretos", Toast.LENGTH_SHORT);
+                                            toast.setGravity(Gravity.CENTER_HORIZONTAL | Gravity.BOTTOM, 0, 0);
+                                            toast.show();
+                                        }
+                                    }
+                                });
+                    }catch(Exception e ){
+                        //Lidar ocm erro de conexao
+                    }
+                }else{
+                    //Lidar com problemas de conexão
+                }
 
-                                    Intent it  = new Intent(TelaLogin.this, TelaPrincipal.class);
-                                    startActivity(it);
-                                    finish();
-                                } else {
-                                    Toast toast = Toast.makeText(TelaLogin.this, "E-mail ou senha incorretos", Toast.LENGTH_SHORT);
-                                    toast.setGravity(Gravity.CENTER_HORIZONTAL | Gravity.BOTTOM, 0, 0);
-                                    toast.show();
-                                }
-                            }
-                        });
             }
         });
 
@@ -207,48 +235,62 @@ public class TelaLogin extends AppCompatActivity {
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-
-        // Result returned from launching the Intent from GoogleSignInClient.getSignInIntent(...);
-        if (requestCode == RC_SIGN_IN) {
-            //Pegaos dados do  retorno
-            Task<GoogleSignInAccount> task = GoogleSignIn.getSignedInAccountFromIntent(data);
+        if (isOnline(TelaLogin.this)){
             try {
-                // pega a conta de usuário selecionada e pasa para a função de LogIn
-                GoogleSignInAccount account = task.getResult(ApiException.class);
-                firebaseAuthWithGoogle(account);
-            } catch (ApiException e) {
-                // Google Sign In failed, update UI appropriately
-                Toast toast = Toast.makeText(TelaLogin.this, e.toString(), Toast.LENGTH_SHORT);
-                toast.setGravity(Gravity.CENTER_HORIZONTAL | Gravity.BOTTOM, 0, 0);
-                toast.show();
+                // Result returned from launching the Intent from GoogleSignInClient.getSignInIntent(...);
+                if (requestCode == RC_SIGN_IN) {
+                    //Pegaos dados do  retorno
+                    Task<GoogleSignInAccount> task = GoogleSignIn.getSignedInAccountFromIntent(data);
+                    try {
+                        // pega a conta de usuário selecionada e pasa para a função de LogIn
+                        GoogleSignInAccount account = task.getResult(ApiException.class);
+                        firebaseAuthWithGoogle(account);
+                    } catch (ApiException e) {
+                        // Google Sign In failed, update UI appropriately
+                        Toast toast = Toast.makeText(TelaLogin.this, e.toString(), Toast.LENGTH_SHORT);
+                        toast.setGravity(Gravity.CENTER_HORIZONTAL | Gravity.BOTTOM, 0, 0);
+                        toast.show();
+                    }
+                }else{
+                    Toast toast = Toast.makeText(TelaLogin.this, "Ocorreu uma falha ao entrar com sua conta Google. Por favor, tente novamente!", Toast.LENGTH_SHORT);
+                    toast.setGravity(Gravity.CENTER_HORIZONTAL | Gravity.BOTTOM, 0, 0);
+                    toast.show();
+                }
+            } catch(Exception e) {
+                // trata o erro de conexão.
             }
         }else{
-            Toast toast = Toast.makeText(TelaLogin.this, "Ocorreu uma falha ao entrar com sua conta Google. Por favor, tente novamente!", Toast.LENGTH_SHORT);
-            toast.setGravity(Gravity.CENTER_HORIZONTAL | Gravity.BOTTOM, 0, 0);
-            toast.show();
+            //Lidar com problemas de conexão
         }
     }
 
     private void firebaseAuthWithGoogle(GoogleSignInAccount account) {
 
-
-        AuthCredential credential = GoogleAuthProvider.getCredential(account.getIdToken(), null);
-        mAuth.signInWithCredential(credential)
-                .addOnCompleteListener(TelaLogin.this, new OnCompleteListener<AuthResult>() {
-                    @Override
-                    public void onComplete(@NonNull Task<AuthResult> task) {
-                        if (task.isSuccessful()) {
-                            Intent it  = new Intent(TelaLogin.this, TelaPrincipal.class);
-                            startActivity(it);
-                            finish();
-                        } else {
-                            // If sign in fails, display a message to the user.
-                            Toast toast = Toast.makeText(TelaLogin.this, "Ocorreu uma falha ao entrar com sua conta Google. Por favor, tente novamente!", Toast.LENGTH_SHORT);
-                            toast.setGravity(Gravity.CENTER_HORIZONTAL | Gravity.BOTTOM, 0, 0);
-                            toast.show();
-                        }
-                    }
-                });
+        if (isOnline(TelaLogin.this)){
+            try {
+                AuthCredential credential = GoogleAuthProvider.getCredential(account.getIdToken(), null);
+                mAuth.signInWithCredential(credential)
+                        .addOnCompleteListener(TelaLogin.this, new OnCompleteListener<AuthResult>() {
+                            @Override
+                            public void onComplete(@NonNull Task<AuthResult> task) {
+                                if (task.isSuccessful()) {
+                                    Intent it  = new Intent(TelaLogin.this, TelaPrincipal.class);
+                                    startActivity(it);
+                                    finish();
+                                } else {
+                                    // If sign in fails, display a message to the user.
+                                    Toast toast = Toast.makeText(TelaLogin.this, "Ocorreu uma falha ao entrar com sua conta Google. Por favor, tente novamente!", Toast.LENGTH_SHORT);
+                                    toast.setGravity(Gravity.CENTER_HORIZONTAL | Gravity.BOTTOM, 0, 0);
+                                    toast.show();
+                                }
+                            }
+                        });
+            } catch(Exception e) {
+                // trata o erro de conexão.
+            }
+        }else{
+            //Lidar com problemas de conexão
+        }
     }
     @Override
     public void onBackPressed() {
@@ -275,4 +317,12 @@ public class TelaLogin extends AppCompatActivity {
         alerta.show();
     }
 
+    public static boolean isOnline(Context context) {
+        ConnectivityManager administradorDeConexao = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo informacoesDeConexao = administradorDeConexao.getActiveNetworkInfo();
+        if (informacoesDeConexao != null && informacoesDeConexao.isConnected())
+            return true;
+        else
+            return false;
+    }
 }

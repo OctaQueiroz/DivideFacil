@@ -8,24 +8,16 @@
     tools:context=".TelaLogin"
     android:orientation="vertical"
     android:gravity="center"
-    android:paddingLeft="15dp"
-    android:paddingRight="15dp">
+    android:paddingLeft="35dp"
+    android:paddingRight="35dp">
 
     <ImageView
         android:id="@+id/imageView"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        app:srcCompat="@drawable/ic_login_96" />
+        android:layout_width="150dp"
+        android:layout_height="140dp"
+        app:srcCompat="@drawable/ic_prancheta_4" />
 
-    <TextView
-        android:id="@+id/textView2"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center_horizontal"
-        android:text="@string/app_name"
-        android:textColor="@color/colorPrimaryDark"
-        android:textStyle="bold"
-        android:fontFamily="@font/cabin"/>
+
 
     <EditText
         android:id="@+id/textEmail"
@@ -34,7 +26,6 @@
         android:ems="10"
         android:hint="@string/palavra_email"
         android:inputType="textEmailAddress"
-        android:paddingTop="20sp"
         android:fontFamily="@font/cabin"/>
 
     <EditText
@@ -46,6 +37,7 @@
         android:hint="@string/senha"
         android:inputType="textPersonName"
         android:paddingTop="20dp"
+
         android:fontFamily="@font/cabin"/>
 
     <Button
@@ -53,6 +45,7 @@
         android:layout_width="wrap_content"
         android:layout_height="40dp"
         android:text="@string/texto_btn_entrar"
+        android:layout_marginTop="20dp"
         android:textColor="#FFFF"
         android:textAppearance="@style/TextAppearance.AppCompat.Medium"
         android:fontFamily="@font/cabin"

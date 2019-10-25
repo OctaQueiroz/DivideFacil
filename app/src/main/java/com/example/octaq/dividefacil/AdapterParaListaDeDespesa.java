@@ -11,12 +11,12 @@ import android.widget.TextView;
 import java.text.DecimalFormat;
 import java.util.List;
 
-public class AdapterListaHistorico extends BaseAdapter {
-    List<Role> lista;
+public class AdapterParaListaDeDespesa extends BaseAdapter {
+    List<Despesa> lista;
     Context context;
     DecimalFormat df = new DecimalFormat("#,###.00");
 
-    public AdapterListaHistorico(List<Role> lista, Context context){
+    public AdapterParaListaDeDespesa(List<Despesa> lista, Context context){
         this.lista = lista;
         this.context = context;
     }
@@ -41,7 +41,7 @@ public class AdapterListaHistorico extends BaseAdapter {
         LayoutInflater mInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
         // cria uma view com o layout  do seu item
-        view = mInflater.inflate(R.layout.layout_lista_item_role, null);
+        view = mInflater.inflate(R.layout.layout_lista_despesa, null);
 
         // Atribuição normal dos campos de uma view
         TextView nome = view.findViewById(R.id.tv_nome_historico);
@@ -53,15 +53,15 @@ public class AdapterListaHistorico extends BaseAdapter {
         nome.setText(lista.get(position).nome);
         if(lista.get(position).fechou){
             if(lista.get(position).valorRoleFechado > 0.0){
-                valor.setText("Valor: R$"+df.format(lista.get(position).valorRoleFechado));
+                valor.setText("R$"+df.format(lista.get(position).valorRoleFechado));
             }else{
-                valor.setText("Valor: R$00,00");
+                valor.setText("R$00,00");
             }
         }else{
             if(lista.get(position).valorRoleAberto > 0.0){
-                valor.setText("Valor: R$"+df.format(lista.get(position).valorRoleAberto));
+                valor.setText("R$"+df.format(lista.get(position).valorRoleAberto));
             }else{
-                valor.setText("Valor: R$00,00");
+                valor.setText("R$00,00");
             }
         }
 

@@ -1,6 +1,6 @@
 package com.example.octaq.dividefacil;
 
-public class Role {
+public class Despesa {
     public String idDadosPessoas;
     public String idDadosRole;
     public String nome;
@@ -9,8 +9,9 @@ public class Role {
     public double valorRoleFechado;
     public boolean fechou;
     public boolean excluido;
+    public TipoDeDespesa tipoDeDespesa;
 
-    public Role(){
+    public Despesa(){
         idDadosPessoas = "";
         idDadosRole = "";
         nome = "";
@@ -19,8 +20,9 @@ public class Role {
         valorRoleFechado = 0.0;
         fechou = false;
         excluido = false;
+        tipoDeDespesa = new TipoDeDespesa();
     }
-    public Role(String idDadosRole, String idDadosPessoas, String nome, String dia){
+    public Despesa(String idDadosRole, String idDadosPessoas, String nome, String dia){
         this.idDadosRole = idDadosRole;
         this.idDadosPessoas = idDadosPessoas;
         this.nome = nome;

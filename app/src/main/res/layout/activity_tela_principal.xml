@@ -45,7 +45,7 @@
         android:clickable="true"
         android:focusable="true"
         app:backgroundTint="#3B9D3E"
-        app:srcCompat="@drawable/ic_mais" />
+        app:srcCompat="@drawable/ic_add" />
 
     <ListView
         android:id="@+id/lv_historico_roles"

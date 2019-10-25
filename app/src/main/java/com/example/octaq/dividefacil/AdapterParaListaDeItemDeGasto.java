@@ -10,13 +10,13 @@ import android.widget.TextView;
 import java.text.DecimalFormat;
 import java.util.List;
 
-public class AdapterListaAlimento extends BaseAdapter {
+public class AdapterParaListaDeItemDeGasto extends BaseAdapter {
 
-    List<Alimento> lista;
+    List<ItemDeGasto> lista;
     Context context;
     DecimalFormat df = new DecimalFormat("#,###.00");
 
-    public AdapterListaAlimento(List<Alimento> lista, Context context){
+    public AdapterParaListaDeItemDeGasto(List<ItemDeGasto> lista, Context context){
         this.lista = lista;
         this.context = context;
     }
@@ -40,7 +40,7 @@ public class AdapterListaAlimento extends BaseAdapter {
         LayoutInflater mInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
         // cria uma view com o layout  do seu item
-        view = mInflater.inflate(R.layout.layout_lista_item_valor, null);
+        view = mInflater.inflate(R.layout.layout_lista_item_de_gasto, null);
 
         // Atribuição normal dos campos de uma view
         TextView campo1 = view.findViewById(R.id.textView_campo1);
@@ -48,9 +48,9 @@ public class AdapterListaAlimento extends BaseAdapter {
 
         campo1.setText(lista.get(position).nome);
         if(lista.get(position).valor > 0.0){
-            campo2.setText("Valor: R$"+df.format(lista.get(position).valor));
+            campo2.setText("R$"+df.format(lista.get(position).valor));
         }else{
-            campo2.setText("Valor: R$00,00");
+            campo2.setText("R$00,00");
         }
 
 

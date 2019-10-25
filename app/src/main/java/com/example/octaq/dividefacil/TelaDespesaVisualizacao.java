@@ -1,11 +1,17 @@
 package com.example.octaq.dividefacil;
 
 
+import android.content.Context;
 import android.content.Intent;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
+
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.view.View;
+import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.ListView;
@@ -25,7 +31,7 @@ import java.util.ArrayList;
 
 import static com.example.octaq.dividefacil.TelaLogin.EXTRA_UID;
 
-public class TelaContaVisualizacao extends AppCompatActivity {
+public class TelaDespesaVisualizacao extends AppCompatActivity {
 
     //Botões da tela
     Button btnFecharConta;
@@ -51,31 +57,41 @@ public class TelaContaVisualizacao extends AppCompatActivity {
     FirebaseAuth mAuth;
     FirebaseUser currentUser;
     Gson gson;
-    TransicaoDados objTr;
+    TransicaoDeDadosEntreActivities objTr;
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_tela_conta_visualizacao);
 
+        Window window = this.getWindow();
+        window.setStatusBarColor(ContextCompat.getColor(TelaDespesaVisualizacao.this,R.color.colorPrimaryDark));
     }
 
     @Override
     protected void onStart() {
         super.onStart();
 
-        //Conectando o Firebase
-        banco = FirebaseDatabase.getInstance();
-        referencia = banco.getReference();
-        mAuth = FirebaseAuth.getInstance();
-        currentUser = mAuth.getCurrentUser();
+        if(isOnline(TelaDespesaVisualizacao.this)){
+            try{
+                //Conectando o Firebase
+                banco = FirebaseDatabase.getInstance();
+                referencia = banco.getReference();
+                mAuth = FirebaseAuth.getInstance();
+                currentUser = mAuth.getCurrentUser();
+            }catch (Exception e){
+               //lidar com erro de conexao
+            }
+        }else{
+            //lidar com erro de conexao
+        }
 
-        //Pega os dados referentes ao role atual
+        //Pega os dados referentes ao despesa atual
         String extra;
         gson = new Gson();
 
         Intent it = getIntent();
         extra = it.getStringExtra(EXTRA_UID);
-        objTr = gson.fromJson(extra, TransicaoDados.class);
+        objTr = gson.fromJson(extra, TransicaoDeDadosEntreActivities.class);
 
         //Inicializando variáveis
         valorFinalConta = findViewById(R.id.valorTotal);
@@ -91,25 +107,41 @@ public class TelaContaVisualizacao extends AppCompatActivity {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 //Chama a tela de pessoa, passando o usuário slecionado e a referencia do rolê
-                objTr.pessoa = dados.get(position);
-                String extra = gson.toJson(objTr);
-                Intent it = new Intent(TelaContaVisualizacao.this, TelaPessoaVisualizacao.class);
-                it.putExtra(EXTRA_UID, extra);
-                startActivity(it);
+                if(isOnline(TelaDespesaVisualizacao.this)){
+                    try{
+                        objTr.pessoa = dados.get(position);
+                        String extra = gson.toJson(objTr);
+                        Intent it = new Intent(TelaDespesaVisualizacao.this, TelaPessoaVisualizacao.class);
+                        it.putExtra(EXTRA_UID, extra);
+                        startActivity(it);
+                    }catch (Exception e){
+                        //lidar com erro de conexao
+                    }
+                }else{
+                    //lidar com erro de conexão
+                }
             }
         });
 
         //Carregando a list view sempre com os dados  de pessoa do banco
-        referencia.child(currentUser.getUid()).child(objTr.role.idDadosRole).child(objTr.role.idDadosPessoas).addValueEventListener(new ValueEventListener() {
+        referencia.child(currentUser.getUid()).child(objTr.despesa.idDadosRole).child(objTr.despesa.idDadosPessoas).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 dados = new ArrayList<>();
                 valorTotalConta = 0.0;
                 valorTotalContaComAcrescimo = 0.0;
 
-                for(DataSnapshot dadosDataSnapshot: dataSnapshot.getChildren()){
-                    Pessoa pessoaCadastrada = dadosDataSnapshot.getValue(Pessoa.class);
-                    dados.add(pessoaCadastrada);
+                if(isOnline(TelaDespesaVisualizacao.this)){
+                    try{
+                        for(DataSnapshot dadosDataSnapshot: dataSnapshot.getChildren()){
+                            Pessoa pessoaCadastrada = dadosDataSnapshot.getValue(Pessoa.class);
+                            dados.add(pessoaCadastrada);
+                        }
+                    }catch (Exception e){
+                        //lidar com erro de conexao
+                    }
+                }else{
+                    //lidar com erro de coneexao
                 }
 
                 nomeParticipantes = new String[dados.size()];
@@ -132,7 +164,7 @@ public class TelaContaVisualizacao extends AppCompatActivity {
                 //Inicializa array list, list view e cria um adapter para ela
                 ListView lv = findViewById(R.id.listaPessoasTelaConta);
 
-                AdapterListaPessoa adapterPessoa = new AdapterListaPessoa(dados,TelaContaVisualizacao.this);
+                AdapterParaListaDePessoa adapterPessoa = new AdapterParaListaDePessoa(dados, TelaDespesaVisualizacao.this);
 
                 lv.setAdapter(adapterPessoa);
             }
@@ -148,5 +180,14 @@ public class TelaContaVisualizacao extends AppCompatActivity {
     public void onBackPressed() {
         super.onBackPressed();
         finish();
+    }
+
+    public static boolean isOnline(Context context) {
+        ConnectivityManager administradorDeConexao = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo informacoesDeConexao = administradorDeConexao.getActiveNetworkInfo();
+        if (informacoesDeConexao != null && informacoesDeConexao.isConnected())
+            return true;
+        else
+            return false;
     }
 }

@@ -1,17 +1,17 @@
 package com.example.octaq.dividefacil;
 
-import android.content.DialogInterface;
+import android.content.Context;
 import android.content.Intent;
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
+
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
-import android.view.Gravity;
-import android.view.View;
-import android.widget.Button;
+import android.view.Window;
 import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -46,44 +46,62 @@ public class TelaPessoaVisualizacao extends AppCompatActivity {
     TextView nome;
     DecimalFormat df = new DecimalFormat("#,###.00");
     Gson gson;
-    TransicaoDados objTr;
+    TransicaoDeDadosEntreActivities objTr;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_tela_pessoa_visualizacao);
 
-        mAuth = FirebaseAuth.getInstance();
-        currentUser = mAuth.getCurrentUser();
+        Window window = this.getWindow();
+        window.setStatusBarColor(ContextCompat.getColor(TelaPessoaVisualizacao.this,R.color.colorPrimaryDark));
+
+        if(isOnline(TelaPessoaVisualizacao.this)){
+            try{
+                mAuth = FirebaseAuth.getInstance();
+                currentUser = mAuth.getCurrentUser();
+                //Conectando o Firebase
+                banco = FirebaseDatabase.getInstance();
+                referencia = banco.getReference();
+            }catch (Exception e){
+                //lidar com erro de conexão
+            }
+        }else {
+            //lidar com erro de conexão
+        }
 
         gson = new Gson();
 
         String extra;
         Intent it = getIntent();
         extra = it.getStringExtra(EXTRA_UID);
-        objTr = gson.fromJson(extra, TransicaoDados.class);
+        objTr = gson.fromJson(extra, TransicaoDeDadosEntreActivities.class);
 
         valorPessoalFinal = findViewById(R.id.valorTotalPessoal);
         valorPessoalComAcrescimo = findViewById(R.id.valor10PorCentoPessoal);
         nome = findViewById(R.id.nomePessoaTelaPessoa);
 
-        //Conectando o Firebase
-        banco = FirebaseDatabase.getInstance();
-        referencia = banco.getReference();
-
-        referencia.child(currentUser.getUid()).child(objTr.role.idDadosRole).child(objTr.role.idDadosPessoas).addValueEventListener(new ValueEventListener() {
+        referencia.child(currentUser.getUid()).child(objTr.despesa.idDadosRole).child(objTr.despesa.idDadosPessoas).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 try {
                     pessoaSelecionada = new Pessoa();
 
-                    for(DataSnapshot dadosDataSnapshot: dataSnapshot.getChildren()){
-                        if(dadosDataSnapshot.getKey().equals(objTr.pessoa.id)){
-                            pessoaSelecionada = dadosDataSnapshot.getValue(Pessoa.class);
+                    if(isOnline(TelaPessoaVisualizacao.this)){
+                        try{
+                            for(DataSnapshot dadosDataSnapshot: dataSnapshot.getChildren()){
+                                if(dadosDataSnapshot.getKey().equals(objTr.pessoa.id)){
+                                    pessoaSelecionada = dadosDataSnapshot.getValue(Pessoa.class);
+                                }
+                            }
+                        }catch (Exception e){
+                            //lidar com erro  de conexao
                         }
+                    }else{
+                        //lidar com erro de conexao
                     }
 
-                    nomeAlimentos = new String[pessoaSelecionada.historicoAlimentos.size()];
+                    nomeAlimentos = new String[pessoaSelecionada.historicoItemDeGastos.size()];
 
                     valorTotalComAcrescimo = 0.0;
 
@@ -101,7 +119,7 @@ public class TelaPessoaVisualizacao extends AppCompatActivity {
                     //Inicializa array list, list view e cria um adapter para ela
                     ListView lv = findViewById(R.id.listaAlimentosTelaPessoa);
 
-                    AdapterListaAlimento adapterAlimento = new AdapterListaAlimento(pessoaSelecionada.historicoAlimentos, TelaPessoaVisualizacao.this);
+                    AdapterParaListaDeItemDeGasto adapterAlimento = new AdapterParaListaDeItemDeGasto(pessoaSelecionada.historicoItemDeGastos, TelaPessoaVisualizacao.this);
 
                     lv.setAdapter(adapterAlimento);
                 }catch (Exception ex){
@@ -114,6 +132,14 @@ public class TelaPessoaVisualizacao extends AppCompatActivity {
 
             }
         });
+    }
 
+    public static boolean isOnline(Context context) {
+        ConnectivityManager administradorDeConexao = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo informacoesDeConexao = administradorDeConexao.getActiveNetworkInfo();
+        if (informacoesDeConexao != null && informacoesDeConexao.isConnected())
+            return true;
+        else
+            return false;
     }
 }
