@@ -35,10 +35,12 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
 import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import java.text.SimpleDateFormat;
@@ -59,7 +61,8 @@ public class TelaPrincipal extends AppCompatActivity {
     ProgressDialog dialog;
 
     //Variáveis do dialogo para criar novo despesa
-    EditText nomeRole;
+    EditText nomeDespesa;
+    boolean[] checados;
     AlertDialog alerta;
     ListView lv;
     @Override
@@ -84,8 +87,7 @@ public class TelaPrincipal extends AppCompatActivity {
         FloatingActionButton novoRole = findViewById(R.id.fab_novo_role);
         novoRole.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View view) {
-                dialogoCadastroRole();
+            public void onClick(View view) {  dialogoEscolhaDeTipoDeDespesa();
             }
         });
 
@@ -210,15 +212,29 @@ public class TelaPrincipal extends AppCompatActivity {
     }
 
     public void deletarRole(View v){
-            AlertDialog.Builder builder = new AlertDialog.Builder(TelaPrincipal.this);
+        AlertDialog.Builder builder = new AlertDialog.Builder(TelaPrincipal.this, R.style.AlertDialogCustom);
 
-            final View view = v;
-            //Define o título do diálogo
-            builder.setTitle("Apagar");
+        final View view = v;
 
-            builder.setMessage("Deseja remover essa despesa do seu histórico?");
+        Context context = TelaPrincipal.this;
+        LinearLayout layout = new LinearLayout(context);
+        layout.setOrientation(LinearLayout.VERTICAL);
+        layout.setPadding(80,30,80,0);
 
-            builder.setPositiveButton("Sim", new DialogInterface.OnClickListener() {
+        TextView textoAlerta = new TextView(TelaPrincipal.this);
+        textoAlerta.setTypeface(ResourcesCompat.getFont(this, R.font.cabin));
+        textoAlerta.setText("Deseja remover essa despesa do seu histórico?");
+        textoAlerta.setTextSize(17);
+
+        //Define o título do diálogo
+        builder.setTitle("Apagar");
+        builder.setIcon(R.drawable.ic_delete);
+
+        layout.addView(textoAlerta);
+        builder.setView(layout);
+
+
+        builder.setPositiveButton("Sim", new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface arg0, int arg1) {
                     int tag = (Integer) view.getTag();
                     Despesa despesaTemp = despesas.get(tag);
@@ -248,12 +264,24 @@ public class TelaPrincipal extends AppCompatActivity {
 
 
     private void verificaLogout(){
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AlertDialogCustom);
+
+        Context context = TelaPrincipal.this;
+        LinearLayout layout = new LinearLayout(context);
+        layout.setOrientation(LinearLayout.VERTICAL);
+        layout.setPadding(80,30,80,0);
+
+        TextView textoAlerta = new TextView(TelaPrincipal.this);
+        textoAlerta.setTypeface(ResourcesCompat.getFont(this, R.font.cabin));
+        textoAlerta.setText("Deseja desconectar da sua conta?");
+        textoAlerta.setTextSize(17);
 
         //Define o título do diálogo
         builder.setTitle("Logoff");
+        builder.setIcon(R.drawable.ic_logout_verde);
 
-        builder.setMessage("Deseja desconectar da sua conta?");
+        layout.addView(textoAlerta);
+        builder.setView(layout);
 
         builder.setPositiveButton("Sim", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface arg0, int arg1) {
@@ -301,7 +329,36 @@ public class TelaPrincipal extends AppCompatActivity {
         return true;
     }
 
-    private void dialogoCadastroRole() {
+    private void dialogoEscolhaDeTipoDeDespesa() {
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AlertDialogCustom);
+
+        //Define o título do diálogo
+        builder.setTitle("Qual o tipo da despesa?");
+        builder.setIcon(R.drawable.ic_filter);
+        //Declara os  vetores de controle de quem será escolhido para participar na conta
+        final TipoDeDespesa tipoDeDespesa = new TipoDeDespesa();
+        //Vetor boolean para identificar quem foi e quem não foi selecionado
+        checados = new boolean[tipoDeDespesa.listaDeTiposDeDespesa.size()];
+
+        //adapter utilizando um layout customizado (TextView)
+        AdapterParaListaDeTipoDeDespesa adapter = new AdapterParaListaDeTipoDeDespesa(tipoDeDespesa.listaDeTiposDeDespesa,this);
+
+        builder.setSingleChoiceItems(adapter, 0, new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface arg0, int arg1) {
+                objTr.despesa = new Despesa();
+                objTr.despesa.tipoDeDespesa = tipoDeDespesa.listaDeTiposDeDespesa.get(arg1);
+                alerta.dismiss();
+                dialogoCadastroDeDespesa();
+            }
+        });
+
+        alerta = builder.create();
+        alerta.show();
+
+    }
+
+    private void dialogoCadastroDeDespesa() {
 
         LinearLayout layout = new LinearLayout(TelaPrincipal.this);
 
@@ -309,16 +366,16 @@ public class TelaPrincipal extends AppCompatActivity {
         layout.setPadding(60,30,60,0);
 
         //Inicializa o Edit text que será  chamado no diálogo
-        nomeRole = new EditText(TelaPrincipal.this);
+        nomeDespesa = new EditText(TelaPrincipal.this);
 
         //Seta o tipo de entrada aceitada pelo Edit Text
-        nomeRole.setInputType(InputType.TYPE_CLASS_TEXT);
+        nomeDespesa.setInputType(InputType.TYPE_CLASS_TEXT);
 
         //Seta as dicas de cada Edit text criado
-        nomeRole.setHint("Insira o nome da despesa");
-        nomeRole.setTypeface(ResourcesCompat.getFont(this, R.font.cabin));
+        nomeDespesa.setHint("Insira o nome da despesa");
+        nomeDespesa.setTypeface(ResourcesCompat.getFont(this, R.font.cabin));
 
-        layout.addView(nomeRole);
+        layout.addView(nomeDespesa);
 
         AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AlertDialogCustom);
 
@@ -330,7 +387,7 @@ public class TelaPrincipal extends AppCompatActivity {
 
         builder.setPositiveButton("Avançar", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface arg0, int arg1) {
-                if(nomeRole.getText().toString().equals("")){
+                if(nomeDespesa.getText().toString().equals("")){
                     Toast toast = Toast.makeText(TelaPrincipal.this, "Não é possível criar uma Despesa sem nome", Toast.LENGTH_SHORT);
                     toast.setGravity(Gravity.CENTER_HORIZONTAL | Gravity.CENTER_VERTICAL, 0, 0);
                     toast.show();
@@ -343,13 +400,13 @@ public class TelaPrincipal extends AppCompatActivity {
 
                     //objTr = new TransicaoDeDadosEntreActivities();
 
-                    objTr.despesa = new Despesa();
+
                     objTr.pessoa = new Pessoa();
 
                     //seta previamente dados sobre o rolê
 
                     objTr.despesa.dia = dataFormatada;
-                    objTr.despesa.nome = nomeRole.getText().toString();
+                    objTr.despesa.nome = nomeDespesa.getText().toString();
 
                     dialogoCadastroPessoa();
 

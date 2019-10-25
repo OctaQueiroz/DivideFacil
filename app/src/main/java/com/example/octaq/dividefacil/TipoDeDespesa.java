@@ -1,19 +1,19 @@
 package com.example.octaq.dividefacil;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class TipoDeDespesa {
-    public boolean laser;
-    public boolean barERestaurante;
-    public boolean supermercado;
-    public boolean transoprte;
-    public boolean saude;
-    public boolean contasDeCasa;
+
+    public ArrayList<String> listaDeTiposDeDespesa;
 
     public TipoDeDespesa(){
-        this.laser = false;
-        this.barERestaurante = false;
-        this.supermercado = false;
-        this.transoprte = false;
-        this.saude = false;
-        this.contasDeCasa = false;
+        listaDeTiposDeDespesa = new ArrayList<>();
+        listaDeTiposDeDespesa.add("Lazer");
+        listaDeTiposDeDespesa.add("Bar e Restaurante");
+        listaDeTiposDeDespesa.add("Supermercado");
+        listaDeTiposDeDespesa.add("Transporte");
+        listaDeTiposDeDespesa.add("Saude");
+        listaDeTiposDeDespesa.add("Contas de Casa");
     }
 }

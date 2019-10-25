@@ -7,16 +7,18 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
 
+import androidx.core.content.res.ResourcesCompat;
+
 import java.text.DecimalFormat;
 import java.util.List;
 
-public class AdapterParaListaDePessoa extends BaseAdapter {
+public class AdapterParaListaDeTipoDeDespesa extends BaseAdapter {
 
-    List<Pessoa> lista;
+    List<String> lista;
     Context context;
     DecimalFormat df = new DecimalFormat("#,###.00");
 
-    public AdapterParaListaDePessoa(List<Pessoa> lista, Context context){
+    public AdapterParaListaDeTipoDeDespesa(List<String> lista, Context context){
         this.lista = lista;
         this.context = context;
     }
@@ -40,18 +42,12 @@ public class AdapterParaListaDePessoa extends BaseAdapter {
         LayoutInflater mInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
         // cria uma view com o layout  do seu item
-        view = mInflater.inflate(R.layout.layout_lista_item_de_gasto, null);
+        view = mInflater.inflate(R.layout.layout_lista_tipos_de_despesa, null);
 
         // Atribuição normal dos campos de uma view
-        TextView campo1 = view.findViewById(R.id.textView_campo1);
-        TextView campo2 = view.findViewById(R.id.textView_campo2);
-
-        campo1.setText(lista.get(position).nome);
-        if(lista.get(position).valorTotal > 0.0){
-            campo2.setText("R$"+df.format(lista.get(position).valorTotal));
-        }else{
-            campo2.setText("R$00.00");
-        }
+        TextView campo1 = view.findViewById(R.id.tv_nome_tipo_Despesa);
+        campo1.setTypeface(ResourcesCompat.getFont(view.getContext(), R.font.cabin));
+        campo1.setText(lista.get(position));
 
         return view;
 
