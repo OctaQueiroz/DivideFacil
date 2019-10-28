@@ -60,6 +60,8 @@ public class TelaPrincipal extends AppCompatActivity {
     boolean[] checados;
     AlertDialog alerta;
     ListView lv;
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -70,8 +72,20 @@ public class TelaPrincipal extends AppCompatActivity {
 
         objTr = new TransicaoDeDadosEntreActivities();
 
-        //pega o id do usuário atual, para ser utilizado
+        //pega o id do usuário atual, para ser utilizado e salva no nó de usuários os dados para acesso de demais usuários
         objTr.userUid = mAuth.getCurrentUser().getUid();
+        objTr.userEmail = mAuth.getCurrentUser().getEmail();
+        String[] nomeUsuarioAtual = mAuth.getCurrentUser().getDisplayName().split(" ");
+        String nomeASerSalvo;
+        if(nomeUsuarioAtual.length > 1){
+            nomeASerSalvo = nomeUsuarioAtual[0] + " "+ nomeUsuarioAtual[nomeUsuarioAtual.length-1];
+        }else{
+            nomeASerSalvo = nomeUsuarioAtual[0];
+        }
+        UsuarioAutenticadoDoFirebase usuarioAtual = new UsuarioAutenticadoDoFirebase(objTr.userUid,objTr.userEmail, nomeASerSalvo);
+        //String ref = referencia.child("users").push().getKey();
+
+        referencia.child("AAAAAUSERS").child(objTr.userUid).setValue(usuarioAtual);
 
         dialog = ProgressDialog.show(TelaPrincipal.this, "",
                 "Carregando suas Despesas...", true);
@@ -151,6 +165,8 @@ public class TelaPrincipal extends AppCompatActivity {
 
             }
         });
+
+
     }
 
     @Override
@@ -236,7 +252,7 @@ public class TelaPrincipal extends AppCompatActivity {
                     despesaTemp.excluido =true;
                     if(isOnline(TelaPrincipal.this)){
                         try{
-                            referencia.child(objTr.userUid).child(despesaTemp.idDadosRole).child(despesaTemp.idDadosRole).setValue(despesaTemp);
+                            referencia.child(objTr.userUid).child(despesaTemp.idDadosDespesa).child(despesaTemp.idDadosDespesa).setValue(despesaTemp);
                         }catch (Exception e){
                             //Lidar com erro de conexão
                         }
@@ -403,7 +419,44 @@ public class TelaPrincipal extends AppCompatActivity {
                     objTr.despesa.dia = dataFormatada;
                     objTr.despesa.nome = nomeDespesa.getText().toString();
 
-                    dialogoCadastroPessoa();
+                    if(isOnline(TelaPrincipal.this)){
+                        try {
+                            //Cria o despesa no banco e adiciona o novo integrante.
+                            //Isso é  feito para evitar que rolês sejam criados sem nenhum integrante, caso o usuario chegue até essa tela e feche o app
+
+                            String idRole = referencia.child(objTr.userUid).push().getKey();
+                            String idPessoas = referencia.child(objTr.userUid).push().getKey();
+
+                            //Termina de setar os dados faltantes e cadastra o rolê  junto do integrante incial ao banco
+
+                            objTr.despesa.idDadosDespesa = idRole;
+                            objTr.despesa.idDadosPessoas = idPessoas;
+                            objTr.despesa.uidIntegrantes.add(objTr.userUid);
+
+                            referencia.child(objTr.userUid).child(objTr.despesa.idDadosDespesa).child(objTr.despesa.idDadosDespesa).setValue(objTr.despesa);
+
+                            Pessoa novoParticipante = new Pessoa();
+                            String[] nomeUsuarioCompleto = mAuth.getCurrentUser().getDisplayName().split(" ");
+                            if(nomeUsuarioCompleto.length>1){
+                                novoParticipante.nome = nomeUsuarioCompleto[0] + " " + nomeUsuarioCompleto[nomeUsuarioCompleto.length-1];
+                            }else{
+                                novoParticipante.nome = nomeUsuarioCompleto[0];
+                            }
+                            novoParticipante.id = objTr.userUid;
+                            referencia.child(objTr.userUid).child(objTr.despesa.idDadosDespesa).child(objTr.despesa.idDadosPessoas).child(novoParticipante.id).setValue(novoParticipante);
+
+                            Gson gson = new Gson();
+                            String extra = gson.toJson(objTr);
+                            Intent it = new Intent(TelaPrincipal.this, TelaDespesa.class);
+                            it.putExtra(EXTRA_UID, extra);
+                            startActivityForResult(it, 2);
+
+                        }catch (Exception e){
+                            //Lidar  com o erro de conexão
+                        }
+                    }else{
+                        //Lidar com o erro de conexão
+                    }
 
                 }
 
@@ -455,37 +508,7 @@ public class TelaPrincipal extends AppCompatActivity {
                     toast.setGravity(Gravity.CENTER_HORIZONTAL | Gravity.CENTER_VERTICAL, 0, 0);
                     toast.show();
                 }else {
-                    if(isOnline(TelaPrincipal.this)){
-                        try {
-                            //Cria o despesa no banco e adiciona o novo integrante.
-                            //Isso é  feito para evitar que rolês sejam criados sem nenhum integrante, caso o usuario chegue até essa tela e feche o app
 
-                            String idRole = referencia.child(objTr.userUid).push().getKey();
-                            String idPessoas = referencia.child(objTr.userUid).push().getKey();
-
-                            //Termina de setar os dados faltantes e cadastra o rolê  junto do integrante incial ao banco
-
-                            objTr.despesa.idDadosRole = idRole;
-                            objTr.despesa.idDadosPessoas = idPessoas;
-
-                            referencia.child(objTr.userUid).child(objTr.despesa.idDadosRole).child(objTr.despesa.idDadosRole).setValue(objTr.despesa);
-
-                            Pessoa novoParticipante = new Pessoa();
-                            novoParticipante.nome = nomePessoa.getText().toString();
-                            novoParticipante.id = referencia.child(objTr.userUid).child(objTr.despesa.idDadosRole).child(objTr.despesa.idDadosPessoas).push().getKey();
-                            referencia.child(objTr.userUid).child(objTr.despesa.idDadosRole).child(objTr.despesa.idDadosPessoas).child(novoParticipante.id).setValue(novoParticipante);
-
-                            Gson gson = new Gson();
-                            String extra = gson.toJson(objTr);
-                            Intent it = new Intent(TelaPrincipal.this, TelaDespesa.class);
-                            it.putExtra(EXTRA_UID, extra);
-                            startActivityForResult(it, 2);
-                        }catch (Exception e){
-                            //Lidar  com o erro de conexão
-                        }
-                    }else{
-                        //Lidar com o erro de conexão
-                    }
                 }
             }
         });

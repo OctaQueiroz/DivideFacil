@@ -25,6 +25,8 @@ import com.google.firebase.database.ValueEventListener;
 import com.google.gson.Gson;
 
 import java.text.DecimalFormat;
+import java.util.ArrayList;
+import java.util.List;
 
 
 import static com.example.octaq.dividefacil.TelaLogin.EXTRA_UID;
@@ -39,6 +41,7 @@ public class TelaPessoa extends AppCompatActivity {
     Double valorTotalComAcrescimo;
     Pessoa pessoaSelecionada;
     AlertDialog alerta;
+    List<UsuarioAutenticadoDoFirebase> usuariosCadastrados;
 
     //Controlando dados mostrados na tela
     TextView valorPessoalFinal;
@@ -69,7 +72,7 @@ public class TelaPessoa extends AppCompatActivity {
         valorPessoalComAcrescimo = findViewById(R.id.valor10PorCentoPessoal);
         nome = findViewById(R.id.nomePessoaTelaPessoa);
 
-        referencia.child(objTr.userUid).child(objTr.despesa.idDadosRole).child(objTr.despesa.idDadosPessoas).addValueEventListener(new ValueEventListener() {
+        referencia.child(objTr.userUid).child(objTr.despesa.idDadosDespesa).child(objTr.despesa.idDadosPessoas).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 try {
@@ -120,6 +123,36 @@ public class TelaPessoa extends AppCompatActivity {
 
             }
         });
+
+
+        referencia.child("AAAAAUSERS").addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                usuariosCadastrados = new ArrayList<>();
+                if(isOnline(TelaPessoa.this)){
+                    try{
+                        for(DataSnapshot dadosDataSnapshot: dataSnapshot.getChildren()){
+                            UsuarioAutenticadoDoFirebase usuarioDaBase = dadosDataSnapshot.getValue(UsuarioAutenticadoDoFirebase.class);
+
+                            if(usuarioDaBase != null) {
+                                usuariosCadastrados.add(usuarioDaBase);
+                            }
+                        }
+                    }catch (Exception e){
+                        //Lidar com erro de conexao
+                    }
+                }else{
+                    //Lidar com erro de conexao
+                }
+
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+
         btnfecharConta.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -158,8 +191,9 @@ public class TelaPessoa extends AppCompatActivity {
                     try {
                         //Apaga todos os dados da tabela
                         pessoaSelecionada.fechouConta = true;
-                        referencia.child(objTr.userUid).child(objTr.despesa.idDadosRole).child(objTr.despesa.idDadosPessoas).child(pessoaSelecionada.id).setValue(pessoaSelecionada);
-
+                        for(int i = 0; i < objTr.despesa.uidIntegrantes.size(); i++){
+                            referencia.child(objTr.despesa.uidIntegrantes.get(i)).child(objTr.despesa.idDadosDespesa).child(objTr.despesa.idDadosPessoas).child(pessoaSelecionada.id).setValue(pessoaSelecionada);
+                        }
                         Toast toast = Toast.makeText(TelaPessoa.this, "Conta pessoal finalizada e apagada com sucesso!", Toast.LENGTH_LONG);
                         toast.setGravity(Gravity.CENTER_HORIZONTAL | Gravity.CENTER_VERTICAL, 0, 0);
                         toast.show();

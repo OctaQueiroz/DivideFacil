@@ -13,9 +13,9 @@
 
     <ImageView
         android:id="@+id/imageView"
-        android:layout_width="150dp"
-        android:layout_height="140dp"
-        app:srcCompat="@drawable/ic_prancheta_4" />
+        android:layout_width="132dp"
+        android:layout_height="122dp"
+        app:srcCompat="@drawable/ic_principal_verde" />
 
 
 

@@ -71,6 +71,7 @@ public class TelaLogin extends AppCompatActivity {
         concluirLogin = findViewById(R.id.btn_Login);
         novoCadastro = findViewById(R.id.btn_NovoCadastro);
 
+
         //Inicializa os objetos necessários para utilizar o logIn no firebase pelo google
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestIdToken(getString(R.string.default_web_client_id))
@@ -196,7 +197,6 @@ public class TelaLogin extends AppCompatActivity {
                                     @Override
                                     public void onComplete(@NonNull Task<AuthResult> task) {
                                         if (task.isSuccessful()) {
-
                                             Intent it  = new Intent(TelaLogin.this, TelaPrincipal.class);
                                             startActivity(it);
                                             finish();

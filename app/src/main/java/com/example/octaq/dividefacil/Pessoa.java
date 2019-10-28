@@ -9,6 +9,7 @@ public class Pessoa {
     public ArrayList<ItemDeGasto> historicoItemDeGastos;
     public boolean fechouConta;
 
+
     public Pessoa(){
         id = "";
         nome  = "";

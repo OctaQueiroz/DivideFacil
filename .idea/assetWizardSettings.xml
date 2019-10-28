@@ -99,7 +99,7 @@
                                     <map>
                                       <entry key="backgroundAssetType" value="COLOR" />
                                       <entry key="backgroundColor" value="3b9d3e" />
-                                      <entry key="foregroundImage" value="C:\Users\octaq\Downloads\Ativo 1 (1).png" />
+                                      <entry key="foregroundImage" value="C:\Users\octaq\Downloads\simbolo branco.svg" />
                                     </map>
                                   </option>
                                 </PersistentState>
@@ -168,8 +168,8 @@
                         <option name="values">
                           <map>
                             <entry key="assetSourceType" value="FILE" />
-                            <entry key="outputName" value="ic_logout_verde" />
-                            <entry key="sourceFile" value="C:\Users\octaq\Downloads\logout (1).svg" />
+                            <entry key="outputName" value="ic_horizontal_branc" />
+                            <entry key="sourceFile" value="C:\Users\octaq\Downloads\horizontal branc.svg" />
                           </map>
                         </option>
                       </PersistentState>
