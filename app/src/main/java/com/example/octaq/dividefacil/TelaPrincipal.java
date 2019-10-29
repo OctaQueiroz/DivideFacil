@@ -140,7 +140,7 @@ public class TelaPrincipal extends AppCompatActivity {
                     try{
                         for(DataSnapshot dadosDataSnapshot: dataSnapshot.getChildren()){
                             String despesaCadastrada = dadosDataSnapshot.getKey();
-                            Despesa despesaAtualizado = dadosDataSnapshot.child(despesaCadastrada).getValue(Despesa.class);
+                            Despesa despesaAtualizado = dadosDataSnapshot.child("Despesa").getValue(Despesa.class);
                             if(despesaAtualizado != null) {
                                 if (!despesaAtualizado.excluido) {
                                     despesas.add(despesaAtualizado);
@@ -222,7 +222,7 @@ public class TelaPrincipal extends AppCompatActivity {
         alerta.show();
     }
 
-    public void deletarRole(View v){
+    public void deletarDespesa(View v){
         AlertDialog.Builder builder = new AlertDialog.Builder(TelaPrincipal.this, R.style.AlertDialogCustom);
 
         final View view = v;
@@ -252,7 +252,7 @@ public class TelaPrincipal extends AppCompatActivity {
                     despesaTemp.excluido =true;
                     if(isOnline(TelaPrincipal.this)){
                         try{
-                            referencia.child(objTr.userUid).child(despesaTemp.idDadosDespesa).child(despesaTemp.idDadosDespesa).setValue(despesaTemp);
+                            referencia.child(objTr.userUid).child(despesaTemp.idDadosDespesa).child("Despesa").setValue(despesaTemp);
                         }catch (Exception e){
                             //Lidar com erro de conexão
                         }
@@ -417,7 +417,7 @@ public class TelaPrincipal extends AppCompatActivity {
                     //seta previamente dados sobre o rolê
 
                     objTr.despesa.dia = dataFormatada;
-                    objTr.despesa.nome = nomeDespesa.getText().toString();
+                    objTr.despesa.nome = nomeDespesa.getText().toString().substring(0,1).toUpperCase() + nomeDespesa.getText().toString().substring(1);
 
                     if(isOnline(TelaPrincipal.this)){
                         try {
@@ -433,7 +433,7 @@ public class TelaPrincipal extends AppCompatActivity {
                             objTr.despesa.idDadosPessoas = idPessoas;
                             objTr.despesa.uidIntegrantes.add(objTr.userUid);
 
-                            referencia.child(objTr.userUid).child(objTr.despesa.idDadosDespesa).child(objTr.despesa.idDadosDespesa).setValue(objTr.despesa);
+                            referencia.child(objTr.userUid).child(objTr.despesa.idDadosDespesa).child("Despesa").setValue(objTr.despesa);
 
                             Pessoa novoParticipante = new Pessoa();
                             String[] nomeUsuarioCompleto = mAuth.getCurrentUser().getDisplayName().split(" ");
@@ -443,7 +443,7 @@ public class TelaPrincipal extends AppCompatActivity {
                                 novoParticipante.nome = nomeUsuarioCompleto[0];
                             }
                             novoParticipante.id = objTr.userUid;
-                            referencia.child(objTr.userUid).child(objTr.despesa.idDadosDespesa).child(objTr.despesa.idDadosPessoas).child(novoParticipante.id).setValue(novoParticipante);
+                            referencia.child(objTr.userUid).child(objTr.despesa.idDadosDespesa).child("Integrantes").child(novoParticipante.id).setValue(novoParticipante);
 
                             Gson gson = new Gson();
                             String extra = gson.toJson(objTr);
@@ -470,57 +470,6 @@ public class TelaPrincipal extends AppCompatActivity {
         });
 
         alerta = builder.create();
-        alerta.show();
-    }
-
-    private void dialogoCadastroPessoa() {
-
-        LinearLayout layout = new LinearLayout(TelaPrincipal.this);
-
-        layout.setOrientation(LinearLayout.VERTICAL);
-        layout.setPadding(60,30,60,0);
-
-        //Inicializa o Edit text que será  chamado no diálogo
-        final EditText nomePessoa = new EditText(TelaPrincipal.this);
-
-        //Seta o tipo de entrada aceitada pelo Edit Text
-        nomePessoa.setInputType(InputType.TYPE_CLASS_TEXT);
-
-        nomePessoa.setTypeface(ResourcesCompat.getFont(this, R.font.cabin));
-        //Seta as dicas de cada Edit text criado
-        nomePessoa.setHint("Insira ao menos um integrante");
-
-        layout.addView(nomePessoa);
-
-        AlertDialog.Builder builder = new AlertDialog.Builder(this,R.style.AlertDialogCustom);
-
-        //Define o título do diálogo
-        builder.setTitle("Cadastro de novo  integrante");
-        builder.setIcon(R.drawable.ic_add_person);
-
-        //Coloca a view criada no diálogo
-        builder.setView(layout);
-
-        builder.setPositiveButton("Avançar", new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface arg0, int arg1) {
-                if(nomePessoa.getText().toString().equals("")){
-                    Toast toast = Toast.makeText(TelaPrincipal.this, "O nome do integrante não pode ser nulo!", Toast.LENGTH_SHORT);
-                    toast.setGravity(Gravity.CENTER_HORIZONTAL | Gravity.CENTER_VERTICAL, 0, 0);
-                    toast.show();
-                }else {
-
-                }
-            }
-        });
-
-        builder.setNegativeButton("Cancelar", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-            }
-        });
-
-        alerta = builder.create();
-
         alerta.show();
     }
 

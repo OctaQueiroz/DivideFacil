@@ -5,64 +5,85 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent" >
 
+    <ImageView
+        android:id="@+id/imageView7"
+        android:layout_width="62dp"
+        android:layout_height="46dp"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginStart="2dp"
+        android:layout_marginTop="35dp"
+        app:srcCompat="@drawable/ic_add_income" />
+
     <TextView
         android:id="@+id/tv_nome_historico"
-        android:layout_width="wrap_content"
+        android:layout_width="162dp"
         android:layout_height="wrap_content"
-        android:layout_alignParentStart="true"
-        android:layout_alignParentLeft="true"
         android:layout_alignParentTop="true"
-        android:layout_marginStart="10dp"
-        android:layout_marginLeft="10dp"
-        android:layout_marginTop="6dp"
-        android:layout_marginBottom="6dp"
+        android:layout_marginStart="9dp"
+        android:layout_marginTop="10dp"
+        android:layout_marginEnd="9dp"
+        android:layout_toStartOf="@+id/iv_delete"
+        android:layout_toEndOf="@+id/imageView7"
         android:text="@string/palavra_nome"
-        android:textAppearance="?android:attr/textAppearanceMedium" />
-
-    <TextView
-        android:id="@+id/tv_data_historico"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/tv_nome_historico"
-        android:layout_alignParentStart="true"
-        android:layout_alignParentLeft="true"
-        android:layout_marginStart="10dp"
-        android:layout_marginLeft="10dp"
-        android:layout_marginTop="3dp"
-        android:layout_marginBottom="6dp"
-        android:text="@string/palavra_dia"
-        android:textAppearance="?android:attr/textAppearanceSmall"
-        android:fontFamily="@font/cabin"/>
-
-    <TextView
-        android:id="@+id/tv_status_historico"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/tv_data_historico"
-        android:layout_alignParentStart="true"
-        android:layout_alignParentLeft="true"
-        android:layout_marginStart="8dp"
-        android:layout_marginLeft="10dp"
-        android:layout_marginTop="3dp"
-        android:layout_marginBottom="6dp"
-        android:text="@string/palavra_status"
-        android:textAppearance="?android:attr/textAppearanceSmall"
-        android:fontFamily="@font/cabin"/>
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:textColor="#464646"/>
 
     <TextView
         android:id="@+id/tv_valor_historico"
-        android:layout_width="wrap_content"
+        android:layout_width="162dp"
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
-        android:layout_marginTop="36dp"
-        android:layout_marginEnd="34dp"
-        android:layout_marginRight="34dp"
-        android:layout_marginBottom="6dp"
+        android:layout_marginStart="9dp"
+        android:layout_marginTop="37dp"
+        android:layout_marginEnd="9dp"
         android:layout_toStartOf="@+id/iv_delete"
-        android:layout_toLeftOf="@+id/iv_delete"
+        android:layout_toEndOf="@+id/imageView7"
+        android:fontFamily="@font/cabin"
         android:text="@string/palavra_valor"
-        android:textAppearance="?android:attr/textAppearanceMedium"
-        android:fontFamily="@font/cabin"/>
+        android:textAppearance="?android:attr/textAppearanceSmall" />
+
+    <TextView
+        android:id="@+id/tv_data_historico"
+        android:layout_width="163dp"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/tv_valor_historico"
+        android:layout_marginStart="10dp"
+        android:layout_marginTop="5dp"
+        android:layout_marginEnd="9dp"
+        android:layout_toStartOf="@+id/iv_delete"
+        android:layout_toEndOf="@+id/imageView7"
+        android:fontFamily="@font/cabin"
+        android:text="@string/palavra_dia"
+        android:textAppearance="?android:attr/textAppearanceSmall" />
+
+    <TextView
+        android:id="@+id/tv_status_historico"
+        android:layout_width="113dp"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/tv_data_historico"
+        android:layout_marginStart="10dp"
+        android:layout_marginTop="4dp"
+        android:layout_marginBottom="10dp"
+        android:layout_marginEnd="60dp"
+        android:layout_toStartOf="@+id/iv_delete"
+        android:layout_toEndOf="@+id/imageView7"
+        android:fontFamily="@font/cabin"
+        android:text="@string/palavra_status"
+        android:textAppearance="?android:attr/textAppearanceSmall" />
+
+    <ImageView
+        android:id="@+id/iv_delete"
+        android:layout_width="25dp"
+        android:layout_height="53dp"
+        android:layout_alignParentTop="true"
+        android:layout_marginTop="31dp"
+        android:layout_marginEnd="9dp"
+        android:layout_marginRight="9dp"
+        android:layout_toStartOf="@+id/imageView2"
+        android:layout_toLeftOf="@+id/imageView2"
+        android:onClick="deletarDespesa"
+        app:srcCompat="@drawable/ic_delete" />
 
     <ImageView
         android:id="@+id/imageView2"
@@ -71,22 +92,9 @@
         android:layout_alignParentTop="true"
         android:layout_alignParentEnd="true"
         android:layout_alignParentRight="true"
-        android:layout_marginTop="19dp"
-        android:layout_marginEnd="10dp"
-        android:layout_marginRight="10dp"
+        android:layout_marginTop="31dp"
+        android:layout_marginEnd="9dp"
+        android:layout_marginRight="9dp"
         app:srcCompat="@drawable/ic_next" />
-
-    <ImageView
-        android:id="@+id/iv_delete"
-        android:layout_width="25dp"
-        android:layout_height="53dp"
-        android:layout_alignParentTop="true"
-        android:layout_marginTop="21dp"
-        android:layout_marginEnd="8dp"
-        android:layout_marginRight="8dp"
-        android:layout_toStartOf="@+id/imageView2"
-        android:layout_toLeftOf="@+id/imageView2"
-        android:onClick="deletarRole"
-        app:srcCompat="@drawable/ic_delete" />
 
 </RelativeLayout>

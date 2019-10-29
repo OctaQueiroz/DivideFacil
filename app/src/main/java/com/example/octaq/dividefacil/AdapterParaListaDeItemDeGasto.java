@@ -5,6 +5,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import java.text.DecimalFormat;
@@ -45,12 +46,14 @@ public class AdapterParaListaDeItemDeGasto extends BaseAdapter {
         // Atribuição normal dos campos de uma view
         TextView campo1 = view.findViewById(R.id.textView_campo1);
         TextView campo2 = view.findViewById(R.id.textView_campo2);
+        ImageView deletar = view.findViewById(R.id.iv_delete_item_de_gasto);
+        deletar.setTag(position);
 
         campo1.setText(lista.get(position).nome);
         if(lista.get(position).valor > 0.0){
-            campo2.setText("R$"+df.format(lista.get(position).valor));
+            campo2.setText("Valor: R$"+df.format(lista.get(position).valor));
         }else{
-            campo2.setText("R$00,00");
+            campo2.setText("Valor: R$00,00");
         }
 
 

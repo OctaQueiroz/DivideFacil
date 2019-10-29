@@ -7,12 +7,12 @@ public class ItemDeGasto {
     public String id;
     public Double valor;
     public String nome;
-    public List<String> uidUsuariosQueConsomemEsseitem;
+    public List<ConsumidorItemDeGasto> usuariosQueConsomemEsseitem;
 
     public ItemDeGasto(){
         id = "";
         valor = 0.0;
         nome = "";
-        uidUsuariosQueConsomemEsseitem = new ArrayList<>();
+        usuariosQueConsomemEsseitem = new ArrayList<>();
     }
 }

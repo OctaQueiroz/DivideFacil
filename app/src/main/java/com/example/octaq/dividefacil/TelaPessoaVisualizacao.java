@@ -79,7 +79,7 @@ public class TelaPessoaVisualizacao extends AppCompatActivity {
         valorPessoalComAcrescimo = findViewById(R.id.valor10PorCentoPessoal);
         nome = findViewById(R.id.nomePessoaTelaPessoa);
 
-        referencia.child(currentUser.getUid()).child(objTr.despesa.idDadosDespesa).child(objTr.despesa.idDadosPessoas).addValueEventListener(new ValueEventListener() {
+        referencia.child(currentUser.getUid()).child(objTr.despesa.idDadosDespesa).child("Integrantes").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 try {

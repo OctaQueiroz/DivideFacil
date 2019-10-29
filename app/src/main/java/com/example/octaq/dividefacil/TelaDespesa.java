@@ -1,6 +1,5 @@
 package com.example.octaq.dividefacil;
 
-import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -141,7 +140,7 @@ public class TelaDespesa extends AppCompatActivity {
         super.onStart();
 
         //Carregando a list view sempre com os dados  de pessoa do banco
-        referencia.child(objTr.userUid).child(objTr.despesa.idDadosDespesa).child(objTr.despesa.idDadosPessoas).addValueEventListener(new ValueEventListener() {
+        referencia.child(objTr.userUid).child(objTr.despesa.idDadosDespesa).child("Integrantes").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
 
@@ -184,7 +183,7 @@ public class TelaDespesa extends AppCompatActivity {
                     objTr.despesa.valorRoleFechado+=dadosSemAlteracao.get(i).valorTotal;
                 }
                 //Guarda no banco os dados atualizados do despesa
-                referencia.child(objTr.userUid).child(objTr.despesa.idDadosDespesa).child(objTr.despesa.idDadosDespesa).setValue(objTr.despesa);
+                referencia.child(objTr.userUid).child(objTr.despesa.idDadosDespesa).child("Despesa").setValue(objTr.despesa);
 
                 valorTotalContaComAcrescimo += objTr.despesa.valorRoleAberto*1.1;
 
@@ -296,7 +295,7 @@ public class TelaDespesa extends AppCompatActivity {
                                     if(novoParticipante.nome.equals(usuariosCadastrados.get(i).email)){
                                         uidIntegrantenovo = usuariosCadastrados.get(i).uid;
                                         objTr.despesa.uidIntegrantes.add(usuariosCadastrados.get(i).uid);
-                                        novoParticipante.nome = usuariosCadastrados.get(i).nome;
+                                        novoParticipante.nome = usuariosCadastrados.get(i).nome.substring(0,1).toUpperCase() + usuariosCadastrados.get(i).nome.substring(1);
                                         novoParticipante.id = usuariosCadastrados.get(i).uid;
                                         achouUsuárioCadastrado = true;
                                         break;
@@ -304,23 +303,24 @@ public class TelaDespesa extends AppCompatActivity {
                                 }
                                 if(!achouUsuárioCadastrado){
                                     novoParticipante.nome = novoParticipante.nome.split("@")[0];
-                                    novoParticipante.id = referencia.child(objTr.userUid).child(objTr.despesa.idDadosDespesa).child(objTr.despesa.idDadosPessoas).push().getKey();
+                                    novoParticipante.nome = novoParticipante.nome.substring(0,1).toUpperCase() + novoParticipante.nome.substring(1);
+                                    novoParticipante.id = referencia.child(objTr.userUid).child(objTr.despesa.idDadosDespesa).child("Integrantes").push().getKey();
                                     for(int i = 0; i < objTr.despesa.uidIntegrantes.size(); i++){
-                                        referencia.child(objTr.despesa.uidIntegrantes.get(i)).child(objTr.despesa.idDadosDespesa).child(objTr.despesa.idDadosPessoas).child(novoParticipante.id).setValue(novoParticipante);
+                                        referencia.child(objTr.despesa.uidIntegrantes.get(i)).child(objTr.despesa.idDadosDespesa).child("Integrantes").child(novoParticipante.id).setValue(novoParticipante);
                                     }
                                 }else{
-                                    referencia.child(uidIntegrantenovo).child(objTr.despesa.idDadosDespesa).child(objTr.despesa.idDadosDespesa).setValue(objTr.despesa);
+                                    referencia.child(uidIntegrantenovo).child(objTr.despesa.idDadosDespesa).child("Despesa").setValue(objTr.despesa);
                                     for(int i = 0; i < dados.size(); i++){
-                                        referencia.child(uidIntegrantenovo).child(objTr.despesa.idDadosDespesa).child(objTr.despesa.idDadosPessoas).child(dados.get(i).id).setValue(dados.get(i));
+                                        referencia.child(uidIntegrantenovo).child(objTr.despesa.idDadosDespesa).child("Integrantes").child(dados.get(i).id).setValue(dados.get(i));
                                     }
                                     for(int i = 0; i < objTr.despesa.uidIntegrantes.size(); i++){
-                                        referencia.child(objTr.despesa.uidIntegrantes.get(i)).child(objTr.despesa.idDadosDespesa).child(objTr.despesa.idDadosPessoas).child(uidIntegrantenovo).setValue(novoParticipante);
+                                        referencia.child(objTr.despesa.uidIntegrantes.get(i)).child(objTr.despesa.idDadosDespesa).child("Integrantes").child(uidIntegrantenovo).setValue(novoParticipante);
                                     }
                                 }
                             }else{
-                                novoParticipante.id = referencia.child(objTr.userUid).child(objTr.despesa.idDadosDespesa).child(objTr.despesa.idDadosPessoas).push().getKey();
+                                novoParticipante.id = referencia.child(objTr.userUid).child(objTr.despesa.idDadosDespesa).child("Integrantes").push().getKey();
                                 for(int i = 0; i < objTr.despesa.uidIntegrantes.size(); i++){
-                                    referencia.child(objTr.despesa.uidIntegrantes.get(i)).child(objTr.despesa.idDadosDespesa).child(objTr.despesa.idDadosPessoas).child(novoParticipante.id).setValue(novoParticipante);
+                                    referencia.child(objTr.despesa.uidIntegrantes.get(i)).child(objTr.despesa.idDadosDespesa).child("Integrantes").child(novoParticipante.id).setValue(novoParticipante);
                                 }
                             }
                         } catch (Exception e) {
@@ -428,10 +428,12 @@ public class TelaDespesa extends AppCompatActivity {
                     try {
                         int dividirParaPessoas = 0;
                         Boolean naoNulo = false;
-
+                        ItemDeGasto novoItemDeGasto = new ItemDeGasto();
                         for (int i = 0; i < checados.length; i++) {
                             if (checados[i]) {
                                 naoNulo = true;
+                                ConsumidorItemDeGasto novoConsumidor = new ConsumidorItemDeGasto(dados.get(i).nome, dados.get(i).id);
+                                novoItemDeGasto.usuariosQueConsomemEsseitem.add(novoConsumidor);
                                 dividirParaPessoas++;
                             }
                         }
@@ -447,13 +449,13 @@ public class TelaDespesa extends AppCompatActivity {
                                         if (checados[i]) {
                                             for (int j = 0; j < dados.size(); j++) {
                                                 if (nomes[i].equals(dados.get(i).nome)) {
-                                                    ItemDeGasto novoItemDeGasto = new ItemDeGasto();
-                                                    novoItemDeGasto.nome = nomeItem.getText().toString();
+                                                    novoItemDeGasto.id = referencia.child(objTr.userUid).child(objTr.despesa.idDadosDespesa).child("Integrantes").push().getKey();
+                                                    novoItemDeGasto.nome = nomeItem.getText().toString().substring(0,1).toUpperCase() + nomeItem.getText().toString().substring(1);
                                                     novoItemDeGasto.valor = valorPorPessoa;
                                                     dados.get(i).valorTotal += valorPorPessoa;
                                                     dados.get(i).historicoItemDeGastos.add(novoItemDeGasto);
                                                     for(int k = 0; k < objTr.despesa.uidIntegrantes.size(); k++){
-                                                        referencia.child(objTr.despesa.uidIntegrantes.get(k)).child(objTr.despesa.idDadosDespesa).child(objTr.despesa.idDadosPessoas).child(dados.get(i).id).setValue(dados.get(i));
+                                                        referencia.child(objTr.despesa.uidIntegrantes.get(k)).child(objTr.despesa.idDadosDespesa).child("Integrantes").child(dados.get(i).id).setValue(dados.get(i));
                                                     }
                                                     //referencia.child(objTr.userUid).child(objTr.despesa.idDadosDespesa).child(objTr.despesa.idDadosPessoas).child(dados.get(i).id).setValue(dados.get(i));
                                                     nomes[i] = "";//Impede que uma mesma pessoa  seja contada mais de uma vez
@@ -522,7 +524,7 @@ public class TelaDespesa extends AppCompatActivity {
                         //Apaga todos os dados da tabela
                         objTr.despesa.fechou = true;
                         for(int i = 0; i < objTr.despesa.uidIntegrantes.size(); i++){
-                            referencia.child(objTr.despesa.uidIntegrantes.get(i)).child(objTr.despesa.idDadosDespesa).child(objTr.despesa.idDadosDespesa).setValue(objTr.despesa);
+                            referencia.child(objTr.despesa.uidIntegrantes.get(i)).child(objTr.despesa.idDadosDespesa).child("Despesa").setValue(objTr.despesa);
                         }
                         //referencia.child(objTr.userUid).child(objTr.despesa.idDadosDespesa).child(objTr.despesa.idDadosDespesa).setValue(objTr.despesa);
                         Toast toast = Toast.makeText(TelaDespesa.this, "Conta finalizada com sucesso!", Toast.LENGTH_SHORT);

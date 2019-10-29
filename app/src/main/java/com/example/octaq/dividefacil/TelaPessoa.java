@@ -72,7 +72,7 @@ public class TelaPessoa extends AppCompatActivity {
         valorPessoalComAcrescimo = findViewById(R.id.valor10PorCentoPessoal);
         nome = findViewById(R.id.nomePessoaTelaPessoa);
 
-        referencia.child(objTr.userUid).child(objTr.despesa.idDadosDespesa).child(objTr.despesa.idDadosPessoas).addValueEventListener(new ValueEventListener() {
+        referencia.child(objTr.userUid).child(objTr.despesa.idDadosDespesa).child("Integrantes").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 try {
@@ -192,7 +192,7 @@ public class TelaPessoa extends AppCompatActivity {
                         //Apaga todos os dados da tabela
                         pessoaSelecionada.fechouConta = true;
                         for(int i = 0; i < objTr.despesa.uidIntegrantes.size(); i++){
-                            referencia.child(objTr.despesa.uidIntegrantes.get(i)).child(objTr.despesa.idDadosDespesa).child(objTr.despesa.idDadosPessoas).child(pessoaSelecionada.id).setValue(pessoaSelecionada);
+                            referencia.child(objTr.despesa.uidIntegrantes.get(i)).child(objTr.despesa.idDadosDespesa).child("Integrantes").child(pessoaSelecionada.id).setValue(pessoaSelecionada);
                         }
                         Toast toast = Toast.makeText(TelaPessoa.this, "Conta pessoal finalizada e apagada com sucesso!", Toast.LENGTH_LONG);
                         toast.setGravity(Gravity.CENTER_HORIZONTAL | Gravity.CENTER_VERTICAL, 0, 0);
@@ -215,6 +215,72 @@ public class TelaPessoa extends AppCompatActivity {
         });
 
         alerta = builder.create();
+        alerta.show();
+    }
+
+    public void deletarItemDeGasto(View v){
+        AlertDialog.Builder builder = new AlertDialog.Builder(TelaPessoa.this, R.style.AlertDialogCustom);
+
+        final View view = v;
+
+        Context context = TelaPessoa.this;
+        LinearLayout layout = new LinearLayout(context);
+        layout.setOrientation(LinearLayout.VERTICAL);
+        layout.setPadding(80,30,80,0);
+
+        int tag = (Integer) view.getTag();
+        ItemDeGasto itemDeGastoSelecionado = pessoaSelecionada.historicoItemDeGastos.get(tag);
+
+        TextView textoAlerta = new TextView(TelaPessoa.this);
+        textoAlerta.setTypeface(ResourcesCompat.getFont(this, R.font.cabin));
+        if(itemDeGastoSelecionado.usuariosQueConsomemEsseitem.size()>1){
+            String textoDoAlerta = "";
+            textoDoAlerta = "Deseja remover essa item do histórico dos seguintes integrantes?"+"\n" + "\n";
+            for(int i = 0; i < itemDeGastoSelecionado.usuariosQueConsomemEsseitem.size(); i++){
+                textoDoAlerta += itemDeGastoSelecionado.usuariosQueConsomemEsseitem.get(i).nomeConsumidor + "\n";
+            }
+            textoAlerta.setText(textoDoAlerta);
+        }else{
+            textoAlerta.setText("Deseja remover esse item do seu histórico?");
+        }
+        textoAlerta.setTextSize(17);
+
+        //Define o título do diálogo
+        builder.setTitle("Apagar");
+        builder.setIcon(R.drawable.ic_delete);
+
+        layout.addView(textoAlerta);
+        builder.setView(layout);
+
+
+        builder.setPositiveButton("Sim", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface arg0, int arg1) {
+
+                int tag = (Integer) view.getTag();
+                ItemDeGasto itemDeGastoASerDeletado = pessoaSelecionada.historicoItemDeGastos.get(tag);
+
+                //itemDeGastoASerDeletado.excluido =true;
+                for(int i = 0; i < itemDeGastoASerDeletado.usuariosQueConsomemEsseitem.size(); i++){
+                    if(isOnline(TelaPessoa.this)){
+                        try{
+                            //referencia.child(objTr.userUid).child(objTr.despesa.idDadosDespesa).child(objTr.despesa.idDadosPessoas).child(itemDeGastoASerDeletado.usuariosQueConsomemEsseitem.get(i).uidConsumidor).setValue(despesaTemp);
+                        }catch (Exception e){
+                            //Lidar com erro de conexão
+                        }
+                    }else{
+                        //Lidar com erro de conexao
+                    }
+                }
+            }
+        });
+
+        builder.setNegativeButton("Não", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+            }
+        });
+
+        AlertDialog alerta = builder.create();
         alerta.show();
     }
 

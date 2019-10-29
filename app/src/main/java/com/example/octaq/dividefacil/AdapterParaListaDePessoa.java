@@ -40,7 +40,7 @@ public class AdapterParaListaDePessoa extends BaseAdapter {
         LayoutInflater mInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
         // cria uma view com o layout  do seu item
-        view = mInflater.inflate(R.layout.layout_lista_item_de_gasto, null);
+        view = mInflater.inflate(R.layout.layout_lista_pessoas_valor, null);
 
         // Atribuição normal dos campos de uma view
         TextView campo1 = view.findViewById(R.id.textView_campo1);

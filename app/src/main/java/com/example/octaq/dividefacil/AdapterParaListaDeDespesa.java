@@ -53,15 +53,15 @@ public class AdapterParaListaDeDespesa extends BaseAdapter {
         nome.setText(lista.get(position).nome);
         if(lista.get(position).fechou){
             if(lista.get(position).valorRoleFechado > 0.0){
-                valor.setText("R$"+df.format(lista.get(position).valorRoleFechado));
+                valor.setText("Valor: R$"+df.format(lista.get(position).valorRoleFechado));
             }else{
-                valor.setText("R$00,00");
+                valor.setText("Valor: R$00,00");
             }
         }else{
             if(lista.get(position).valorRoleAberto > 0.0){
-                valor.setText("R$"+df.format(lista.get(position).valorRoleAberto));
+                valor.setText("Valor: R$"+df.format(lista.get(position).valorRoleAberto));
             }else{
-                valor.setText("R$00,00");
+                valor.setText("Valor: R$00,00");
             }
         }
 
@@ -71,7 +71,7 @@ public class AdapterParaListaDeDespesa extends BaseAdapter {
         }else{
             status.setText("Conta aberta");
         }
-        data.setText(lista.get(position).dia);
+        data.setText("Criação da despesa: "+ lista.get(position).dia);
         deletar.setTag(position);
         return view;
 
