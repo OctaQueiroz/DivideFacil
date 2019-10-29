@@ -1,36 +1,34 @@
 package com.example.octaq.dividefacil;
 
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.content.ContextCompat;
 
-import android.content.Context;
-import android.content.Intent;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
-import android.os.Bundle;
-import android.view.View;
-import android.view.Window;
-import android.widget.AdapterView;
-import android.widget.Button;
-import android.widget.ListView;
-import android.widget.TextView;
+        import android.content.Context;
+        import android.content.Intent;
+        import androidx.annotation.NonNull;
+        import androidx.appcompat.app.AppCompatActivity;
+        import androidx.core.content.ContextCompat;
+        import android.net.ConnectivityManager;
+        import android.net.NetworkInfo;
+        import android.os.Bundle;
+        import android.view.View;
+        import android.view.Window;
+        import android.widget.AdapterView;
+        import android.widget.Button;
+        import android.widget.ListView;
+        import android.widget.TextView;
+        import com.google.firebase.auth.FirebaseAuth;
+        import com.google.firebase.auth.FirebaseUser;
+        import com.google.firebase.database.DataSnapshot;
+        import com.google.firebase.database.DatabaseError;
+        import com.google.firebase.database.DatabaseReference;
+        import com.google.firebase.database.FirebaseDatabase;
+        import com.google.firebase.database.ValueEventListener;
+        import com.google.gson.Gson;
+        import java.text.DecimalFormat;
+        import java.util.ArrayList;
 
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
-import com.google.gson.Gson;
+        import static com.example.octaq.dividefacil.TelaLogin.EXTRA_UID;
 
-import java.text.DecimalFormat;
-import java.util.ArrayList;
-
-import static com.example.octaq.dividefacil.TelaLogin.EXTRA_UID;
-
-public class TelaDespesaVisualizacao extends AppCompatActivity {
+public class TelaDespesaBarERestauranteVisualizacao extends AppCompatActivity {
 
     //Botões da tela
     Button btnFecharConta;
@@ -40,6 +38,7 @@ public class TelaDespesaVisualizacao extends AppCompatActivity {
 
     //Edit Texts do Diálogo
     TextView valorFinalConta;
+    TextView valorFinalContaComAcrescimo;
 
     DecimalFormat df = new DecimalFormat("#,###.00");
 
@@ -51,7 +50,7 @@ public class TelaDespesaVisualizacao extends AppCompatActivity {
     ArrayList <Pessoa> dados;
     FirebaseDatabase banco;
     DatabaseReference referencia;
-    Double valorTotalConta;
+    Double valorTotalConta, valorTotalContaComAcrescimo;
     FirebaseAuth mAuth;
     FirebaseUser currentUser;
     Gson gson;
@@ -59,17 +58,17 @@ public class TelaDespesaVisualizacao extends AppCompatActivity {
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_tela_despesa_visualizacao);
+        setContentView(R.layout.activity_tela_despesa_bar_e_restaurante_visualizacao);
 
         Window window = this.getWindow();
-        window.setStatusBarColor(ContextCompat.getColor(TelaDespesaVisualizacao.this,R.color.colorPrimaryDark));
+        window.setStatusBarColor(ContextCompat.getColor(TelaDespesaBarERestauranteVisualizacao.this,R.color.colorPrimaryDark));
     }
 
     @Override
     protected void onStart() {
         super.onStart();
 
-        if(isOnline(TelaDespesaVisualizacao.this)){
+        if(isOnline(TelaDespesaBarERestauranteVisualizacao.this)){
             try{
                 //Conectando o Firebase
                 banco = FirebaseDatabase.getInstance();
@@ -93,6 +92,7 @@ public class TelaDespesaVisualizacao extends AppCompatActivity {
 
         //Inicializando variáveis
         valorFinalConta = findViewById(R.id.valorTotal);
+        valorFinalContaComAcrescimo = findViewById(R.id.valor10PorCento);
         btnFecharConta = findViewById(R.id.btn_FecharConta);
         participantes = new ArrayList<>();
         adiciona = clique = nomeValor = selecao = false;
@@ -104,11 +104,11 @@ public class TelaDespesaVisualizacao extends AppCompatActivity {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 //Chama a tela de pessoa, passando o usuário slecionado e a referencia do rolê
-                if(isOnline(TelaDespesaVisualizacao.this)){
+                if(isOnline(TelaDespesaBarERestauranteVisualizacao.this)){
                     try{
                         objTr.pessoa = dados.get(position);
                         String extra = gson.toJson(objTr);
-                        Intent it = new Intent(TelaDespesaVisualizacao.this, TelaPessoaVisualizacao.class);
+                        Intent it = new Intent(TelaDespesaBarERestauranteVisualizacao.this, TelaPessoaBarERestauranteVisualizacao.class);
                         it.putExtra(EXTRA_UID, extra);
                         startActivity(it);
                     }catch (Exception e){
@@ -126,8 +126,9 @@ public class TelaDespesaVisualizacao extends AppCompatActivity {
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 dados = new ArrayList<>();
                 valorTotalConta = 0.0;
+                valorTotalContaComAcrescimo = 0.0;
 
-                if(isOnline(TelaDespesaVisualizacao.this)){
+                if(isOnline(TelaDespesaBarERestauranteVisualizacao.this)){
                     try{
                         for(DataSnapshot dadosDataSnapshot: dataSnapshot.getChildren()){
                             Pessoa pessoaCadastrada = dadosDataSnapshot.getValue(Pessoa.class);
@@ -147,16 +148,20 @@ public class TelaDespesaVisualizacao extends AppCompatActivity {
                     valorTotalConta+=dados.get(i).valorTotal;
                 }
 
+                valorTotalContaComAcrescimo += valorTotalConta*1.1;
+
                 if(valorTotalConta > 0.0){
                     valorFinalConta.setText("R$"+df.format(valorTotalConta));
+                    valorFinalContaComAcrescimo.setText("R$"+df.format(valorTotalContaComAcrescimo));
                 }else{
                     valorFinalConta.setText("R$00,00");
+                    valorFinalContaComAcrescimo.setText("R$00,00");
                 }
 
                 //Inicializa array list, list view e cria um adapter para ela
                 ListView lv = findViewById(R.id.listaPessoasTelaConta);
 
-                AdapterParaListaDePessoa adapterPessoa = new AdapterParaListaDePessoa(dados, TelaDespesaVisualizacao.this);
+                AdapterParaListaDePessoa adapterPessoa = new AdapterParaListaDePessoa(dados, TelaDespesaBarERestauranteVisualizacao.this);
 
                 lv.setAdapter(adapterPessoa);
             }

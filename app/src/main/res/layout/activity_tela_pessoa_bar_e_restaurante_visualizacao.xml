@@ -1,56 +1,82 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".TelaDespesa"
+    tools:context=".TelaPessoaBarERestaurante"
     android:orientation="vertical">
+
+
+    <TextView
+        android:id="@+id/nomePessoaTelaPessoa"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:background="@color/colorPrimary"
+        android:paddingLeft="16dp"
+        android:paddingTop="5dp"
+        android:text="@string/nome_pessoa"
+        android:textColor="@android:color/white"
+        android:textSize="30sp"
+        android:fontFamily="@font/cabin"/>
+
+    <ListView
+        android:id="@+id/listaAlimentosTelaPessoa"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_weight="1">
+    </ListView>
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:orientation="horizontal"
         android:background="@color/colorPrimary">
 
         <TextView
-            android:id="@+id/tv_valor"
+            android:id="@+id/tv_valor_pessoa"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:background="@color/colorPrimary"
-            android:paddingTop="5dp"
-            android:text="@string/valor_conta"
+            android:paddingTop="10dp"
+            android:paddingBottom="10dp"
+            android:text="@string/valor_conta_pessoal"
             android:textAlignment="center"
             android:textAppearance="?android:attr/textAppearanceMedium"
             android:textColor="@android:color/white"
             android:fontFamily="@font/cabin"/>
 
         <TextView
-            android:id="@+id/tv_valor_10"
+            android:id="@+id/tv_valor_10_pessoa"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:background="@color/colorPrimary"
-            android:paddingTop="5dp"
-            android:text="@string/valor_10_por_cento"
+            android:paddingTop="10dp"
+            android:paddingBottom="10dp"
+            android:text="@string/valor_10_por_cento_pessoal"
             android:textAlignment="center"
             android:textAppearance="?android:attr/textAppearanceMedium"
             android:textColor="@android:color/white"
             android:fontFamily="@font/cabin"/>
     </LinearLayout>
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/colorPrimary"
-        android:paddingBottom="5dp">
+        android:paddingBottom="5dp"
+        android:orientation="horizontal"
+        android:background="@color/colorPrimary">
 
         <TextView
-            android:id="@+id/valorTotal"
+            android:id="@+id/valorTotalPessoal"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:background="@color/colorPrimary"
-            android:paddingTop="5dp"
+            android:paddingTop="10dp"
+            android:paddingBottom="10dp"
             android:text="@string/valor_padrao"
             android:textAlignment="center"
             android:textAppearance="?android:attr/textAppearanceMedium"
@@ -58,12 +84,13 @@
             android:fontFamily="@font/cabin"/>
 
         <TextView
-            android:id="@+id/valor10PorCento"
+            android:id="@+id/valor10PorCentoPessoal"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:background="@color/colorPrimary"
-            android:paddingTop="5dp"
+            android:paddingTop="10dp"
+            android:paddingBottom="10dp"
             android:text="@string/valor_padrao"
             android:textAlignment="center"
             android:textAppearance="?android:attr/textAppearanceMedium"
@@ -71,19 +98,6 @@
             android:fontFamily="@font/cabin"/>
     </LinearLayout>
 
-    <ListView
-        android:id="@+id/listaPessoasTelaConta"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1">
 
-    </ListView>
-
-    <ImageView
-        android:id="@+id/imageView3"
-        android:layout_width="match_parent"
-        android:layout_height="50dp"
-        app:srcCompat="@color/colorPrimary" />
 
 </LinearLayout>
-

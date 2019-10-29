@@ -1,14 +1,13 @@
 package com.example.octaq.dividefacil;
 
+import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 import androidx.core.content.res.ResourcesCompat;
-
-import android.content.Context;
-import android.content.DialogInterface;
-import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
@@ -20,7 +19,6 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.ValueEventListener;
@@ -30,21 +28,24 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 
+
 import static com.example.octaq.dividefacil.TelaLogin.EXTRA_UID;
 import static com.example.octaq.dividefacil.TelaLogin.referencia;
 
-public class TelaPessoa extends AppCompatActivity {
+public class TelaPessoaBarERestaurante extends AppCompatActivity {
 
     //Para administrar a list view
     String[] nomeAlimentos;
 
     //Controlando o banco de dados
+    Double valorTotalComAcrescimo;
     Pessoa pessoaSelecionada;
     AlertDialog alerta;
     List<UsuarioAutenticadoDoFirebase> usuariosCadastrados;
 
     //Controlando dados mostrados na tela
     TextView valorPessoalFinal;
+    TextView valorPessoalComAcrescimo;
     TextView nome;
     DecimalFormat df = new DecimalFormat("#,###.00");
     Button btnfecharConta;
@@ -54,10 +55,10 @@ public class TelaPessoa extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_tela_pessoa);
+        setContentView(R.layout.activity_tela_pessoa_bar_e_restaurante);
 
         Window window = this.getWindow();
-        window.setStatusBarColor(ContextCompat.getColor(TelaPessoa.this,R.color.colorPrimaryDark));
+        window.setStatusBarColor(ContextCompat.getColor(TelaPessoaBarERestaurante.this,R.color.colorPrimaryDark));
 
         gson = new Gson();
 
@@ -68,6 +69,7 @@ public class TelaPessoa extends AppCompatActivity {
 
         btnfecharConta = findViewById(R.id.btn_finalizarContaPessoal);
         valorPessoalFinal = findViewById(R.id.valorTotalPessoal);
+        valorPessoalComAcrescimo = findViewById(R.id.valor10PorCentoPessoal);
         nome = findViewById(R.id.nomePessoaTelaPessoa);
         integrantes = new ArrayList<>();;
         referencia.child(objTr.userUid).child(objTr.despesa.idDadosDespesa).child("Integrantes").addValueEventListener(new ValueEventListener() {
@@ -76,7 +78,7 @@ public class TelaPessoa extends AppCompatActivity {
                 try {
                     pessoaSelecionada = new Pessoa();
 
-                    if(isOnline(TelaPessoa.this)){
+                    if(isOnline(TelaPessoaBarERestaurante.this)){
                         try{
                             for(DataSnapshot dadosDataSnapshot: dataSnapshot.getChildren()){
                                 if(dadosDataSnapshot != null){
@@ -96,17 +98,22 @@ public class TelaPessoa extends AppCompatActivity {
 
                     nomeAlimentos = new String[pessoaSelecionada.historicoItemDeGastos.size()];
 
+                    valorTotalComAcrescimo = 0.0;
+
                     nome.setText(pessoaSelecionada.nome);
 
+                    valorTotalComAcrescimo += pessoaSelecionada.valorTotal*1.1;
                     if(pessoaSelecionada.valorTotal > 0.0){
                         valorPessoalFinal.setText("R$"+df.format(pessoaSelecionada.valorTotal));
+                        valorPessoalComAcrescimo.setText("R$"+df.format(valorTotalComAcrescimo));
                     }else{
                         valorPessoalFinal.setText("R$00,00");
+                        valorPessoalComAcrescimo.setText("R$00,00");
                     }
                     //Inicializa array list, list view e cria um adapter para ela
                     ListView lv = findViewById(R.id.listaItemDeGastoTelaPessoa);
 
-                    AdapterParaListaDeItemDeGasto adapterAlimento = new AdapterParaListaDeItemDeGasto(pessoaSelecionada.historicoItemDeGastos, TelaPessoa.this);
+                    AdapterParaListaDeItemDeGasto adapterAlimento = new AdapterParaListaDeItemDeGasto(pessoaSelecionada.historicoItemDeGastos, TelaPessoaBarERestaurante.this);
 
                     lv.setAdapter(adapterAlimento);
                 }catch (Exception ex){
@@ -125,7 +132,7 @@ public class TelaPessoa extends AppCompatActivity {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 usuariosCadastrados = new ArrayList<>();
-                if(isOnline(TelaPessoa.this)){
+                if(isOnline(TelaPessoaBarERestaurante.this)){
                     try{
                         for(DataSnapshot dadosDataSnapshot: dataSnapshot.getChildren()){
                             UsuarioAutenticadoDoFirebase usuarioDaBase = dadosDataSnapshot.getValue(UsuarioAutenticadoDoFirebase.class);
@@ -160,12 +167,12 @@ public class TelaPessoa extends AppCompatActivity {
 
     private void dialogoFinalizaConta() {
 
-        Context context = TelaPessoa.this;
+        Context context = TelaPessoaBarERestaurante.this;
         LinearLayout layout = new LinearLayout(context);
         layout.setOrientation(LinearLayout.VERTICAL);
         layout.setPadding(80,30,80,0);
 
-        TextView textoAlerta = new TextView(TelaPessoa.this);
+        TextView textoAlerta = new TextView(TelaPessoaBarERestaurante.this);
         textoAlerta.setTypeface(ResourcesCompat.getFont(this, R.font.cabin));
         textoAlerta.setText("Ao finalizar a conta pessoal, é entendido que o valor foi pago. Todos os dados da conta pessoal serão apagados, deseja prosseguir?");
         textoAlerta.setTextSize(17);
@@ -183,14 +190,14 @@ public class TelaPessoa extends AppCompatActivity {
 
         builder.setPositiveButton("Confirmar Finalização", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface arg0, int arg1) {
-                if(isOnline(TelaPessoa.this)){
+                if(isOnline(TelaPessoaBarERestaurante.this)){
                     try {
                         //Apaga todos os dados da tabela
                         pessoaSelecionada.fechouConta = true;
                         for(int i = 0; i < objTr.despesa.uidIntegrantes.size(); i++){
                             referencia.child(objTr.despesa.uidIntegrantes.get(i)).child(objTr.despesa.idDadosDespesa).child("Integrantes").child(pessoaSelecionada.id).setValue(pessoaSelecionada);
                         }
-                        Toast toast = Toast.makeText(TelaPessoa.this, "Conta pessoal finalizada e apagada com sucesso!", Toast.LENGTH_LONG);
+                        Toast toast = Toast.makeText(TelaPessoaBarERestaurante.this, "Conta pessoal finalizada e apagada com sucesso!", Toast.LENGTH_LONG);
                         toast.setGravity(Gravity.CENTER_HORIZONTAL | Gravity.CENTER_VERTICAL, 0, 0);
                         toast.show();
 
@@ -215,11 +222,11 @@ public class TelaPessoa extends AppCompatActivity {
     }
 
     public void deletarItemDeGasto(View v){
-        AlertDialog.Builder builder = new AlertDialog.Builder(TelaPessoa.this, R.style.AlertDialogCustom);
+        AlertDialog.Builder builder = new AlertDialog.Builder(TelaPessoaBarERestaurante.this, R.style.AlertDialogCustom);
 
         final View view = v;
 
-        Context context = TelaPessoa.this;
+        Context context = TelaPessoaBarERestaurante.this;
         LinearLayout layout = new LinearLayout(context);
         layout.setOrientation(LinearLayout.VERTICAL);
         layout.setPadding(80,30,80,0);
@@ -227,7 +234,7 @@ public class TelaPessoa extends AppCompatActivity {
         int tag = (Integer) view.getTag();
         final ItemDeGasto itemDeGastoSelecionado = pessoaSelecionada.historicoItemDeGastos.get(tag);
 
-        TextView textoAlerta = new TextView(TelaPessoa.this);
+        TextView textoAlerta = new TextView(TelaPessoaBarERestaurante.this);
         textoAlerta.setTypeface(ResourcesCompat.getFont(this, R.font.cabin));
         if(itemDeGastoSelecionado.usuariosQueConsomemEsseitem.size()>1){
             String textoDoAlerta = "";
@@ -257,7 +264,7 @@ public class TelaPessoa extends AppCompatActivity {
 
                 //itemDeGastoASerDeletado.excluido =true;
                 for(int i = 0; i < itemDeGastoASerDeletado.usuariosQueConsomemEsseitem.size(); i++){
-                    if(isOnline(TelaPessoa.this)){
+                    if(isOnline(TelaPessoaBarERestaurante.this)){
                         try{
                             for(int j = 0; j < integrantes.size(); j++){
                                 if (integrantes.get(j).id.equals(itemDeGastoASerDeletado.usuariosQueConsomemEsseitem.get(i).uidConsumidor)){

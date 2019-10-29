@@ -21,7 +21,7 @@
         android:fontFamily="@font/cabin"/>
 
     <ListView
-        android:id="@+id/listaAlimentosTelaPessoa"
+        android:id="@+id/listaItemDeGastoTelaPessoa"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_weight="1">
@@ -42,6 +42,20 @@
             android:paddingTop="10dp"
             android:paddingBottom="10dp"
             android:text="@string/valor_conta_pessoal"
+            android:textAlignment="center"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:textColor="@android:color/white"
+            android:fontFamily="@font/cabin"/>
+
+        <TextView
+            android:id="@+id/tv_valor_10_pessoa"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:background="@color/colorPrimary"
+            android:paddingTop="10dp"
+            android:paddingBottom="10dp"
+            android:text="@string/valor_10_por_cento_pessoal"
             android:textAlignment="center"
             android:textAppearance="?android:attr/textAppearanceMedium"
             android:textColor="@android:color/white"
@@ -68,8 +82,36 @@
             android:textAppearance="?android:attr/textAppearanceMedium"
             android:textColor="@android:color/white"
             android:fontFamily="@font/cabin"/>
+
+        <TextView
+            android:id="@+id/valor10PorCentoPessoal"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:background="@color/colorPrimary"
+            android:paddingTop="10dp"
+            android:paddingBottom="10dp"
+            android:text="@string/valor_padrao"
+            android:textAlignment="center"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:textColor="@android:color/white"
+            android:fontFamily="@font/cabin"/>
     </LinearLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/colorPrimary"
+        android:orientation="vertical">
+        <Button
+            android:id="@+id/btn_finalizarContaPessoal"
+            android:layout_marginBottom="10dp"
+            android:layout_width="200dp"
+            android:layout_height="40dp"
+            android:layout_gravity="center_horizontal"
+            android:textColor="@color/colorPrimary"
+            android:background="@drawable/button_shape_round_border_white"
+            android:text="@string/texto_btn_Pagar" />
 
-
+    </LinearLayout>
 
 </LinearLayout>

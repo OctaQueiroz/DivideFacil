@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".TelaPessoa"
+    tools:context=".TelaPessoaBarERestaurante"
     android:orientation="vertical">
 
 
@@ -46,20 +46,6 @@
             android:textAppearance="?android:attr/textAppearanceMedium"
             android:textColor="@android:color/white"
             android:fontFamily="@font/cabin"/>
-
-        <TextView
-            android:id="@+id/tv_valor_10_pessoa"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:background="@color/colorPrimary"
-            android:paddingTop="10dp"
-            android:paddingBottom="10dp"
-            android:text="@string/valor_10_por_cento_pessoal"
-            android:textAlignment="center"
-            android:textAppearance="?android:attr/textAppearanceMedium"
-            android:textColor="@android:color/white"
-            android:fontFamily="@font/cabin"/>
     </LinearLayout>
 
     <LinearLayout
@@ -71,20 +57,6 @@
 
         <TextView
             android:id="@+id/valorTotalPessoal"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:background="@color/colorPrimary"
-            android:paddingTop="10dp"
-            android:paddingBottom="10dp"
-            android:text="@string/valor_padrao"
-            android:textAlignment="center"
-            android:textAppearance="?android:attr/textAppearanceMedium"
-            android:textColor="@android:color/white"
-            android:fontFamily="@font/cabin"/>
-
-        <TextView
-            android:id="@+id/valor10PorCentoPessoal"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_weight="1"

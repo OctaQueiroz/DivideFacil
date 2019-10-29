@@ -112,11 +112,21 @@ public class TelaPrincipal extends AppCompatActivity {
                         Gson gson = new Gson();
                         String extra = gson.toJson(objTr);
                         if(!objTr.despesa.fechou){
-                            Intent it = new Intent(TelaPrincipal.this, TelaDespesa.class);
+                            Intent it;
+                            if(objTr.despesa.tipoDeDespesa.equals("Bar e Restaurante")){
+                                it = new Intent(TelaPrincipal.this, TelaDespesaBarERestaurante.class);
+                            }else{
+                                it = new Intent(TelaPrincipal.this, TelaDespesa.class);
+                            }
                             it.putExtra(EXTRA_UID, extra);
                             startActivityForResult(it, 2);
                         }else{
-                            Intent it = new Intent(TelaPrincipal.this, TelaDespesaVisualizacao.class);
+                            Intent it;
+                            if(objTr.despesa.tipoDeDespesa.equals("Bar e Restaurante")){
+                                it = new Intent(TelaPrincipal.this, TelaDespesaBarERestauranteVisualizacao.class);
+                            }else{
+                                it = new Intent(TelaPrincipal.this, TelaDespesaVisualizacao.class);
+                            }
                             it.putExtra(EXTRA_UID, extra);
                             startActivityForResult(it, 2);
                         }
@@ -447,7 +457,12 @@ public class TelaPrincipal extends AppCompatActivity {
 
                             Gson gson = new Gson();
                             String extra = gson.toJson(objTr);
-                            Intent it = new Intent(TelaPrincipal.this, TelaDespesa.class);
+                            Intent it;
+                            if(objTr.despesa.tipoDeDespesa.equals("Bar e Restaurante")){
+                                it = new Intent(TelaPrincipal.this, TelaDespesaBarERestaurante.class);
+                            }else{
+                                it = new Intent(TelaPrincipal.this, TelaDespesa.class);
+                            }
                             it.putExtra(EXTRA_UID, extra);
                             startActivityForResult(it, 2);
 

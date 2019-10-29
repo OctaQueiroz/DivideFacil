@@ -11,7 +11,11 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.AppCompat.Light.NoActionBar"
         tools:ignore="GoogleAppIndexingWarning">
-        <activity android:name=".TelaListagemItemDeGasto"></activity>
+        <activity android:name=".TelaPessoaVisualizacao"></activity>
+        <activity android:name=".TelaPessoa" />
+        <activity android:name=".TelaDespesaVisualizacao" />
+        <activity android:name=".TelaDespesa" />
+        <activity android:name=".TelaListagemItemDeGasto" />
         <activity
             android:name=".TelaSplash"
             android:theme="@style/TelaCheia">
@@ -25,19 +29,19 @@
             android:name=".TelaPrincipal"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".TelaDespesa"
+            android:name=".TelaDespesaBarERestaurante"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".TelaPessoa"
+            android:name=".TelaPessoaBarERestaurante"
             android:screenOrientation="portrait" />
         <activity
             android:name=".TelaLogin"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".TelaDespesaVisualizacao"
+            android:name=".TelaDespesaBarERestauranteVisualizacao"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".TelaPessoaVisualizacao"
+            android:name=".TelaPessoaBarERestauranteVisualizacao"
             android:screenOrientation="portrait" />
     </application>
     <uses-permission android:name="android.permission.INTERNET" />
