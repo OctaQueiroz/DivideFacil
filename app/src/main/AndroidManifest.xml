@@ -18,6 +18,7 @@
         <activity android:name=".TelaListagemItemDeGasto" />
         <activity
             android:name=".TelaSplash"
+            android:screenOrientation="portrait"
             android:theme="@style/TelaCheia">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

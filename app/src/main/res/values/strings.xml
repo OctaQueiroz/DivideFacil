@@ -10,7 +10,7 @@
     <string name="valor_10_por_cento_pessoal">Pessoal com 10%</string>
     <string name="texto_btn_TelaPessoas">Nova pessoa</string>
     <string name="texto_btn_AdicionarComida">Novo produto</string>
-    <string name="texto_btn_FecharConta">Finalizar conta</string>
+    <string name="texto_btn_FinalizarDespesa">Finalizar despesa</string>
     <string name="nome_pessoa">Nome Pessoa</string>
     <string name="texto_btn_Pagar">Pagar valor pessoal</string>
     <string name="login">Login</string>
@@ -27,4 +27,7 @@
     <string name="palavra_email">E-mail</string>
     <string name="palavra_senha">Senha</string>
     <string name="palavra_repetir_senha">Repita a senha</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>

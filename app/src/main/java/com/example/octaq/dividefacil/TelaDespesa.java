@@ -6,6 +6,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 import androidx.core.content.res.ResourcesCompat;
 
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -69,6 +70,8 @@ public class TelaDespesa extends AppCompatActivity {
     List<UsuarioAutenticadoDoFirebase> usuariosCadastrados;
     List<Pessoa> integrantesSemCntaFechada;
 
+    private ProgressDialog dialog;
+
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_tela_despesa);
@@ -95,6 +98,8 @@ public class TelaDespesa extends AppCompatActivity {
         participantes = new ArrayList<>();
         integrantesSemCntaFechada = new ArrayList<>();
         adiciona = clique = nomeValor = selecao = false;
+
+        dialog = ProgressDialog.show(TelaDespesa.this, "","Carregando os dados da despesa...", true);
 
         btnAdicionaPessoa.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -143,8 +148,12 @@ public class TelaDespesa extends AppCompatActivity {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
 
+                dialog.show();
+
                 dados = new ArrayList<>();
                 dadosSemAlteracao = new ArrayList<>();
+
+
 
                 if (isOnline(TelaDespesa.this)){
                     try{
@@ -195,7 +204,7 @@ public class TelaDespesa extends AppCompatActivity {
 
                 lv.setAdapter(adapterPessoa);
 
-                //dialog.dismiss();
+                dialog.dismiss();
             }
 
             @Override

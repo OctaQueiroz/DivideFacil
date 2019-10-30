@@ -90,7 +90,7 @@
             android:layout_height="40dp"
             android:layout_gravity="center_horizontal"
             android:layout_margin="5dp"
-            android:text="@string/texto_btn_FecharConta"
+            android:text="@string/texto_btn_FinalizarDespesa"
             android:fontFamily="@font/cabin"
             android:textColor="@color/colorPrimary"
             android:textAppearance="@style/TextAppearance.AppCompat.Medium"
