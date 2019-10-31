@@ -9,6 +9,8 @@ import android.widget.TextView;
 
 import androidx.core.content.res.ResourcesCompat;
 
+import com.hookedonplay.decoviewlib.DecoView;
+
 import java.text.DecimalFormat;
 import java.util.List;
 

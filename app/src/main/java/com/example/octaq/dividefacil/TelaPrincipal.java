@@ -103,14 +103,14 @@ public class TelaPrincipal extends AppCompatActivity {
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        telaDeGraficos = new FragmentEstatisticasDoUsuario();
+        telaDeGraficos = FragmentEstatisticasDoUsuario.newInstance(objTr);
         managerFragment(telaDeGraficos, "Fragment graficos");
 
         tabLayout.addOnTabSelectedListener(new TabLayout.BaseOnTabSelectedListener() {
             @Override
             public void onTabSelected(TabLayout.Tab tab) {
                 if (tab.getPosition() == 0) {
-                    telaDeGraficos = new FragmentEstatisticasDoUsuario();
+                    telaDeGraficos = FragmentEstatisticasDoUsuario.newInstance(objTr);
                     managerFragment(telaDeGraficos, "Fragment graficos");
                 } else if (tab.getPosition() == 1) {
                     telaDeHistorico = FragmentHistoricoDeDespesas.newInstance(objTr);

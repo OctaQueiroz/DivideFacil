@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <com.hookedonplay.decoviewlib.DecoView
+        android:id="@+id/grafico_porcentagem_despesa"
+        android:layout_width="84dp"
+        android:layout_height="70dp"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginStart="5dp"
+        android:layout_marginTop="5dp" />
+
+    <TextView
+        android:id="@+id/tv_nome_despesa_grafico"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_marginStart="20dp"
+        android:layout_marginTop="10dp"
+        android:layout_toEndOf="@+id/grafico_porcentagem_despesa"
+        android:text="Nome Despesa"
+        android:textAppearance="@style/TextAppearance.AppCompat.Medium" />
+
+    <TextView
+        android:id="@+id/tv_valor_despesa_grafico"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/tv_nome_despesa_grafico"
+        android:layout_marginStart="20dp"
+        android:layout_marginTop="10dp"
+        android:layout_toEndOf="@+id/grafico_porcentagem_despesa"
+        android:text="R$00,00" />
+
+    <TextView
+        android:id="@+id/tv_porcentagem_despesa_grafico"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignStart="@+id/grafico_porcentagem_despesa"
+        android:layout_alignTop="@+id/grafico_porcentagem_despesa"
+        android:layout_alignEnd="@+id/grafico_porcentagem_despesa"
+        android:layout_alignBottom="@+id/grafico_porcentagem_despesa"
+        android:layout_marginStart="12dp"
+        android:layout_marginTop="25dp"
+        android:layout_marginEnd="13dp"
+        android:layout_marginBottom="26dp"
+        android:text="100%"
+        android:textAlignment="center"/>
+
+</RelativeLayout>
