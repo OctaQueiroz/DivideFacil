@@ -4,6 +4,7 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
@@ -12,12 +13,8 @@ import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.tabs.TabLayout;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.ValueEventListener;
 import com.google.gson.Gson;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
@@ -28,25 +25,17 @@ import androidx.core.content.res.ResourcesCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
-
-import android.text.InputType;
-import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.View;
 import android.view.Window;
-import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.FrameLayout;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.Toast;
-import java.text.SimpleDateFormat;
+
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 import static com.example.octaq.dividefacil.TelaLogin.EXTRA_UID;
@@ -56,21 +45,17 @@ import static com.example.octaq.dividefacil.TelaLogin.referencia;
 public class TelaPrincipal extends AppCompatActivity {
 
     //Para administrar a list view
-    List<Despesa> despesas;
     TransicaoDeDadosEntreActivities objTr;
-    ProgressDialog dialog;
 
     //Variáveis do dialogo para criar novo despesa
-    EditText nomeDespesa;
-    boolean[] checados;
     AlertDialog alerta;
     ListView lv;
 
-
-    FrameLayout containerDosFragments;
     TabLayout tabLayout;
     Fragment telaDeGraficos;
     Fragment telaDeHistorico;
+    Toolbar toolbar;
+    List<String> listaDeDaltonismos;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -100,10 +85,11 @@ public class TelaPrincipal extends AppCompatActivity {
 
         referencia.child("AAAAAUSERS").child(objTr.userUid).setValue(usuarioAtual);
 
-        Toolbar toolbar = findViewById(R.id.toolbar);
+        toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
         telaDeGraficos = FragmentEstatisticasDoUsuario.newInstance(objTr);
+        toolbar.setTitle("Minha análise geral");
         managerFragment(telaDeGraficos, "Fragment graficos");
 
         tabLayout.addOnTabSelectedListener(new TabLayout.BaseOnTabSelectedListener() {
@@ -111,9 +97,11 @@ public class TelaPrincipal extends AppCompatActivity {
             public void onTabSelected(TabLayout.Tab tab) {
                 if (tab.getPosition() == 0) {
                     telaDeGraficos = FragmentEstatisticasDoUsuario.newInstance(objTr);
+                    toolbar.setTitle("Minha análise geral");
                     managerFragment(telaDeGraficos, "Fragment graficos");
                 } else if (tab.getPosition() == 1) {
                     telaDeHistorico = FragmentHistoricoDeDespesas.newInstance(objTr);
+                    toolbar.setTitle("Minhas despesas");
                     managerFragment(telaDeHistorico, "Fragment historico");
                 }
             }
@@ -142,6 +130,9 @@ public class TelaPrincipal extends AppCompatActivity {
         if(item.getItemId() == R.id.action_settings){
             verificaLogout();
             return true;
+        }else if(item.getItemId() == R.id.action_daltonism){
+            assistenciaDaltonismo();
+            return true;
         }
         return super.onOptionsItemSelected(item);
     }
@@ -160,12 +151,27 @@ public class TelaPrincipal extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AlertDialogCustom);
+
+        Context context = TelaPrincipal.this;
+        LinearLayout layout = new LinearLayout(context);
+        layout.setOrientation(LinearLayout.VERTICAL);
+        layout.setPadding(80,30,80,0);
+
+        TextView textoAlerta = new TextView(TelaPrincipal.this);
+        textoAlerta.setTypeface(ResourcesCompat.getFont(this, R.font.cabin));
+        textoAlerta.setText("Deseja sair do App?");
+        textoAlerta.setTextSize(17);
 
         //Define o título do diálogo
         builder.setTitle("Aviso");
 
-        builder.setMessage("Deseja sair do App?");
+        //builder.setMessage("Deseja sair do App?");
+
+        builder.setIcon(R.drawable.ic_logout_verde);
+
+        layout.addView(textoAlerta);
+        builder.setView(layout);
 
         builder.setPositiveButton("Sim", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface arg0, int arg1) {
@@ -176,10 +182,44 @@ public class TelaPrincipal extends AppCompatActivity {
         builder.setNegativeButton("Não", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
+
             }
         });
 
         AlertDialog alerta = builder.create();
+        alerta.show();
+    }
+
+    private void assistenciaDaltonismo(){
+        SharedPreferences sharedPreferences = getSharedPreferences("TipoDaltonismo", Context.MODE_PRIVATE);
+
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        //editor.putString("Tipo","");
+        editor.apply();
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(TelaPrincipal.this, R.style.AlertDialogCustom);
+
+        //Define o título do diálogo
+        builder.setTitle("Dequal tipo de daltonismo você é portador?");
+        builder.setIcon(R.drawable.ic_eye_green);
+        listaDeDaltonismos = new ArrayList<>();
+        listaDeDaltonismos.add("Nenhum");
+        listaDeDaltonismos.add("Protanopia");
+        listaDeDaltonismos.add("Deuteranopia");
+        listaDeDaltonismos.add("Tritanopia");
+        AdapterParaListaDeTipoDeDaltonismo adapter = new AdapterParaListaDeTipoDeDaltonismo(listaDeDaltonismos,TelaPrincipal.this);
+
+        builder.setSingleChoiceItems(adapter, 0, new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface arg0, int arg1) {
+                objTr.daltonismo = listaDeDaltonismos.get(arg1);
+                alerta.dismiss();
+                telaDeGraficos = FragmentEstatisticasDoUsuario.newInstance(objTr);
+                toolbar.setTitle("Minha análise geral");
+                managerFragment(telaDeGraficos, "Fragment graficos");
+            }
+        });
+
+        alerta = builder.create();
         alerta.show();
     }
 

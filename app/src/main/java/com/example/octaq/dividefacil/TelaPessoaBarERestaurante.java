@@ -11,24 +11,18 @@ import androidx.core.content.res.ResourcesCompat;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
-import android.view.Gravity;
 import android.view.View;
 import android.view.Window;
-import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.Toast;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.ValueEventListener;
 import com.google.gson.Gson;
-
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
-
-
 import static com.example.octaq.dividefacil.TelaLogin.EXTRA_UID;
 import static com.example.octaq.dividefacil.TelaLogin.referencia;
 
@@ -40,7 +34,6 @@ public class TelaPessoaBarERestaurante extends AppCompatActivity {
     //Controlando o banco de dados
     Double valorTotalComAcrescimo;
     Pessoa pessoaSelecionada;
-    AlertDialog alerta;
     List<UsuarioAutenticadoDoFirebase> usuariosCadastrados;
 
     //Controlando dados mostrados na tela
@@ -48,10 +41,10 @@ public class TelaPessoaBarERestaurante extends AppCompatActivity {
     TextView valorPessoalComAcrescimo;
     TextView nome;
     DecimalFormat df = new DecimalFormat("#,###.00");
-    Button btnfecharConta;
     Gson gson;
     TransicaoDeDadosEntreActivities objTr;
     List<Pessoa> integrantes;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -67,7 +60,7 @@ public class TelaPessoaBarERestaurante extends AppCompatActivity {
         extra = it.getStringExtra(EXTRA_UID);
         objTr = gson.fromJson(extra, TransicaoDeDadosEntreActivities.class);
 
-        btnfecharConta = findViewById(R.id.btn_finalizarContaPessoal);
+        //btnfecharConta = findViewById(R.id.btn_finalizarContaPessoal);
         valorPessoalFinal = findViewById(R.id.valorTotalPessoal);
         valorPessoalComAcrescimo = findViewById(R.id.valor10PorCentoPessoal);
         nome = findViewById(R.id.nomePessoaTelaPessoa);
@@ -155,70 +148,6 @@ public class TelaPessoaBarERestaurante extends AppCompatActivity {
 
             }
         });
-
-        btnfecharConta.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                dialogoFinalizaConta();
-            }
-        });
-    }
-
-
-    private void dialogoFinalizaConta() {
-
-        Context context = TelaPessoaBarERestaurante.this;
-        LinearLayout layout = new LinearLayout(context);
-        layout.setOrientation(LinearLayout.VERTICAL);
-        layout.setPadding(80,30,80,0);
-
-        TextView textoAlerta = new TextView(TelaPessoaBarERestaurante.this);
-        textoAlerta.setTypeface(ResourcesCompat.getFont(this, R.font.cabin));
-        textoAlerta.setText("Ao finalizar a conta pessoal, é entendido que o valor foi pago. Todos os dados da conta pessoal serão apagados, deseja prosseguir?");
-        textoAlerta.setTextSize(17);
-        AlertDialog.Builder builder = new AlertDialog.Builder(this,R.style.AlertDialogCustom);
-
-        layout.addView(textoAlerta);
-        builder.setView(layout);
-
-        //Define o título do diálogo
-        builder.setIcon(R.drawable.ic_cart);
-
-        builder.setTitle("Finalização de conta");
-
-        //builder.setMessage("Ao finalizar a conta pessoal, é entendido que o valor foi pago. Todos os dados da conta pessoal serão apagados, deseja prosseguir?");
-
-        builder.setPositiveButton("Confirmar Finalização", new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface arg0, int arg1) {
-                if(isOnline(TelaPessoaBarERestaurante.this)){
-                    try {
-                        //Apaga todos os dados da tabela
-                        pessoaSelecionada.fechouConta = true;
-                        for(int i = 0; i < objTr.despesa.uidIntegrantes.size(); i++){
-                            referencia.child(objTr.despesa.uidIntegrantes.get(i)).child(objTr.despesa.idDadosDespesa).child("Integrantes").child(pessoaSelecionada.id).setValue(pessoaSelecionada);
-                        }
-                        Toast toast = Toast.makeText(TelaPessoaBarERestaurante.this, "Conta pessoal finalizada e apagada com sucesso!", Toast.LENGTH_LONG);
-                        toast.setGravity(Gravity.CENTER_HORIZONTAL | Gravity.CENTER_VERTICAL, 0, 0);
-                        toast.show();
-
-                        finish();
-                    }catch (Exception e){
-                        //LLidar com erro de conexao
-                    }
-                }else{
-                    //lidar com erro de conexao
-                }
-            }
-        });
-
-        builder.setNegativeButton("Cancelar", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-            }
-        });
-
-        alerta = builder.create();
-        alerta.show();
     }
 
     public void deletarItemDeGasto(View v){
@@ -261,34 +190,45 @@ public class TelaPessoaBarERestaurante extends AppCompatActivity {
 
                 int tag = (Integer) view.getTag();
                 ItemDeGasto itemDeGastoASerDeletado = pessoaSelecionada.historicoItemDeGastos.get(tag);
-
-                //itemDeGastoASerDeletado.excluido =true;
-                for(int i = 0; i < itemDeGastoASerDeletado.usuariosQueConsomemEsseitem.size(); i++){
-                    if(isOnline(TelaPessoaBarERestaurante.this)){
-                        try{
+                if(isOnline(TelaPessoaBarERestaurante.this)){
+                    try{
+                        //itemDeGastoASerDeletado.excluido =true;
+                        for(int i = 0; i < itemDeGastoASerDeletado.usuariosQueConsomemEsseitem.size(); i++){
                             for(int j = 0; j < integrantes.size(); j++){
                                 if (integrantes.get(j).id.equals(itemDeGastoASerDeletado.usuariosQueConsomemEsseitem.get(i).uidConsumidor)){
                                     for(int k = 0; k < integrantes.get(j).historicoItemDeGastos.size(); k ++){
                                         if(integrantes.get(j).historicoItemDeGastos.get(k).id.equals(itemDeGastoASerDeletado.id)){
                                             integrantes.get(j).valorTotal -= integrantes.get(j).historicoItemDeGastos.get(k).valor;
+
                                             integrantes.get(j).historicoItemDeGastos.remove(k);
                                             break;
                                         }
                                     }
                                     for(int k = 0; k < objTr.despesa.uidIntegrantes.size(); k++){
-                                        referencia.child(objTr.despesa.uidIntegrantes.get(k)).child(objTr.despesa.idDadosDespesa).child("Integrantes").child(integrantes.get(j).id).setValue(integrantes.get(j));
+                                        referencia.child(objTr.despesa.uidIntegrantes.get(k).uid).child(objTr.despesa.idDadosDespesa).child("Integrantes").child(integrantes.get(j).id).setValue(integrantes.get(j));
                                     }
                                     break;
                                 }
 
                             }
-                            //Pessoa usuario =
-                        }catch (Exception e){
-                            //Lidar com erro de conexão
                         }
-                    }else{
-                        //Lidar com erro de conexao
+                        objTr.despesa.valorRoleAberto -= itemDeGastoASerDeletado.valor * itemDeGastoASerDeletado.usuariosQueConsomemEsseitem.size();
+                        for(int i = 0; i < itemDeGastoASerDeletado.usuariosQueConsomemEsseitem.size(); i++){
+                            for(int j = 0; j < objTr.despesa.uidIntegrantes.size();  j++){
+                                if(itemDeGastoASerDeletado.usuariosQueConsomemEsseitem.get(i).uidConsumidor.equals(objTr.despesa.uidIntegrantes.get(j).uid)){
+                                    objTr.despesa.uidIntegrantes.get(j).gasto -= itemDeGastoASerDeletado.valor;
+                                    break;
+                                }
+                            }
+                        }
+                        for(int i = 0; i < objTr.despesa.uidIntegrantes.size(); i++){
+                            referencia.child(objTr.despesa.uidIntegrantes.get(i).uid).child(objTr.despesa.idDadosDespesa).child("Despesa").setValue(objTr.despesa);
+                        }
+                    }catch (Exception e){
+                        //Lidar com erro de conexão
                     }
+                }else{
+                    //Lidar com erro de conexao
                 }
             }
         });

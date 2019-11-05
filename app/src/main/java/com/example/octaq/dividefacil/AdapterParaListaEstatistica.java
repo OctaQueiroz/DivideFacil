@@ -8,13 +8,9 @@ import android.view.ViewGroup;
 import android.view.animation.OvershootInterpolator;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
-
-import androidx.core.content.res.ResourcesCompat;
-
 import com.hookedonplay.decoviewlib.DecoView;
 import com.hookedonplay.decoviewlib.charts.SeriesItem;
 import com.hookedonplay.decoviewlib.events.DecoEvent;
-
 import java.text.DecimalFormat;
 import java.util.List;
 
@@ -60,7 +56,7 @@ public class AdapterParaListaEstatistica extends BaseAdapter {
                 .setLineWidth(10f)
                 .build());
 
-        SeriesItem seriesItem1 = new SeriesItem.Builder(Color.argb(255, 64, 196, 0))
+        SeriesItem seriesItem1 = new SeriesItem.Builder(Color.argb(255, lista.get(position).red, lista.get(position).green, lista.get(position).blue))
                 .setRange(0, 100, 0)
                 .setInitialVisibility(false)
                 .setLineWidth(10f)

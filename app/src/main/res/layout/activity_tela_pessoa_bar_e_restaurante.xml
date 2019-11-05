@@ -97,6 +97,7 @@
             android:textColor="@android:color/white"
             android:fontFamily="@font/cabin"/>
     </LinearLayout>
+    <!--
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -113,5 +114,5 @@
             android:text="@string/texto_btn_Pagar" />
 
     </LinearLayout>
-
+    -->
 </LinearLayout>

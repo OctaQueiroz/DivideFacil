@@ -98,7 +98,6 @@ public class FragmentHistoricoDeDespesas extends Fragment {
         novaDespesa = view.findViewById(R.id.fab_novo_role);
 
         dialog = ProgressDialog.show(getActivity(), "","Carregando suas Despesas...", true);
-
         novaDespesa.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {  dialogoEscolhaDeTipoDeDespesa();
@@ -166,6 +165,7 @@ public class FragmentHistoricoDeDespesas extends Fragment {
                         }
                     }catch (Exception e){
                         //Lidar com erro de conexao
+                        despesas = new ArrayList<>();
                     }
                 }else{
                     //Lidar com erro de conexao
@@ -279,7 +279,8 @@ public class FragmentHistoricoDeDespesas extends Fragment {
 
                             objTr.despesa.idDadosDespesa = idRole;
                             objTr.despesa.idDadosPessoas = idPessoas;
-                            objTr.despesa.uidIntegrantes.add(objTr.userUid);
+                            IntegrantesUsuariosDoFirebase novoIntegrante = new IntegrantesUsuariosDoFirebase(objTr.userUid);
+                            objTr.despesa.uidIntegrantes.add(novoIntegrante);
 
                             referencia.child(objTr.userUid).child(objTr.despesa.idDadosDespesa).child("Despesa").setValue(objTr.despesa);
 

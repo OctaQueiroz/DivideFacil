@@ -5,18 +5,18 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
-import android.widget.ImageView;
 import android.widget.TextView;
-import java.text.DecimalFormat;
+
+import androidx.core.content.res.ResourcesCompat;
+
 import java.util.List;
 
-public class AdapterParaListaDeItemDeGasto extends BaseAdapter {
+public class AdapterParaListaDeTipoDeDaltonismo extends BaseAdapter {
 
-    List<ItemDeGasto> lista;
+    List<String> lista;
     Context context;
-    DecimalFormat df = new DecimalFormat("#,###.00");
 
-    public AdapterParaListaDeItemDeGasto(List<ItemDeGasto> lista, Context context){
+    public AdapterParaListaDeTipoDeDaltonismo(List<String> lista, Context context){
         this.lista = lista;
         this.context = context;
     }
@@ -40,21 +40,12 @@ public class AdapterParaListaDeItemDeGasto extends BaseAdapter {
         LayoutInflater mInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
         // cria uma view com o layout  do seu item
-        view = mInflater.inflate(R.layout.layout_lista_item_de_gasto, null);
+        view = mInflater.inflate(R.layout.layout_lista_tipos_de_daltonismo, null);
 
         // Atribuição normal dos campos de uma view
-        TextView campo1 = view.findViewById(R.id.textView_campo1);
-        TextView campo2 = view.findViewById(R.id.textView_campo2);
-        ImageView deletar = view.findViewById(R.id.iv_delete_item_de_gasto);
-        deletar.setTag(position);
-
-        campo1.setText(lista.get(position).nome);
-        if(lista.get(position).valor > 0.0){
-            campo2.setText("Valor: R$"+df.format(lista.get(position).valor));
-        }else{
-            campo2.setText("Valor: R$00,00");
-        }
-
+        TextView campo1 = view.findViewById(R.id.tv_nome_tipo_daltonismo);
+        campo1.setTypeface(ResourcesCompat.getFont(view.getContext(), R.font.cabin));
+        campo1.setText(lista.get(position));
 
         return view;
 

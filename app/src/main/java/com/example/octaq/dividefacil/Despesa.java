@@ -9,11 +9,10 @@ public class Despesa {
     public String nome;
     public String dia;
     public double valorRoleAberto;
-    public double valorRoleFechado;
     public boolean fechou;
     public boolean excluido;
     public String tipoDeDespesa;
-    public List<String> uidIntegrantes;
+    public List<IntegrantesUsuariosDoFirebase> uidIntegrantes;
 
     public Despesa(){
         idDadosPessoas = "";
@@ -21,7 +20,6 @@ public class Despesa {
         nome = "";
         dia = "";
         valorRoleAberto = 0.0;
-        valorRoleFechado = 0.0;
         fechou = false;
         excluido = false;
         tipoDeDespesa = "";
