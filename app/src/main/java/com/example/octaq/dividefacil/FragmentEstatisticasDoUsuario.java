@@ -24,6 +24,7 @@ import com.google.gson.Gson;
 import com.hookedonplay.decoviewlib.DecoView;
 import com.hookedonplay.decoviewlib.charts.SeriesItem;
 import com.hookedonplay.decoviewlib.events.DecoEvent;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -44,6 +45,8 @@ public class FragmentEstatisticasDoUsuario extends Fragment {
     DecoView arcView;
     List<DadosDespesaParaGraficos> listaDadosDespesaParaGraficos;
     TextView textPercentage;
+    double valorTotalGastoPessoal;
+    DecimalFormat df = new DecimalFormat("#,###.00");
     public FragmentEstatisticasDoUsuario() {
         // Required empty public constructor
     }
@@ -110,22 +113,35 @@ public class FragmentEstatisticasDoUsuario extends Fragment {
                     double gastoLazer = 0.0;
 
                     for(int i = 0; i < despesas.size(); i++){
-                        if(despesas.get(i).tipoDeDespesa.equals("Bar e Restaurante")){
-                            //for(int  j = 0;  j < despesas.get(i).){
-
-                            //}
+                        if(despesas.get(i).tipoDeDespesa.equals("Bar e Restaurante") && despesas.get(i).fechou){
+                            gastoBarERestaurante += pegaValorPessoal(despesas.get(i));
+                        }else if(despesas.get(i).tipoDeDespesa.equals("Transporte") && despesas.get(i).fechou){
+                            gastoTransporte += pegaValorPessoal(despesas.get(i));
+                        }else if(despesas.get(i).tipoDeDespesa.equals("Saude")&& despesas.get(i).fechou){
+                            gastoSaude += pegaValorPessoal(despesas.get(i));
+                        }else if(despesas.get(i).tipoDeDespesa.equals("Supermercado")&& despesas.get(i).fechou){
+                            gastoSupermercado += pegaValorPessoal(despesas.get(i));
+                        }else if(despesas.get(i).tipoDeDespesa.equals("Contas de Casa")&& despesas.get(i).fechou){
+                            gastoContasDeCasa += pegaValorPessoal(despesas.get(i));
+                        }else if(despesas.get(i).tipoDeDespesa.equals("Lazer")&& despesas.get(i).fechou){
+                            gastoLazer += pegaValorPessoal(despesas.get(i));
                         }
                     }
+                    valorTotalGastoPessoal = 0.0;
+                    valorTotalGastoPessoal += gastoBarERestaurante + gastoTransporte + gastoSaude + gastoSupermercado + gastoContasDeCasa + gastoLazer;
+
+                    listaDadosDespesaParaGraficos.add(new DadosDespesaParaGraficos(gastoBarERestaurante, "Bar e Restaurante", calculaPorcentagemGasto(gastoBarERestaurante), objTr.daltonismo));
+                    listaDadosDespesaParaGraficos.add(new DadosDespesaParaGraficos(gastoTransporte, "Transporte", calculaPorcentagemGasto(gastoTransporte), objTr.daltonismo));
+                    listaDadosDespesaParaGraficos.add(new DadosDespesaParaGraficos(gastoSaude, "Saude", calculaPorcentagemGasto(gastoSaude), objTr.daltonismo));
+                    listaDadosDespesaParaGraficos.add(new DadosDespesaParaGraficos(gastoSupermercado, "Supermercado", calculaPorcentagemGasto(gastoSupermercado), objTr.daltonismo));
+                    listaDadosDespesaParaGraficos.add(new DadosDespesaParaGraficos(gastoContasDeCasa, "Contas de Casa", calculaPorcentagemGasto(gastoContasDeCasa), objTr.daltonismo));
+                    listaDadosDespesaParaGraficos.add(new DadosDespesaParaGraficos(gastoLazer, "Lazer", calculaPorcentagemGasto(gastoLazer), objTr.daltonismo));
+
                 }catch (Exception e){
                     //Lidar com erro de conexao
                 }
 
-                listaDadosDespesaParaGraficos.add(new DadosDespesaParaGraficos(1000, "Bar e Restaurante", 50, objTr.daltonismo));
-                listaDadosDespesaParaGraficos.add(new DadosDespesaParaGraficos(700, "Transporte", 15, objTr.daltonismo));
-                listaDadosDespesaParaGraficos.add(new DadosDespesaParaGraficos(400, "Saude", 10, objTr.daltonismo));
-                listaDadosDespesaParaGraficos.add(new DadosDespesaParaGraficos(200, "Supermercado", 9, objTr.daltonismo));
-                listaDadosDespesaParaGraficos.add(new DadosDespesaParaGraficos(180, "Contas de Casa", 7, objTr.daltonismo));
-                listaDadosDespesaParaGraficos.add(new DadosDespesaParaGraficos(100, "Lazer", 3, objTr.daltonismo));
+                ordenaListaDeDespesasporGasto();
 
                 adapterParaListaEstatistica.notifyDataSetChanged();
                 ajustaOTamanhoDaListViewParaOcuparTodaAScrollView(lv);
@@ -142,6 +158,40 @@ public class FragmentEstatisticasDoUsuario extends Fragment {
         return view;
     }
 
+    public int calculaPorcentagemGasto(double valor){
+        return (int)((valor/valorTotalGastoPessoal)*100);
+    }
+
+    public double pegaValorPessoal(Despesa despesa){
+        for(int i = 0; i < despesa.uidIntegrantes.size(); i++){
+            if(despesa.uidIntegrantes.get(i).uid.equals(objTr.userUid)){
+                return despesa.uidIntegrantes.get(i).gasto;
+            }
+        }
+        return 0.0;
+    }
+
+    public void ordenaListaDeDespesasporGasto(){
+
+        if(listaDadosDespesaParaGraficos.size()>0){
+            DadosDespesaParaGraficos dadoAuxiliarTemporario;
+            for(int i = 0;  i < listaDadosDespesaParaGraficos.size();i++){
+                dadoAuxiliarTemporario = listaDadosDespesaParaGraficos.get(i);
+                for(int j = i; j < listaDadosDespesaParaGraficos.size(); j++){
+                    if(listaDadosDespesaParaGraficos.get(j).valor > dadoAuxiliarTemporario.valor){
+                        listaDadosDespesaParaGraficos.add(i,listaDadosDespesaParaGraficos.get(j));
+                        listaDadosDespesaParaGraficos.remove(i+1);
+                        listaDadosDespesaParaGraficos.add(j,dadoAuxiliarTemporario);
+                        listaDadosDespesaParaGraficos.remove(j+1);
+
+                        dadoAuxiliarTemporario = listaDadosDespesaParaGraficos.get(i);
+                    }
+                }
+            }
+        }
+
+
+    }
     public void plotaGraficos(){
 
         SeriesItem seriesItem1;
@@ -285,8 +335,8 @@ public class FragmentEstatisticasDoUsuario extends Fragment {
                 .setDuration(2000)
                 .build());
 
+        textPercentage.setText("R$"+df.format(valorTotalGastoPessoal));
 
-        textPercentage.setText("R$1000,00");
         arcView.configureAngles(360, 0);
     }
     public static void ajustaOTamanhoDaListViewParaOcuparTodaAScrollView(ListView listView) {

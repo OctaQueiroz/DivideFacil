@@ -53,13 +53,13 @@ public class AdapterParaListaEstatistica extends BaseAdapter {
 
         arcView.addSeries(new SeriesItem.Builder(Color.argb(255, 250, 250, 250))
                 .setRange(0, 100, 100)
-                .setLineWidth(10f)
+                .setLineWidth(15f)
                 .build());
 
         SeriesItem seriesItem1 = new SeriesItem.Builder(Color.argb(255, lista.get(position).red, lista.get(position).green, lista.get(position).blue))
                 .setRange(0, 100, 0)
                 .setInitialVisibility(false)
-                .setLineWidth(10f)
+                .setLineWidth(15f)
                 .setInterpolator(new OvershootInterpolator())
                 .setShowPointWhenEmpty(false)
                 .setDrawAsPoint(false)

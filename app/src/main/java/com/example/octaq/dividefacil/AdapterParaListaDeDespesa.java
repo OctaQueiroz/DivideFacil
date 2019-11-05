@@ -59,9 +59,73 @@ public class AdapterParaListaDeDespesa extends BaseAdapter {
         TextView valor = view.findViewById(R.id.tv_valor_historico);
         TextView status = view.findViewById(R.id.tv_status_historico);
         TextView data = view.findViewById(R.id.tv_data_historico);
+        ImageView icone = view.findViewById(R.id.ic_despesa);
         final ImageView deletar = view.findViewById(R.id.iv_delete);
 
         deletar.setTag(position);
+
+
+        if(lista.get(position).tipoDeDespesa.equals("Lazer")){
+            if(objTr.daltonismo.equals("Nenhum")){
+                icone.setBackgroundResource(R.drawable.ic_lazer_normal);
+            }else if(objTr.daltonismo.equals("Protanopia")){
+                icone.setBackgroundResource(R.drawable.ic_lazer_protanopia);
+            }else if(objTr.daltonismo.equals("Deuteranopia")){
+                icone.setBackgroundResource(R.drawable.ic_lazer_deuteranopia);
+            }else if(objTr.daltonismo.equals("Tritanopia")){
+                icone.setBackgroundResource(R.drawable.ic_lazer_tritanopia);
+            }
+        }else if(lista.get(position).tipoDeDespesa.equals("Bar e Restaurante")){
+            if(objTr.daltonismo.equals("Nenhum")){
+                icone.setBackgroundResource(R.drawable.ic_cheers_normal);
+            }else if(objTr.daltonismo.equals("Protanopia")){
+                icone.setBackgroundResource(R.drawable.ic_cheers_protanopia);
+            }else if(objTr.daltonismo.equals("Deuteranopia")){
+                icone.setBackgroundResource(R.drawable.ic_cheers_deuteranopia);
+            }else if(objTr.daltonismo.equals("Tritanopia")){
+                icone.setBackgroundResource(R.drawable.ic_cheers_tritanopia);
+            }
+        }else if(lista.get(position).tipoDeDespesa.equals("Supermercado")){
+            if(objTr.daltonismo.equals("Nenhum")){
+                icone.setBackgroundResource(R.drawable.ic_groceries_normal);
+            }else if(objTr.daltonismo.equals("Protanopia")){
+                icone.setBackgroundResource(R.drawable.ic_groceries_protanopia);
+            }else if(objTr.daltonismo.equals("Deuteranopia")){
+                icone.setBackgroundResource(R.drawable.ic_groceries_deuteranopia);
+            }else if(objTr.daltonismo.equals("Tritanopia")){
+                icone.setBackgroundResource(R.drawable.ic_groceries_tritanopia);
+            }
+        }else if(lista.get(position).tipoDeDespesa.equals("Transporte")){
+            if(objTr.daltonismo.equals("Nenhum")){
+                icone.setBackgroundResource(R.drawable.ic_car_normal);
+            }else if(objTr.daltonismo.equals("Protanopia")){
+                icone.setBackgroundResource(R.drawable.ic_car_protanopia);
+            }else if(objTr.daltonismo.equals("Deuteranopia")){
+                icone.setBackgroundResource(R.drawable.ic_car_deuteranopia);
+            }else if(objTr.daltonismo.equals("Tritanopia")){
+                icone.setBackgroundResource(R.drawable.ic_car_tritanopia);
+            }
+        }else if(lista.get(position).tipoDeDespesa.equals("Saude")){
+            if(objTr.daltonismo.equals("Nenhum")){
+                icone.setBackgroundResource(R.drawable.ic_health_normal);
+            }else if(objTr.daltonismo.equals("Protanopia")){
+                icone.setBackgroundResource(R.drawable.ic_health_protanopia);
+            }else if(objTr.daltonismo.equals("Deuteranopia")){
+                icone.setBackgroundResource(R.drawable.ic_health_deuteranopia);
+            }else if(objTr.daltonismo.equals("Tritanopia")){
+                icone.setBackgroundResource(R.drawable.ic_health_tritanopia);
+            }
+        }else if(lista.get(position).tipoDeDespesa.equals("Contas de Casa")){
+            if(objTr.daltonismo.equals("Nenhum")){
+                icone.setBackgroundResource(R.drawable.ic_home_normal);
+            }else if(objTr.daltonismo.equals("Protanopia")){
+                icone.setBackgroundResource(R.drawable.ic_home_protanopia);
+            }else if(objTr.daltonismo.equals("Deuteranopia")){
+                icone.setBackgroundResource(R.drawable.ic_home_deuteranopia);
+            }else if(objTr.daltonismo.equals("Tritanopia")){
+                icone.setBackgroundResource(R.drawable.ic_home_tritanopia);
+            }
+        }
 
         deletar.setOnClickListener(new View.OnClickListener() {
             @Override

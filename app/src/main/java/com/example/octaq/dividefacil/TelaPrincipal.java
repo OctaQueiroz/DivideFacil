@@ -216,6 +216,18 @@ public class TelaPrincipal extends AppCompatActivity {
                 telaDeGraficos = FragmentEstatisticasDoUsuario.newInstance(objTr);
                 toolbar.setTitle("Minha análise geral");
                 managerFragment(telaDeGraficos, "Fragment graficos");
+
+                FragmentManager fragmentManager = getSupportFragmentManager();
+                Fragment fragment = fragmentManager.findFragmentByTag("Fragment historico");
+                if (fragment != null && fragment.isVisible()) {
+                    telaDeHistorico = FragmentHistoricoDeDespesas.newInstance(objTr);
+                    toolbar.setTitle("Minhas despesas");
+                    managerFragment(telaDeHistorico, "Fragment historico");
+                }else{
+                    telaDeGraficos = FragmentEstatisticasDoUsuario.newInstance(objTr);
+                    toolbar.setTitle("Minha análise geral");
+                    managerFragment(telaDeGraficos, "Fragment graficos");
+                }
             }
         });
 
