@@ -110,7 +110,7 @@ public class FragmentHistoricoDeDespesas extends Fragment {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 //Chama a tela de pessoa, passando o id do usuário selecionado e os  meios dde comunicação com o banco
-                if(isOnline(getActivity().getApplicationContext())){
+                //if(isOnline(getActivity().getApplicationContext())){
                     try{
                         objTr.despesa = despesas.get(position);
                         Gson gson = new Gson();
@@ -137,9 +137,9 @@ public class FragmentHistoricoDeDespesas extends Fragment {
                     }catch (Exception e){
                         //Lidar com problemas de conexão
                     }
-                }else{
+                //}else{
                     //Lidar com problemas de conexão
-                }
+                //}
             }
         });
 
@@ -153,7 +153,7 @@ public class FragmentHistoricoDeDespesas extends Fragment {
                 dialog.show();
 
                 despesas = new ArrayList<>();
-                if(isOnline(getContext())){
+                //if(isOnline(getContext())){
                     try{
                         for(DataSnapshot dadosDataSnapshot: dataSnapshot.getChildren()){
                             Despesa despesaAtualizado = dadosDataSnapshot.child("Despesa").getValue(Despesa.class);
@@ -167,9 +167,9 @@ public class FragmentHistoricoDeDespesas extends Fragment {
                         //Lidar com erro de conexao
                         despesas = new ArrayList<>();
                     }
-                }else{
+                //}else{
                     //Lidar com erro de conexao
-                }
+                //}
                 //Cria um adapter para a list View
                 adapterParaListaDeDespesa = new AdapterParaListaDeDespesa(despesas, getContext(),objTr);
 
@@ -267,7 +267,7 @@ public class FragmentHistoricoDeDespesas extends Fragment {
                     objTr.despesa.dia = dataFormatada;
                     objTr.despesa.nome = nomeDespesa.getText().toString().substring(0,1).toUpperCase() + nomeDespesa.getText().toString().substring(1);
 
-                    if(isOnline(getActivity().getApplicationContext())){
+                    //if(isOnline(getActivity().getApplicationContext())){
                         try {
                             //Cria o despesa no banco e adiciona o novo integrante.
                             //Isso é  feito para evitar que rolês sejam criados sem nenhum integrante, caso o usuario chegue até essa tela e feche o app
@@ -308,9 +308,9 @@ public class FragmentHistoricoDeDespesas extends Fragment {
                         }catch (Exception e){
                             //Lidar  com o erro de conexão
                         }
-                    }else{
+                    //}else{
                         //Lidar com o erro de conexão
-                    }
+                    //}
 
                 }
 
@@ -326,7 +326,7 @@ public class FragmentHistoricoDeDespesas extends Fragment {
         alerta = builder.create();
         alerta.show();
     }
-
+    /*
     public static boolean isOnline(Context context) {
         ConnectivityManager administradorDeConexao = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo informacoesDeConexao = administradorDeConexao.getActiveNetworkInfo();
@@ -335,4 +335,5 @@ public class FragmentHistoricoDeDespesas extends Fragment {
         else
             return false;
     }
+     */
 }

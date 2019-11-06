@@ -78,6 +78,15 @@ public class TelaLogin extends AppCompatActivity {
                 .requestEmail()
                 .build();
         mGoogleSignInClient = GoogleSignIn.getClient(this, gso);
+
+        mGoogleSignInClient.revokeAccess()
+                .addOnCompleteListener(this, new OnCompleteListener<Void>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Void> task) {
+
+                    }
+                });
+
         signInButton = findViewById(R.id.google_sign_in_button);
         RC_SIGN_IN = 1;
 
@@ -220,8 +229,19 @@ public class TelaLogin extends AppCompatActivity {
         signInButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent signInIntent = mGoogleSignInClient.getSignInIntent();
-                startActivityForResult(signInIntent, RC_SIGN_IN);
+                if(isOnline(TelaLogin.this)){
+                    try{
+                        Intent signInIntent = mGoogleSignInClient.getSignInIntent();
+                        startActivityForResult(signInIntent, RC_SIGN_IN);
+                    }catch (Exception e){
+
+                    }
+
+                }else{
+                    Toast toast = Toast.makeText(TelaLogin.this, "Conexão fraca com a internet, tente novamente!", Toast.LENGTH_SHORT);
+                    toast.setGravity(Gravity.CENTER_HORIZONTAL | Gravity.BOTTOM, 0, 0);
+                    toast.show();
+                }
             }
         });
 
@@ -253,7 +273,7 @@ public class TelaLogin extends AppCompatActivity {
                     toast.show();
                 }
             } catch(Exception e) {
-                // trata o erro de conexão.
+
             }
         }else{
             //Lidar com problemas de conexão

@@ -96,7 +96,7 @@ public class AdapterParaListaEstatistica extends BaseAdapter {
         int series1Index = arcView.addSeries(seriesItem1);
 
         arcView.addEvent(new DecoEvent.Builder((int)lista.get(position).porcentagem).setIndex(series1Index).setDelay(250).build());
-        
+
         return view;
     }
 }
