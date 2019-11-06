@@ -161,7 +161,7 @@ public class TelaDespesaBarERestauranteVisualizacao extends AppCompatActivity {
                 //Inicializa array list, list view e cria um adapter para ela
                 ListView lv = findViewById(R.id.listaPessoasTelaConta);
 
-                AdapterParaListaDePessoa adapterPessoa = new AdapterParaListaDePessoa(dados, TelaDespesaBarERestauranteVisualizacao.this);
+                AdapterParaListaDePessoa adapterPessoa = new AdapterParaListaDePessoa(dados,objTr, TelaDespesaBarERestauranteVisualizacao.this);
 
                 lv.setAdapter(adapterPessoa);
             }

@@ -18,7 +18,7 @@ public class AdapterParaListaEstatistica extends BaseAdapter {
 
     List<DadosDespesaParaGraficos> lista;
     Context context;
-    DecimalFormat df = new DecimalFormat("#,###.00");
+    DecimalFormat df = new DecimalFormat("#,##0.00");
 
     public AdapterParaListaEstatistica(List<DadosDespesaParaGraficos> lista, Context context){
         this.lista = lista;
@@ -46,17 +46,20 @@ public class AdapterParaListaEstatistica extends BaseAdapter {
         // cria uma view com o layout  do seu item
         view = mInflater.inflate(R.layout.layout_lista_estatisticas, null);
 
-        DecoView arcView = view.findViewById(R.id.grafico_porcentagem_despesa);
+
         TextView nomeDespesa = view.findViewById(R.id.tv_nome_despesa_grafico);
         TextView valorDespesa = view.findViewById(R.id.tv_valor_despesa_grafico);
-        TextView porcentagemDespesa = view.findViewById(R.id.tv_porcentagem_despesa_grafico);
+        DecoView arcView = view.findViewById(R.id.grafico_porcentagem_despesa);
+        final TextView porcentagemDespesa = view.findViewById(R.id.tv_porcentagem_despesa_grafico);
 
-        arcView.addSeries(new SeriesItem.Builder(Color.argb(255, 250, 250, 250))
+        final float porcentagem = (float)lista.get(position).porcentagem;
+
+        arcView.addSeries(new SeriesItem.Builder(Color.argb(255, 245, 245, 245))
                 .setRange(0, 100, 100)
                 .setLineWidth(15f)
                 .build());
 
-        SeriesItem seriesItem1 = new SeriesItem.Builder(Color.argb(255, lista.get(position).red, lista.get(position).green, lista.get(position).blue))
+        final SeriesItem seriesItem1 = new SeriesItem.Builder(Color.argb(255, lista.get(position).red, lista.get(position).green, lista.get(position).blue))
                 .setRange(0, 100, 0)
                 .setInitialVisibility(false)
                 .setLineWidth(15f)
@@ -68,16 +71,34 @@ public class AdapterParaListaEstatistica extends BaseAdapter {
                 .setChartStyle(SeriesItem.ChartStyle.STYLE_DONUT)
                 .build();
 
+        porcentagemDespesa.setText("00,00%");
+        seriesItem1.addArcSeriesItemListener(new SeriesItem.SeriesItemListener() {
+            @Override
+            public void onSeriesItemAnimationProgress(float percentComplete, float currentPosition) {
+                //float percentFilled = ((currentPosition - seriesItem1.getMinValue()) / (porcentagem - seriesItem1.getMinValue()));
+                if(currentPosition>0){
+                    porcentagemDespesa.setText(df.format(percentComplete * porcentagem)+"%");
+                }
+            }
+
+            @Override
+            public void onSeriesItemDisplayProgress(float percentComplete) {
+
+            }
+        });
+
         int series1Index = arcView.addSeries(seriesItem1);
 
         arcView.addEvent(new DecoEvent.Builder((int)lista.get(position).porcentagem).setIndex(series1Index).setDelay(1000).build());
 
         nomeDespesa.setText(lista.get(position).tipoDeDespesa);
         valorDespesa.setText("Valor gasto: R$"+df.format(lista.get(position).valor));
-        porcentagemDespesa.setText(df.format(lista.get(position).porcentagem) + "%");
-
+        if(lista.get(position).porcentagem>0){
+            porcentagemDespesa.setText(df.format(lista.get(position).porcentagem) + "%");
+        }else{
+            porcentagemDespesa.setText("0%");
+        }
 
         return view;
-
     }
 }

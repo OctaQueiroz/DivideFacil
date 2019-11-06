@@ -166,7 +166,7 @@ public class TelaDespesaBarERestaurante extends AppCompatActivity {
 
                 ListView lv = findViewById(R.id.listaPessoasTelaConta);
 
-                AdapterParaListaDePessoa adapterPessoa = new AdapterParaListaDePessoa(dados, TelaDespesaBarERestaurante.this);
+                AdapterParaListaDePessoa adapterPessoa = new AdapterParaListaDePessoa(dados, objTr,TelaDespesaBarERestaurante.this);
 
                 lv.setAdapter(adapterPessoa);
             }
@@ -312,6 +312,7 @@ public class TelaDespesaBarERestaurante extends AppCompatActivity {
                                     }
                                 }
                             }else{
+                                novoParticipante.nome = novoParticipante.nome.substring(0,1).toUpperCase() + novoParticipante.nome.substring(1);
                                 novoParticipante.id = referencia.child(objTr.userUid).child(objTr.despesa.idDadosDespesa).child("Integrantes").push().getKey();
                                 for(int i = 0; i < objTr.despesa.uidIntegrantes.size(); i++){
                                     referencia.child(objTr.despesa.uidIntegrantes.get(i).uid).child(objTr.despesa.idDadosDespesa).child("Integrantes").child(novoParticipante.id).setValue(novoParticipante);

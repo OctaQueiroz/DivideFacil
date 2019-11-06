@@ -13,7 +13,7 @@
         android:layout_alignParentTop="true"
         android:layout_marginStart="19dp"
         android:layout_marginTop="21dp"
-        app:srcCompat="@drawable/ic_circle_shape_outline" />
+        app:srcCompat="@drawable/ic_circle" />
 
     <TextView
         android:id="@+id/tv_nome_tipo_Despesa"
@@ -22,6 +22,7 @@
         android:layout_alignParentTop="true"
         android:layout_marginStart="19dp"
         android:layout_marginTop="14dp"
+        android:layout_marginBottom="10dp"
         android:layout_toEndOf="@+id/imageView4"
         android:text="TextView"
         android:textAppearance="@style/TextAppearance.AppCompat.Medium" />

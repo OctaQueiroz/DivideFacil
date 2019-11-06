@@ -8,12 +8,22 @@ public class DadosDespesaParaGraficos {
     public int green;
     public int blue;
     public String tipoDaltonismo;
-
+    public DadosDespesaParaGraficos(String tipoDeDespesa, String daltonismo){
+        this.valor = 0.0;
+        this.tipoDeDespesa = tipoDeDespesa;
+        this.porcentagem = 0.0;
+        this.tipoDaltonismo = daltonismo;
+        defineCoresDoGrafico();
+    }
     public DadosDespesaParaGraficos(double valor, String tipoDeDespesa, double porcentagem, String daltonismo){
         this.valor = valor;
         this.tipoDeDespesa = tipoDeDespesa;
         this.porcentagem = porcentagem;
         this.tipoDaltonismo = daltonismo;
+        defineCoresDoGrafico();
+    }
+
+    public void defineCoresDoGrafico(){
         if(tipoDaltonismo.equals("Nenhum")){
             if(tipoDeDespesa.equals("Bar e Restaurante")){
                 this.red = 188;
@@ -119,6 +129,5 @@ public class DadosDespesaParaGraficos {
                 this.blue = 57;
             }
         }
-
     }
 }

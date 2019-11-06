@@ -26,6 +26,7 @@ import com.hookedonplay.decoviewlib.charts.SeriesItem;
 import com.hookedonplay.decoviewlib.events.DecoEvent;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 
 import static com.example.octaq.dividefacil.TelaLogin.referencia;
@@ -158,8 +159,8 @@ public class FragmentEstatisticasDoUsuario extends Fragment {
         return view;
     }
 
-    public int calculaPorcentagemGasto(double valor){
-        return (int)((valor/valorTotalGastoPessoal)*100);
+    public float calculaPorcentagemGasto(double valor){
+        return (float) ((valor/valorTotalGastoPessoal)*100);
     }
 
     public double pegaValorPessoal(Despesa despesa){
@@ -194,22 +195,60 @@ public class FragmentEstatisticasDoUsuario extends Fragment {
     }
     public void plotaGraficos(){
 
+        final SeriesItem seriesItem0;
         SeriesItem seriesItem1;
         SeriesItem seriesItem2;
         SeriesItem seriesItem3;
         SeriesItem seriesItem4;
         SeriesItem seriesItem5;
         SeriesItem seriesItem6;
+        int series0Index;
         int series1Index;
         int series2Index;
         int series3Index;
         int series4Index;
         int series5Index;
         int series6Index;
+
+        arcView.addSeries(new SeriesItem.Builder(Color.argb(255, 255, 255, 255))
+                .setRange(0, 100, 100)
+                .setLineWidth(0f)
+                .build());
+        seriesItem0 = new SeriesItem.Builder(Color.argb(255, 255, 255, 255))
+                .setRange(0, 100, 0)
+                .setInitialVisibility(false)
+                .setLineWidth(0f)
+                .setInterpolator(new OvershootInterpolator())
+                .setShowPointWhenEmpty(false)
+                .setDrawAsPoint(false)
+                .setSpinClockwise(true)
+                .setSpinDuration(4000)
+                .setChartStyle(SeriesItem.ChartStyle.STYLE_DONUT)
+                .build();
+
+
+
+        seriesItem0.addArcSeriesItemListener(new SeriesItem.SeriesItemListener() {
+            @Override
+            public void onSeriesItemAnimationProgress(float percentComplete, float currentPosition) {
+                    //float percentFilled = ((currentPosition - seriesItem0.getMinValue()) / (seriesItem0.getMaxValue() - seriesItem0.getMinValue()));
+                if(currentPosition>0){
+                    textPercentage.setText("R$"+df.format(percentComplete * valorTotalGastoPessoal));
+                }
+            }
+
+            @Override
+            public void onSeriesItemDisplayProgress(float percentComplete) {
+
+            }
+        });
+        series0Index = arcView.addSeries(seriesItem0);
+        arcView.addEvent(new DecoEvent.Builder((int)(100)).setIndex(series0Index).setDelay(1000).build());
+
         if(listaDadosDespesaParaGraficos.size()>0){
             arcView.addSeries(new SeriesItem.Builder(Color.argb(255, 245, 245, 245))
                     .setRange(0, 100, 100)
-                    .setLineWidth(49f)
+                    .setLineWidth(20f)
                     .build());
             seriesItem1 = new SeriesItem.Builder(Color.argb(255, listaDadosDespesaParaGraficos.get(0).red, listaDadosDespesaParaGraficos.get(0).green, listaDadosDespesaParaGraficos.get(0).blue))
                     .setRange(0, 100, 0)
@@ -228,7 +267,7 @@ public class FragmentEstatisticasDoUsuario extends Fragment {
                 arcView.addSeries(new SeriesItem.Builder(Color.argb(255, 245, 245, 245))
                         .setRange(0, 100, 100)
                         .setInset(new PointF(50f, 50f))
-                        .setLineWidth(49f)
+                        .setLineWidth(20f)
                         .build());
                 seriesItem2 = new SeriesItem.Builder(Color.argb(255, listaDadosDespesaParaGraficos.get(1).red, listaDadosDespesaParaGraficos.get(1).green, listaDadosDespesaParaGraficos.get(1).blue))
                         .setRange(0, 100, 0)
@@ -248,7 +287,7 @@ public class FragmentEstatisticasDoUsuario extends Fragment {
                     arcView.addSeries(new SeriesItem.Builder(Color.argb(255, 245, 245, 245))
                             .setRange(0, 100, 100)
                             .setInset(new PointF(100f, 100f))
-                            .setLineWidth(49f)
+                            .setLineWidth(20f)
                             .build());
                     seriesItem3 = new SeriesItem.Builder(Color.argb(255, listaDadosDespesaParaGraficos.get(2).red, listaDadosDespesaParaGraficos.get(2).green, listaDadosDespesaParaGraficos.get(2).blue))
                             .setRange(0, 100, 0)
@@ -268,7 +307,7 @@ public class FragmentEstatisticasDoUsuario extends Fragment {
                         arcView.addSeries(new SeriesItem.Builder(Color.argb(255, 245, 245, 245))
                                 .setRange(0, 100, 100)
                                 .setInset(new PointF(150f, 150f))
-                                .setLineWidth(49f)
+                                .setLineWidth(20f)
                                 .build());
                         seriesItem4 = new SeriesItem.Builder(Color.argb(255, listaDadosDespesaParaGraficos.get(3).red, listaDadosDespesaParaGraficos.get(3).green, listaDadosDespesaParaGraficos.get(3).blue))
                                 .setRange(0, 100, 0)
@@ -288,7 +327,7 @@ public class FragmentEstatisticasDoUsuario extends Fragment {
                             arcView.addSeries(new SeriesItem.Builder(Color.argb(255, 245, 245, 245))
                                     .setRange(0, 100, 100)
                                     .setInset(new PointF(200f, 200f))
-                                    .setLineWidth(49f)
+                                    .setLineWidth(20f)
                                     .build());
                             seriesItem5 = new SeriesItem.Builder(Color.argb(255, listaDadosDespesaParaGraficos.get(4).red, listaDadosDespesaParaGraficos.get(4).green, listaDadosDespesaParaGraficos.get(4).blue))
                                     .setRange(0, 100, 0)
@@ -308,7 +347,7 @@ public class FragmentEstatisticasDoUsuario extends Fragment {
                                 arcView.addSeries(new SeriesItem.Builder(Color.argb(255, 245, 245, 245))
                                         .setRange(0, 100, 100)
                                         .setInset(new PointF(250f, 250f))
-                                        .setLineWidth(49f)
+                                        .setLineWidth(20f)
                                         .build());
                                 seriesItem6 = new SeriesItem.Builder(Color.argb(255, listaDadosDespesaParaGraficos.get(5).red, listaDadosDespesaParaGraficos.get(5).green, listaDadosDespesaParaGraficos.get(5).blue))
                                         .setRange(0, 100, 0)
@@ -335,7 +374,7 @@ public class FragmentEstatisticasDoUsuario extends Fragment {
                 .setDuration(2000)
                 .build());
 
-        textPercentage.setText("R$"+df.format(valorTotalGastoPessoal));
+        //.setText("R$"+df.format(valorTotalGastoPessoal));
 
         arcView.configureAngles(360, 0);
     }

@@ -168,8 +168,8 @@
                         <option name="values">
                           <map>
                             <entry key="assetSourceType" value="FILE" />
-                            <entry key="outputName" value="ic_cheers_protanopia" />
-                            <entry key="sourceFile" value="C:\Users\octaq\Downloads\cheers (4).svg" />
+                            <entry key="outputName" value="ic_circle" />
+                            <entry key="sourceFile" value="C:\Users\octaq\Downloads\circle.svg" />
                           </map>
                         </option>
                       </PersistentState>
