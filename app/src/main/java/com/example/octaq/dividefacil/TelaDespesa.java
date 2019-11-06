@@ -364,7 +364,20 @@ public class TelaDespesa extends AppCompatActivity {
         builder.setPositiveButton("Avançar", new DialogInterface.OnClickListener() {
 
             public void onClick(DialogInterface arg0, int arg1) {
-                dialogoNovoItemDeGasto();
+                boolean verificaSelecionado = false;
+                for(int i = 0; i < checados.length; i++){
+                    if(checados[i]){
+                        dialogoNovoItemDeGasto();
+                        verificaSelecionado = true;
+                        break;
+                    }
+                }
+                if(!verificaSelecionado){
+                    Toast toast = Toast.makeText(TelaDespesa.this, "Selecione ao menos uma pessoa que irá consumir o item", Toast.LENGTH_SHORT);
+                    toast.setGravity(Gravity.CENTER_HORIZONTAL | Gravity.CENTER_VERTICAL, 0, 0);
+                    toast.show();
+                }
+
             }
         });
 
@@ -423,62 +436,54 @@ public class TelaDespesa extends AppCompatActivity {
                 if (isOnline(TelaDespesa.this)){
                     try {
                         int dividirParaPessoas = 0;
-                        Boolean naoNulo = false;
                         ItemDeGasto novoItemDeGasto = new ItemDeGasto();
                         for (int i = 0; i < checados.length; i++) {
                             if (checados[i]) {
-                                naoNulo = true;
                                 ConsumidorItemDeGasto novoConsumidor = new ConsumidorItemDeGasto(dados.get(i).nome, dados.get(i).id);
                                 novoItemDeGasto.usuariosQueConsomemEsseitem.add(novoConsumidor);
                                 dividirParaPessoas++;
                             }
                         }
-                        if (naoNulo) {
-                            String[] verificadorDigito = valorItem.getText().toString().split(",");
-                            if (verificadorDigito.length == 2) {
-                                valorItem.setText(verificadorDigito[0] + "." + verificadorDigito[1]);
-                            }
-                            if (!valorItem.getText().toString().equals("")) {
-                                if (!nomeItem.getText().toString().equals("")) {
-                                    Double valorPorPessoa = Double.valueOf(valorItem.getText().toString()) / dividirParaPessoas;
-                                    novoItemDeGasto.id = referencia.child(objTr.userUid).child(objTr.despesa.idDadosDespesa).child("Integrantes").push().getKey();
-                                    novoItemDeGasto.nome = nomeItem.getText().toString().substring(0,1).toUpperCase() + nomeItem.getText().toString().substring(1);
-                                    novoItemDeGasto.valor = valorPorPessoa;
-                                    objTr.despesa.valorRoleAberto += valorPorPessoa * dividirParaPessoas;
-                                    for (int i = 0; i < checados.length; i++) {
-                                        if (checados[i]) {
-                                            for (int j = 0; j < dados.size(); j++) {
-                                                if (nomes[i].equals(dados.get(i).nome)) {
-                                                    for(int k = 0; k < objTr.despesa.uidIntegrantes.size(); k++){
-                                                        if(dados.get(i).id.equals(objTr.despesa.uidIntegrantes.get(k).uid)){
-                                                            objTr.despesa.uidIntegrantes.get(k).gasto += valorPorPessoa;
-                                                            break;
-                                                        }
+                        String[] verificadorDigito = valorItem.getText().toString().split(",");
+                        if (verificadorDigito.length == 2) {
+                            valorItem.setText(verificadorDigito[0] + "." + verificadorDigito[1]);
+                        }
+                        if (!valorItem.getText().toString().equals("")) {
+                            if (!nomeItem.getText().toString().equals("")) {
+                                Double valorPorPessoa = Double.valueOf(valorItem.getText().toString()) / dividirParaPessoas;
+                                novoItemDeGasto.id = referencia.child(objTr.userUid).child(objTr.despesa.idDadosDespesa).child("Integrantes").push().getKey();
+                                novoItemDeGasto.nome = nomeItem.getText().toString().substring(0,1).toUpperCase() + nomeItem.getText().toString().substring(1);
+                                novoItemDeGasto.valor = valorPorPessoa;
+                                objTr.despesa.valorRoleAberto += valorPorPessoa * dividirParaPessoas;
+                                for (int i = 0; i < checados.length; i++) {
+                                    if (checados[i]) {
+                                        for (int j = 0; j < dados.size(); j++) {
+                                            if (nomes[i].equals(dados.get(i).nome)) {
+                                                for(int k = 0; k < objTr.despesa.uidIntegrantes.size(); k++){
+                                                    if(dados.get(i).id.equals(objTr.despesa.uidIntegrantes.get(k).uid)){
+                                                        objTr.despesa.uidIntegrantes.get(k).gasto += valorPorPessoa;
+                                                        break;
                                                     }
-                                                    dados.get(i).valorTotal += valorPorPessoa;
-                                                    dados.get(i).historicoItemDeGastos.add(novoItemDeGasto);
-                                                    for(int k = 0; k < objTr.despesa.uidIntegrantes.size(); k++){
-                                                        referencia.child(objTr.despesa.uidIntegrantes.get(k).uid).child(objTr.despesa.idDadosDespesa).child("Despesa").setValue(objTr.despesa);
-                                                        referencia.child(objTr.despesa.uidIntegrantes.get(k).uid).child(objTr.despesa.idDadosDespesa).child("Integrantes").child(dados.get(i).id).setValue(dados.get(i));
-                                                    }
-                                                    //referencia.child(objTr.userUid).child(objTr.despesa.idDadosDespesa).child(objTr.despesa.idDadosPessoas).child(dados.get(i).id).setValue(dados.get(i));
-                                                    nomes[i] = "";//Impede que uma mesma pessoa  seja contada mais de uma vez
                                                 }
+                                                dados.get(i).valorTotal += valorPorPessoa;
+                                                dados.get(i).historicoItemDeGastos.add(novoItemDeGasto);
+                                                for(int k = 0; k < objTr.despesa.uidIntegrantes.size(); k++){
+                                                    referencia.child(objTr.despesa.uidIntegrantes.get(k).uid).child(objTr.despesa.idDadosDespesa).child("Despesa").setValue(objTr.despesa);
+                                                    referencia.child(objTr.despesa.uidIntegrantes.get(k).uid).child(objTr.despesa.idDadosDespesa).child("Integrantes").child(dados.get(i).id).setValue(dados.get(i));
+                                                }
+                                                //referencia.child(objTr.userUid).child(objTr.despesa.idDadosDespesa).child(objTr.despesa.idDadosPessoas).child(dados.get(i).id).setValue(dados.get(i));
+                                                nomes[i] = "";//Impede que uma mesma pessoa  seja contada mais de uma vez
                                             }
                                         }
                                     }
-                                } else {
-                                    Toast toast = Toast.makeText(TelaDespesa.this, "Insira um nome não nulo para o item", Toast.LENGTH_SHORT);
-                                    toast.setGravity(Gravity.CENTER_HORIZONTAL | Gravity.CENTER_VERTICAL, 0, 0);
-                                    toast.show();
                                 }
                             } else {
-                                Toast toast = Toast.makeText(TelaDespesa.this, "Insira um valor não nulo para o item", Toast.LENGTH_SHORT);
+                                Toast toast = Toast.makeText(TelaDespesa.this, "Insira um nome não nulo para o item", Toast.LENGTH_SHORT);
                                 toast.setGravity(Gravity.CENTER_HORIZONTAL | Gravity.CENTER_VERTICAL, 0, 0);
                                 toast.show();
                             }
                         } else {
-                            Toast toast = Toast.makeText(TelaDespesa.this, "Selecione ao menos uma pessoa que irá consumir o item", Toast.LENGTH_SHORT);
+                            Toast toast = Toast.makeText(TelaDespesa.this, "Insira um valor não nulo para o item", Toast.LENGTH_SHORT);
                             toast.setGravity(Gravity.CENTER_HORIZONTAL | Gravity.CENTER_VERTICAL, 0, 0);
                             toast.show();
                         }

@@ -52,6 +52,9 @@ public class AdapterParaListaEstatistica extends BaseAdapter {
         DecoView arcView = view.findViewById(R.id.grafico_porcentagem_despesa);
         final TextView porcentagemDespesa = view.findViewById(R.id.tv_porcentagem_despesa_grafico);
 
+        nomeDespesa.setText(lista.get(position).tipoDeDespesa);
+        valorDespesa.setText("Valor gasto: R$"+df.format(lista.get(position).valor));
+
         final float porcentagem = (float)lista.get(position).porcentagem;
 
         arcView.addSeries(new SeriesItem.Builder(Color.argb(255, 245, 245, 245))
@@ -76,8 +79,11 @@ public class AdapterParaListaEstatistica extends BaseAdapter {
             @Override
             public void onSeriesItemAnimationProgress(float percentComplete, float currentPosition) {
                 //float percentFilled = ((currentPosition - seriesItem1.getMinValue()) / (porcentagem - seriesItem1.getMinValue()));
-                if(currentPosition>0){
-                    porcentagemDespesa.setText(df.format(percentComplete * porcentagem)+"%");
+                float numeroMostrado = percentComplete * porcentagem;
+                if(currentPosition>0 && numeroMostrado<=porcentagem){
+                    porcentagemDespesa.setText(df.format(numeroMostrado)+"%");
+                }else if(currentPosition>0){
+                    porcentagemDespesa.setText(df.format(porcentagem)+"%");
                 }
             }
 
@@ -89,16 +95,8 @@ public class AdapterParaListaEstatistica extends BaseAdapter {
 
         int series1Index = arcView.addSeries(seriesItem1);
 
-        arcView.addEvent(new DecoEvent.Builder((int)lista.get(position).porcentagem).setIndex(series1Index).setDelay(1000).build());
-
-        nomeDespesa.setText(lista.get(position).tipoDeDespesa);
-        valorDespesa.setText("Valor gasto: R$"+df.format(lista.get(position).valor));
-        if(lista.get(position).porcentagem>0){
-            porcentagemDespesa.setText(df.format(lista.get(position).porcentagem) + "%");
-        }else{
-            porcentagemDespesa.setText("0%");
-        }
-
+        arcView.addEvent(new DecoEvent.Builder((int)lista.get(position).porcentagem).setIndex(series1Index).setDelay(250).build());
+        
         return view;
     }
 }

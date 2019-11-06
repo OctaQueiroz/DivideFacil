@@ -231,9 +231,11 @@ public class FragmentEstatisticasDoUsuario extends Fragment {
         seriesItem0.addArcSeriesItemListener(new SeriesItem.SeriesItemListener() {
             @Override
             public void onSeriesItemAnimationProgress(float percentComplete, float currentPosition) {
-                    //float percentFilled = ((currentPosition - seriesItem0.getMinValue()) / (seriesItem0.getMaxValue() - seriesItem0.getMinValue()));
-                if(currentPosition>0){
-                    textPercentage.setText("R$"+df.format(percentComplete * valorTotalGastoPessoal));
+                float numeroMostrado = (float) (percentComplete * valorTotalGastoPessoal);
+                if(currentPosition>0 && numeroMostrado <= valorTotalGastoPessoal){
+                    textPercentage.setText("R$"+df.format(numeroMostrado));
+                }else if(currentPosition>0){
+                    textPercentage.setText("R$"+df.format(valorTotalGastoPessoal));
                 }
             }
 
@@ -243,7 +245,7 @@ public class FragmentEstatisticasDoUsuario extends Fragment {
             }
         });
         series0Index = arcView.addSeries(seriesItem0);
-        arcView.addEvent(new DecoEvent.Builder((int)(100)).setIndex(series0Index).setDelay(1000).build());
+        arcView.addEvent(new DecoEvent.Builder((int)(100)).setIndex(series0Index).setDelay(250).build());
 
         if(listaDadosDespesaParaGraficos.size()>0){
             arcView.addSeries(new SeriesItem.Builder(Color.argb(255, 245, 245, 245))
@@ -262,7 +264,7 @@ public class FragmentEstatisticasDoUsuario extends Fragment {
                     .setChartStyle(SeriesItem.ChartStyle.STYLE_DONUT)
                     .build();
             series1Index = arcView.addSeries(seriesItem1);
-            arcView.addEvent(new DecoEvent.Builder((int)(listaDadosDespesaParaGraficos.get(0).porcentagem)).setIndex(series1Index).setDelay(1000).build());
+            arcView.addEvent(new DecoEvent.Builder((int)(listaDadosDespesaParaGraficos.get(0).porcentagem)).setIndex(series1Index).setDelay(250).build());
             if(listaDadosDespesaParaGraficos.size()>1){
                 arcView.addSeries(new SeriesItem.Builder(Color.argb(255, 245, 245, 245))
                         .setRange(0, 100, 100)
@@ -282,7 +284,7 @@ public class FragmentEstatisticasDoUsuario extends Fragment {
                         .setChartStyle(SeriesItem.ChartStyle.STYLE_DONUT)
                         .build();
                 series2Index = arcView.addSeries(seriesItem2);
-                arcView.addEvent(new DecoEvent.Builder((int)(listaDadosDespesaParaGraficos.get(1).porcentagem)).setIndex(series2Index).setDelay(1000).build());
+                arcView.addEvent(new DecoEvent.Builder((int)(listaDadosDespesaParaGraficos.get(1).porcentagem)).setIndex(series2Index).setDelay(250).build());
                 if(listaDadosDespesaParaGraficos.size()>2){
                     arcView.addSeries(new SeriesItem.Builder(Color.argb(255, 245, 245, 245))
                             .setRange(0, 100, 100)
@@ -302,7 +304,7 @@ public class FragmentEstatisticasDoUsuario extends Fragment {
                             .setChartStyle(SeriesItem.ChartStyle.STYLE_DONUT)
                             .build();
                     series3Index = arcView.addSeries(seriesItem3);
-                    arcView.addEvent(new DecoEvent.Builder((int)(listaDadosDespesaParaGraficos.get(2).porcentagem)).setIndex(series3Index).setDelay(1000).build());
+                    arcView.addEvent(new DecoEvent.Builder((int)(listaDadosDespesaParaGraficos.get(2).porcentagem)).setIndex(series3Index).setDelay(250).build());
                     if(listaDadosDespesaParaGraficos.size()>3){
                         arcView.addSeries(new SeriesItem.Builder(Color.argb(255, 245, 245, 245))
                                 .setRange(0, 100, 100)
@@ -322,7 +324,7 @@ public class FragmentEstatisticasDoUsuario extends Fragment {
                                 .setChartStyle(SeriesItem.ChartStyle.STYLE_DONUT)
                                 .build();
                         series4Index = arcView.addSeries(seriesItem4);
-                        arcView.addEvent(new DecoEvent.Builder((int)(listaDadosDespesaParaGraficos.get(3).porcentagem)).setIndex(series4Index).setDelay(1000).build());
+                        arcView.addEvent(new DecoEvent.Builder((int)(listaDadosDespesaParaGraficos.get(3).porcentagem)).setIndex(series4Index).setDelay(250).build());
                         if(listaDadosDespesaParaGraficos.size()>4){
                             arcView.addSeries(new SeriesItem.Builder(Color.argb(255, 245, 245, 245))
                                     .setRange(0, 100, 100)
@@ -342,7 +344,7 @@ public class FragmentEstatisticasDoUsuario extends Fragment {
                                     .setChartStyle(SeriesItem.ChartStyle.STYLE_DONUT)
                                     .build();
                             series5Index = arcView.addSeries(seriesItem5);
-                            arcView.addEvent(new DecoEvent.Builder((int)(listaDadosDespesaParaGraficos.get(4).porcentagem)).setIndex(series5Index).setDelay(1000).build());
+                            arcView.addEvent(new DecoEvent.Builder((int)(listaDadosDespesaParaGraficos.get(4).porcentagem)).setIndex(series5Index).setDelay(250).build());
                             if(listaDadosDespesaParaGraficos.size()>5){
                                 arcView.addSeries(new SeriesItem.Builder(Color.argb(255, 245, 245, 245))
                                         .setRange(0, 100, 100)
@@ -362,17 +364,13 @@ public class FragmentEstatisticasDoUsuario extends Fragment {
                                         .setChartStyle(SeriesItem.ChartStyle.STYLE_DONUT)
                                         .build();
                                 series6Index = arcView.addSeries(seriesItem6);
-                                arcView.addEvent(new DecoEvent.Builder((int)(listaDadosDespesaParaGraficos.get(5).porcentagem)).setIndex(series6Index).setDelay(1000).build());
+                                arcView.addEvent(new DecoEvent.Builder((int)(listaDadosDespesaParaGraficos.get(5).porcentagem)).setIndex(series6Index).setDelay(250).build());
                             }
                         }
                     }
                 }
             }
         }
-
-        arcView.addEvent(new DecoEvent.Builder(DecoEvent.EventType.EVENT_SHOW, true)
-                .setDuration(2000)
-                .build());
 
         //.setText("R$"+df.format(valorTotalGastoPessoal));
 

@@ -82,7 +82,7 @@ public class AdapterParaListaDePessoa extends BaseAdapter {
                 .setShowPointWhenEmpty(false)
                 .setDrawAsPoint(false)
                 .setSpinClockwise(true)
-                .setSpinDuration(6000)
+                .setSpinDuration(4000)
                 .setChartStyle(SeriesItem.ChartStyle.STYLE_DONUT)
                 .build();
 
@@ -91,8 +91,11 @@ public class AdapterParaListaDePessoa extends BaseAdapter {
         seriesItem1.addArcSeriesItemListener(new SeriesItem.SeriesItemListener() {
             @Override
             public void onSeriesItemAnimationProgress(float percentComplete, float currentPosition) {
-                if(currentPosition>0){
-                    porcentagemDespesa.setText(df.format(percentComplete * porcentagem)+"%");
+                float numeroMostrado = percentComplete * porcentagem;
+                if(currentPosition>0 && numeroMostrado<=porcentagem){
+                    porcentagemDespesa.setText(df.format(numeroMostrado)+"%");
+                }else if(currentPosition>0){
+                    porcentagemDespesa.setText(df.format(porcentagem)+"%");
                 }
             }
 
@@ -104,7 +107,7 @@ public class AdapterParaListaDePessoa extends BaseAdapter {
 
         int series1Index = arcView.addSeries(seriesItem1);
 
-        arcView.addEvent(new DecoEvent.Builder((int)porcentagem).setIndex(series1Index).setDelay(1000).build());
+        arcView.addEvent(new DecoEvent.Builder((int)porcentagem).setIndex(series1Index).setDelay(250).build());
 
         return view;
 
