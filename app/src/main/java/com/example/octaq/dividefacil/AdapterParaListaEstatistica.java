@@ -43,9 +43,8 @@ public class AdapterParaListaEstatistica extends BaseAdapter {
     public View getView(int position, View view, ViewGroup parent) {
         LayoutInflater mInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
-        // cria uma view com o layout  do seu item
+        // Cria uma view com o layout  do seu item
         view = mInflater.inflate(R.layout.layout_lista_estatisticas, null);
-
 
         TextView nomeDespesa = view.findViewById(R.id.tv_nome_despesa_grafico);
         TextView valorDespesa = view.findViewById(R.id.tv_valor_despesa_grafico);

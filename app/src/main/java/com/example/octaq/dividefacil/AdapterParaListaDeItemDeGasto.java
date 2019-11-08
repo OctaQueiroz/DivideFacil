@@ -39,7 +39,7 @@ public class AdapterParaListaDeItemDeGasto extends BaseAdapter {
     public View getView(int position, View view, ViewGroup parent) {
         LayoutInflater mInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
-        // cria uma view com o layout  do seu item
+        // Cria uma view com o layout  do seu item
         view = mInflater.inflate(R.layout.layout_lista_item_de_gasto, null);
 
         // Atribuição normal dos campos de uma view
@@ -54,9 +54,6 @@ public class AdapterParaListaDeItemDeGasto extends BaseAdapter {
         }else{
             campo2.setText("Valor: R$00,00");
         }
-
-
         return view;
-
     }
 }

@@ -5,16 +5,17 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 import androidx.core.content.res.ResourcesCompat;
-
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Color;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.text.InputType;
 import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.Window;
 import android.widget.AdapterView;
@@ -24,12 +25,10 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.ValueEventListener;
 import com.google.gson.Gson;
-
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
@@ -64,12 +63,13 @@ public class TelaDespesa extends AppCompatActivity {
 
     //Controlando o banco de dados
     ArrayList <Pessoa> dados;
-    //ArrayList <Pessoa> dadosSemAlteracao;
     Gson gson;
     TransicaoDeDadosEntreActivities objTr;
     List<UsuarioAutenticadoDoFirebase> usuariosCadastrados;
     List<Pessoa> integrantesSemCntaFechada;
-    private ProgressDialog dialog;
+    ValueEventListener listenerDosIntegrantes;
+    ValueEventListener listenerDasDespesas;
+    ValueEventListener listenerDosUsuarios;
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -86,8 +86,6 @@ public class TelaDespesa extends AppCompatActivity {
         extra = it.getStringExtra(EXTRA_UID);
         objTr = gson.fromJson(extra, TransicaoDeDadosEntreActivities.class);
 
-        //dialog = ProgressDialog.show(TelaDespesaBarERestaurante.this, "", "Carregando os dados dos integrantes do Rolê...", true);
-
         //Inicializando variáveis
         btnAdicionaPessoa = findViewById(R.id.btn_NovaPessoa);
         btnAdicionaAlimento = findViewById(R.id.btn_CadastroAlimento);
@@ -98,12 +96,10 @@ public class TelaDespesa extends AppCompatActivity {
         integrantesSemCntaFechada = new ArrayList<>();
         adiciona = clique = nomeValor = selecao = false;
 
-        dialog = ProgressDialog.show(TelaDespesa.this, "","Carregando os dados da despesa...", true);
-
         btnAdicionaPessoa.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                dialogoCadastroPessoa();
+                dialogoPreCadastroDepessoa();
             }
         });
 
@@ -120,34 +116,56 @@ public class TelaDespesa extends AppCompatActivity {
         lv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                //Chama a tela de pessoa, passando o id do usuário selecionado e
-                if(isOnline(TelaDespesa.this)){
-                    try{
-                        objTr.pessoa = dados.get(position);
-                        String extra = gson.toJson(objTr);
-                        Intent it = new Intent(TelaDespesa.this, TelaPessoa.class);
-                        it.putExtra(EXTRA_UID, extra);
-                        startActivity(it);
-                    }catch (Exception e){
-                        //lidar com erro de conexao
-                    }
-                }else{
-                    //lidar  com erro de conexão
+            //Chama a tela de pessoa, passando o id do usuário selecionado e
+            if(isOnline(TelaDespesa.this)){
+                try{
+                    objTr.pessoa = dados.get(position);
+                    String extra = gson.toJson(objTr);
+                    Intent it = new Intent(TelaDespesa.this, TelaPessoa.class);
+                    it.putExtra(EXTRA_UID, extra);
+                    startActivity(it);
+                }catch (Exception e){
+                    //lidar com erro de conexao
                 }
+            }else{
+                //lidar  com erro de conexão
+            }
             }
         });
-    }
 
-    @Override
-    protected void onStart() {
-        super.onStart();
-
-        //Carregando a list view sempre com os dados  de pessoa do banco
-        referencia.child(objTr.userUid).child(objTr.despesa.idDadosDespesa).child("Integrantes").addValueEventListener(new ValueEventListener() {
+        listenerDasDespesas = new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                Despesa despesaTemporaria = dataSnapshot.getValue(Despesa.class);
 
-                dialog.show();
+                if(despesaTemporaria.valorRoleAberto > 0.0){
+                    valorFinalConta.setText("R$"+df.format(objTr.despesa.valorRoleAberto));
+                }else{
+                    valorFinalConta.setText("R$00,00");
+                }
+                if(despesaTemporaria.fechou!= objTr.despesa.fechou){
+                    objTr.despesa = despesaTemporaria;
+                    Toast toast = Toast.makeText(TelaDespesa.this, "Despesa finalizada por outro integrante!", Toast.LENGTH_SHORT);
+                    toast.setGravity(Gravity.CENTER_HORIZONTAL | Gravity.BOTTOM, 0, 0);
+                    toast.show();
+
+                    Intent it  = new Intent(TelaDespesa.this, TelaPrincipal.class);
+                    startActivity(it);
+                    finish();
+                }else{
+                    objTr.despesa = despesaTemporaria;
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        };
+
+        listenerDosIntegrantes = new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
 
                 dados = new ArrayList<>();
 
@@ -155,7 +173,7 @@ public class TelaDespesa extends AppCompatActivity {
                     try{
                         for(DataSnapshot dadosDataSnapshot: dataSnapshot.getChildren()){
                             Pessoa pessoaCadastrada = dadosDataSnapshot.getValue(Pessoa.class);
-                                dados.add(pessoaCadastrada);
+                            dados.add(pessoaCadastrada);
                         }
                     }catch (Exception  e){
                         //Lidar com problemas de conexão
@@ -176,34 +194,15 @@ public class TelaDespesa extends AppCompatActivity {
 
                 lv.setAdapter(adapterPessoa);
 
-                dialog.dismiss();
             }
 
             @Override
             public void onCancelled(@NonNull DatabaseError databaseError) {
 
             }
-        });
+        };
 
-        referencia.child(objTr.userUid).child(objTr.despesa.idDadosDespesa).child("Despesa").addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                objTr.despesa = dataSnapshot.getValue(Despesa.class);
-
-                if(objTr.despesa.valorRoleAberto > 0.0){
-                    valorFinalConta.setText("R$"+df.format(objTr.despesa.valorRoleAberto));
-                }else{
-                    valorFinalConta.setText("R$00,00");
-                }
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-
-            }
-        });
-
-        referencia.child("AAAAAUSERS").addValueEventListener(new ValueEventListener() {
+        listenerDosUsuarios = new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 usuariosCadastrados = new ArrayList<>();
@@ -222,14 +221,13 @@ public class TelaDespesa extends AppCompatActivity {
                 }else{
                     //Lidar com erro de conexao
                 }
-
             }
 
             @Override
             public void onCancelled(@NonNull DatabaseError databaseError) {
 
             }
-        });
+        };
 
         btnFecharConta.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -239,8 +237,95 @@ public class TelaDespesa extends AppCompatActivity {
         });
     }
 
-    private void dialogoCadastroPessoa() {
+    @Override
+    protected void onResume() {
+        super.onResume();
+        referencia.child(objTr.userUid).child(objTr.despesa.idDadosDespesa).child("Integrantes").addValueEventListener(listenerDosIntegrantes);
+        referencia.child(objTr.userUid).child(objTr.despesa.idDadosDespesa).child("Despesa").addValueEventListener(listenerDasDespesas);
+        referencia.child("AAAAAUSERS").addValueEventListener(listenerDosUsuarios);
+    }
 
+    @Override
+    protected void onPause() {
+        super.onPause();
+        referencia.child(objTr.userUid).child(objTr.despesa.idDadosDespesa).child("Integrantes").removeEventListener(listenerDosIntegrantes);
+        referencia.child(objTr.userUid).child(objTr.despesa.idDadosDespesa).child("Despesa").removeEventListener(listenerDasDespesas);
+        referencia.child("AAAAAUSERS").removeEventListener(listenerDosUsuarios);
+    }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        finish();
+    }
+
+    private void dialogoPreCadastroDepessoa(){
+        LinearLayout layout = new LinearLayout(TelaDespesa.this);
+        layout.setOrientation(LinearLayout.VERTICAL);
+        layout.setPadding(80,40,80,10);
+
+        LinearLayout layoutButtonShareIt = new LinearLayout(TelaDespesa.this);
+        layoutButtonShareIt.setOrientation(LinearLayout.VERTICAL);
+        layoutButtonShareIt.setPadding(0,0,0,20);
+
+        LinearLayout layoutButtonPadrao = new LinearLayout(TelaDespesa.this);
+        layoutButtonPadrao.setOrientation(LinearLayout.VERTICAL);
+
+        Button usuarioShareIt = new Button(TelaDespesa.this);
+        Button usuarioPadrao = new Button(TelaDespesa.this);
+
+        usuarioShareIt.setBackgroundResource(R.drawable.button_shape_round_border_green);
+        usuarioShareIt.setTextColor(Color.WHITE);
+        usuarioShareIt.setTypeface(ResourcesCompat.getFont(this, R.font.cabin));
+        usuarioShareIt.setText("Usuário ShareIt");
+
+        usuarioPadrao.setBackgroundResource(R.drawable.button_shape_round_border_green);
+        usuarioPadrao.setTextColor(Color.WHITE);
+        usuarioPadrao.setTypeface(ResourcesCompat.getFont(this, R.font.cabin));
+        usuarioPadrao.setText("Usuário padrão");
+
+        layoutButtonShareIt.addView(usuarioShareIt);
+        layoutButtonPadrao.addView(usuarioPadrao);
+        layout.addView(layoutButtonShareIt);
+        layout.addView(layoutButtonPadrao);
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AlertDialogCustom);
+
+        //Define o título do diálogo
+        builder.setTitle("Quem será o novo integrante?");
+        builder.setIcon(R.drawable.ic_simbolo_verde1);
+
+        //Coloca a view criada no diálogo
+        builder.setView(layout);
+
+        usuarioShareIt.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                alerta.dismiss();
+                dialogoCadastroPessoaEmail();
+            }
+        });
+
+        usuarioPadrao.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                alerta.dismiss();
+                dialogoCadastroPessoaNome();
+            }
+        });
+
+
+        builder.setNegativeButton("Cancelar", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+            }
+        });
+
+        alerta = builder.create();
+        alerta.show();
+    }
+
+    public void dialogoCadastroPessoaNome(){
         LinearLayout layout = new LinearLayout(TelaDespesa.this);
 
         layout.setOrientation(LinearLayout.VERTICAL);
@@ -280,44 +365,10 @@ public class TelaDespesa extends AppCompatActivity {
                         try {
                             Pessoa novoParticipante = new Pessoa();
                             novoParticipante.nome = nomePessoa.getText().toString();
-                            if(novoParticipante.nome.contains("@")){
-                                String uidIntegrantenovo = "";
-                                boolean achouUsuárioCadastrado = false;
-                                for(int i = 0; i < usuariosCadastrados.size(); i++){
-                                    if(novoParticipante.nome.equals(usuariosCadastrados.get(i).email)){
-                                        uidIntegrantenovo = usuariosCadastrados.get(i).uid;
-                                        IntegrantesUsuariosDoFirebase  novoIntegrante = new IntegrantesUsuariosDoFirebase(usuariosCadastrados.get(i).uid);
-                                        objTr.despesa.uidIntegrantes.add(novoIntegrante);
-                                        novoParticipante.nome = usuariosCadastrados.get(i).nome.substring(0,1).toUpperCase() + usuariosCadastrados.get(i).nome.substring(1);
-                                        novoParticipante.id = usuariosCadastrados.get(i).uid;
-                                        achouUsuárioCadastrado = true;
-                                        break;
-                                    }
-                                }
-                                if(!achouUsuárioCadastrado){
-                                    novoParticipante.nome = novoParticipante.nome.split("@")[0];
-                                    novoParticipante.nome = novoParticipante.nome.substring(0,1).toUpperCase() + novoParticipante.nome.substring(1);
-                                    novoParticipante.id = referencia.child(objTr.userUid).child(objTr.despesa.idDadosDespesa).child("Integrantes").push().getKey();
-                                    for(int i = 0; i < objTr.despesa.uidIntegrantes.size(); i++){
-                                        referencia.child(objTr.despesa.uidIntegrantes.get(i).uid).child(objTr.despesa.idDadosDespesa).child("Integrantes").child(novoParticipante.id).setValue(novoParticipante);
-                                    }
-                                }else{
-                                    for(int i = 0; i < objTr.despesa.uidIntegrantes.size(); i++){
-                                        referencia.child(objTr.despesa.uidIntegrantes.get(i).uid).child(objTr.despesa.idDadosDespesa).child("Despesa").setValue(objTr.despesa);
-                                    }
-                                    for(int i = 0; i < dados.size(); i++){
-                                        referencia.child(uidIntegrantenovo).child(objTr.despesa.idDadosDespesa).child("Integrantes").child(dados.get(i).id).setValue(dados.get(i));
-                                    }
-                                    for(int i = 0; i < objTr.despesa.uidIntegrantes.size(); i++){
-                                        referencia.child(objTr.despesa.uidIntegrantes.get(i).uid).child(objTr.despesa.idDadosDespesa).child("Integrantes").child(uidIntegrantenovo).setValue(novoParticipante);
-                                    }
-                                }
-                            }else{
-                                novoParticipante.nome = novoParticipante.nome.substring(0,1).toUpperCase() + novoParticipante.nome.substring(1);
-                                novoParticipante.id = referencia.child(objTr.userUid).child(objTr.despesa.idDadosDespesa).child("Integrantes").push().getKey();
-                                for(int i = 0; i < objTr.despesa.uidIntegrantes.size(); i++){
-                                    referencia.child(objTr.despesa.uidIntegrantes.get(i).uid).child(objTr.despesa.idDadosDespesa).child("Integrantes").child(novoParticipante.id).setValue(novoParticipante);
-                                }
+                            novoParticipante.nome = novoParticipante.nome.substring(0,1).toUpperCase() + novoParticipante.nome.substring(1);
+                            novoParticipante.id = referencia.child(objTr.userUid).child(objTr.despesa.idDadosDespesa).child("Integrantes").push().getKey();
+                            for(int i = 0; i < objTr.despesa.uidIntegrantes.size(); i++){
+                                referencia.child(objTr.despesa.uidIntegrantes.get(i).uid).child(objTr.despesa.idDadosDespesa).child("Integrantes").child(novoParticipante.id).setValue(novoParticipante);
                             }
                         } catch (Exception e) {
                             //Lidar com erro de conexão
@@ -326,6 +377,102 @@ public class TelaDespesa extends AppCompatActivity {
                         //Lidar com problemas de conexão
                     }
                 }
+            }
+
+        });
+
+        builder.setNegativeButton("Cancelar", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+            }
+        });
+
+        alerta = builder.create();
+        alerta.show();
+    }
+
+    public void dialogoCadastroPessoaEmail() {
+
+        LinearLayout layout = new LinearLayout(TelaDespesa.this);
+
+        layout.setOrientation(LinearLayout.VERTICAL);
+        layout.setPadding(60,30,60,0);
+
+        //Inicializa o Edit text que será  chamado no diálogo
+        nomePessoa = new EditText(TelaDespesa.this);
+
+        //Seta o tipo de entrada aceitada pelo Edit Text
+        nomePessoa.setInputType(InputType.TYPE_CLASS_TEXT);
+        //Seta as dicas de cada Edit text criado
+        nomePessoa.setHint("Insira o email do novo integrante");
+
+        nomePessoa.setTypeface(ResourcesCompat.getFont(this, R.font.cabin));
+
+        //Adiciona os Edit Texts na nova view
+        layout.addView(nomePessoa);
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AlertDialogCustom);
+
+        //Define o título do diálogo
+        builder.setTitle("Novo integrante ShareIt");
+        builder.setIcon(R.drawable.ic_add_person);
+
+        //Coloca a view criada no diálogo
+        builder.setView(layout);
+
+        builder.setPositiveButton("Confirmar", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface arg0, int arg1) {
+            if(nomePessoa.getText().toString().equals("")){
+                Toast toast = Toast.makeText(TelaDespesa.this, "O nome do integrante não pode ser nulo!", Toast.LENGTH_SHORT);
+                toast.setGravity(Gravity.CENTER_HORIZONTAL | Gravity.CENTER_VERTICAL, 0, 0);
+                toast.show();
+            }else {
+                //Adicionando novo cadastro ao banco da despesa
+                if(isOnline(TelaDespesa.this)) {
+                    try {
+                        Pessoa novoParticipante = new Pessoa();
+                        novoParticipante.nome = nomePessoa.getText().toString();
+                        if(novoParticipante.nome.contains("@")){
+                            String uidIntegrantenovo = "";
+                            boolean achouUsuárioCadastrado = false;
+                            for(int i = 0; i < usuariosCadastrados.size(); i++){
+                                if(novoParticipante.nome.equals(usuariosCadastrados.get(i).email)){
+                                    uidIntegrantenovo = usuariosCadastrados.get(i).uid;
+                                    IntegrantesUsuariosDoFirebase  novoIntegrante = new IntegrantesUsuariosDoFirebase(usuariosCadastrados.get(i).uid);
+                                    objTr.despesa.uidIntegrantes.add(novoIntegrante);
+                                    novoParticipante.nome = usuariosCadastrados.get(i).nome.substring(0,1).toUpperCase() + usuariosCadastrados.get(i).nome.substring(1);
+                                    novoParticipante.id = usuariosCadastrados.get(i).uid;
+                                    achouUsuárioCadastrado = true;
+                                    break;
+                                }
+                            }
+                            if(!achouUsuárioCadastrado){
+                                Toast toast = Toast.makeText(TelaDespesa.this, "Não foi encontrado nenhum usuário com o endereço de e-mail informado!", Toast.LENGTH_SHORT);
+                                toast.setGravity(Gravity.CENTER_HORIZONTAL | Gravity.CENTER_VERTICAL, 0, 0);
+                                toast.show();
+                            }else{
+                                for(int i = 0; i < objTr.despesa.uidIntegrantes.size(); i++){
+                                    referencia.child(objTr.despesa.uidIntegrantes.get(i).uid).child(objTr.despesa.idDadosDespesa).child("Despesa").setValue(objTr.despesa);
+                                }
+                                for(int i = 0; i < dados.size(); i++){
+                                    referencia.child(uidIntegrantenovo).child(objTr.despesa.idDadosDespesa).child("Integrantes").child(dados.get(i).id).setValue(dados.get(i));
+                                }
+                                for(int i = 0; i < objTr.despesa.uidIntegrantes.size(); i++){
+                                    referencia.child(objTr.despesa.uidIntegrantes.get(i).uid).child(objTr.despesa.idDadosDespesa).child("Integrantes").child(uidIntegrantenovo).setValue(novoParticipante);
+                                }
+                            }
+                        }else{
+                            Toast toast = Toast.makeText(TelaDespesa.this, "Insira um endereço de e-mail válido!", Toast.LENGTH_SHORT);
+                            toast.setGravity(Gravity.CENTER_HORIZONTAL | Gravity.CENTER_VERTICAL, 0, 0);
+                            toast.show();
+                        }
+                    } catch (Exception e) {
+                        //Lidar com erro de conexão
+                    }
+                }else{
+                    //Lidar com problemas de conexão
+                }
+            }
             }
 
         });
@@ -352,7 +499,6 @@ public class TelaDespesa extends AppCompatActivity {
         nomes = nomeParticipantes;
         //Vetor boolean para identificar quem foi e quem não foi selecionado
         checados = new boolean[nomes.length];
-
         //Configura as checkboxes
         builder.setMultiChoiceItems(nomes, checados, new DialogInterface.OnMultiChoiceClickListener() {
             public void onClick(DialogInterface arg0, int arg1, boolean arg2) {
@@ -389,7 +535,6 @@ public class TelaDespesa extends AppCompatActivity {
 
         alerta = builder.create();
         alerta.show();
-
     }
 
     private void dialogoNovoItemDeGasto() {
@@ -433,66 +578,65 @@ public class TelaDespesa extends AppCompatActivity {
         builder.setPositiveButton("Adicionar novo item", new DialogInterface.OnClickListener() {
 
             public void onClick(DialogInterface arg0, int arg1) {
-                if (isOnline(TelaDespesa.this)){
-                    try {
-                        int dividirParaPessoas = 0;
-                        ItemDeGasto novoItemDeGasto = new ItemDeGasto();
-                        for (int i = 0; i < checados.length; i++) {
-                            if (checados[i]) {
-                                ConsumidorItemDeGasto novoConsumidor = new ConsumidorItemDeGasto(dados.get(i).nome, dados.get(i).id);
-                                novoItemDeGasto.usuariosQueConsomemEsseitem.add(novoConsumidor);
-                                dividirParaPessoas++;
-                            }
+            if (isOnline(TelaDespesa.this)){
+                try {
+                    int dividirParaPessoas = 0;
+                    ItemDeGasto novoItemDeGasto = new ItemDeGasto();
+                    for (int i = 0; i < checados.length; i++) {
+                        if (checados[i]) {
+                            ConsumidorItemDeGasto novoConsumidor = new ConsumidorItemDeGasto(dados.get(i).nome, dados.get(i).id);
+                            novoItemDeGasto.usuariosQueConsomemEsseitem.add(novoConsumidor);
+                            dividirParaPessoas++;
                         }
-                        String[] verificadorDigito = valorItem.getText().toString().split(",");
-                        if (verificadorDigito.length == 2) {
-                            valorItem.setText(verificadorDigito[0] + "." + verificadorDigito[1]);
-                        }
-                        if (!valorItem.getText().toString().equals("")) {
-                            if (!nomeItem.getText().toString().equals("")) {
-                                Double valorPorPessoa = Double.valueOf(valorItem.getText().toString()) / dividirParaPessoas;
-                                novoItemDeGasto.id = referencia.child(objTr.userUid).child(objTr.despesa.idDadosDespesa).child("Integrantes").push().getKey();
-                                novoItemDeGasto.nome = nomeItem.getText().toString().substring(0,1).toUpperCase() + nomeItem.getText().toString().substring(1);
-                                novoItemDeGasto.valor = valorPorPessoa;
-                                objTr.despesa.valorRoleAberto += valorPorPessoa * dividirParaPessoas;
-                                for (int i = 0; i < checados.length; i++) {
-                                    if (checados[i]) {
-                                        for (int j = 0; j < dados.size(); j++) {
-                                            if (nomes[i].equals(dados.get(i).nome)) {
-                                                for(int k = 0; k < objTr.despesa.uidIntegrantes.size(); k++){
-                                                    if(dados.get(i).id.equals(objTr.despesa.uidIntegrantes.get(k).uid)){
-                                                        objTr.despesa.uidIntegrantes.get(k).gasto += valorPorPessoa;
-                                                        break;
-                                                    }
+                    }
+                    String[] verificadorDigito = valorItem.getText().toString().split(",");
+                    if (verificadorDigito.length == 2) {
+                        valorItem.setText(verificadorDigito[0] + "." + verificadorDigito[1]);
+                    }
+                    if (!valorItem.getText().toString().equals("")) {
+                        if (!nomeItem.getText().toString().equals("")) {
+                            Double valorPorPessoa = Double.valueOf(valorItem.getText().toString()) / dividirParaPessoas;
+                            novoItemDeGasto.id = referencia.child(objTr.userUid).child(objTr.despesa.idDadosDespesa).child("Integrantes").push().getKey();
+                            novoItemDeGasto.nome = nomeItem.getText().toString().substring(0,1).toUpperCase() + nomeItem.getText().toString().substring(1);
+                            novoItemDeGasto.valor = valorPorPessoa;
+                            objTr.despesa.valorRoleAberto += valorPorPessoa * dividirParaPessoas;
+                            for (int i = 0; i < checados.length; i++) {
+                                if (checados[i]) {
+                                    for (int j = 0; j < dados.size(); j++) {
+                                        if (nomes[i].equals(dados.get(i).nome)) {
+                                            for(int k = 0; k < objTr.despesa.uidIntegrantes.size(); k++){
+                                                if(dados.get(i).id.equals(objTr.despesa.uidIntegrantes.get(k).uid)){
+                                                    objTr.despesa.uidIntegrantes.get(k).gasto += valorPorPessoa;
+                                                    break;
                                                 }
-                                                dados.get(i).valorTotal += valorPorPessoa;
-                                                dados.get(i).historicoItemDeGastos.add(novoItemDeGasto);
-                                                for(int k = 0; k < objTr.despesa.uidIntegrantes.size(); k++){
-                                                    referencia.child(objTr.despesa.uidIntegrantes.get(k).uid).child(objTr.despesa.idDadosDespesa).child("Despesa").setValue(objTr.despesa);
-                                                    referencia.child(objTr.despesa.uidIntegrantes.get(k).uid).child(objTr.despesa.idDadosDespesa).child("Integrantes").child(dados.get(i).id).setValue(dados.get(i));
-                                                }
-                                                //referencia.child(objTr.userUid).child(objTr.despesa.idDadosDespesa).child(objTr.despesa.idDadosPessoas).child(dados.get(i).id).setValue(dados.get(i));
-                                                nomes[i] = "";//Impede que uma mesma pessoa  seja contada mais de uma vez
                                             }
+                                            dados.get(i).valorTotal += valorPorPessoa;
+                                            dados.get(i).historicoItemDeGastos.add(novoItemDeGasto);
+                                            for(int k = 0; k < objTr.despesa.uidIntegrantes.size(); k++){
+                                                referencia.child(objTr.despesa.uidIntegrantes.get(k).uid).child(objTr.despesa.idDadosDespesa).child("Despesa").setValue(objTr.despesa);
+                                                referencia.child(objTr.despesa.uidIntegrantes.get(k).uid).child(objTr.despesa.idDadosDespesa).child("Integrantes").child(dados.get(i).id).setValue(dados.get(i));
+                                            }
+                                            nomes[i] = "";//Impede que uma mesma pessoa  seja contada mais de uma vez
                                         }
                                     }
                                 }
-                            } else {
-                                Toast toast = Toast.makeText(TelaDespesa.this, "Insira um nome não nulo para o item", Toast.LENGTH_SHORT);
-                                toast.setGravity(Gravity.CENTER_HORIZONTAL | Gravity.CENTER_VERTICAL, 0, 0);
-                                toast.show();
                             }
                         } else {
-                            Toast toast = Toast.makeText(TelaDespesa.this, "Insira um valor não nulo para o item", Toast.LENGTH_SHORT);
+                            Toast toast = Toast.makeText(TelaDespesa.this, "Insira um nome não nulo para o item", Toast.LENGTH_SHORT);
                             toast.setGravity(Gravity.CENTER_HORIZONTAL | Gravity.CENTER_VERTICAL, 0, 0);
                             toast.show();
                         }
-                    }catch (Exception e){
-                        //Lidar com erro de conexão
+                    } else {
+                        Toast toast = Toast.makeText(TelaDespesa.this, "Insira um valor não nulo para o item", Toast.LENGTH_SHORT);
+                        toast.setGravity(Gravity.CENTER_HORIZONTAL | Gravity.CENTER_VERTICAL, 0, 0);
+                        toast.show();
                     }
-                }else{
-                    //Lidar com problemas de conexão
+                }catch (Exception e){
+                    //Lidar com erro de conexão
                 }
+            }else{
+                //Lidar com problemas de conexão
+            }
             }
         });
         builder.setNegativeButton("Cancelar", new DialogInterface.OnClickListener() {
@@ -505,6 +649,7 @@ public class TelaDespesa extends AppCompatActivity {
         alerta = builder.create();
         alerta.show();
     }
+
     private void dialogoFinalizaConta() {
 
         Context context = TelaDespesa.this;
@@ -528,27 +673,25 @@ public class TelaDespesa extends AppCompatActivity {
 
         builder.setPositiveButton("Confirmar Finalização", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface arg0, int arg1) {
-                if(isOnline(TelaDespesa.this)) {
-                    try{
-                        //Apaga todos os dados da tabela
-                        objTr.despesa.fechou = true;
-                        for(int i = 0; i < objTr.despesa.uidIntegrantes.size(); i++){
-                            referencia.child(objTr.despesa.uidIntegrantes.get(i).uid).child(objTr.despesa.idDadosDespesa).child("Despesa").setValue(objTr.despesa);
-                        }
-                        //referencia.child(objTr.userUid).child(objTr.despesa.idDadosDespesa).child(objTr.despesa.idDadosDespesa).setValue(objTr.despesa);
-                        Toast toast = Toast.makeText(TelaDespesa.this, "Conta finalizada com sucesso!", Toast.LENGTH_SHORT);
-                        toast.setGravity(Gravity.CENTER_HORIZONTAL | Gravity.CENTER_VERTICAL, 0, 0);
-                        toast.show();
-
-                        Intent it  = new Intent(TelaDespesa.this, TelaPrincipal.class);
-                        startActivity(it);
-                        finish();
-                    }catch(Exception e){
-                        //Lidar com erro de conexão
+            if(isOnline(TelaDespesa.this)) {
+                try{
+                    objTr.despesa.fechou = true;
+                    for(int i = 0; i < objTr.despesa.uidIntegrantes.size(); i++){
+                        referencia.child(objTr.despesa.uidIntegrantes.get(i).uid).child(objTr.despesa.idDadosDespesa).child("Despesa").setValue(objTr.despesa);
                     }
-                }else{
-                    //Lidar com problemas de conexão
+                    Toast toast = Toast.makeText(TelaDespesa.this, "Despesa finalizada com sucesso!", Toast.LENGTH_SHORT);
+                    toast.setGravity(Gravity.CENTER_HORIZONTAL | Gravity.BOTTOM, 0, 0);
+                    toast.show();
+
+                    Intent it  = new Intent(TelaDespesa.this, TelaPrincipal.class);
+                    startActivity(it);
+                    finish();
+                }catch(Exception e){
+                    //Lidar com erro de conexão
                 }
+            }else{
+                //Lidar com problemas de conexão
+            }
             }
         });
 
@@ -560,12 +703,6 @@ public class TelaDespesa extends AppCompatActivity {
 
         alerta = builder.create();
         alerta.show();
-    }
-
-    @Override
-    public void onBackPressed() {
-        super.onBackPressed();
-        finish();
     }
 
     public static boolean isOnline(Context context) {

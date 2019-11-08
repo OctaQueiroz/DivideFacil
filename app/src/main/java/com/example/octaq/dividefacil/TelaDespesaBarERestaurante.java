@@ -8,6 +8,8 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 import androidx.core.content.res.ResourcesCompat;
+
+import android.graphics.Color;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
@@ -26,7 +28,6 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.ValueEventListener;
 import com.google.gson.Gson;
-
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
@@ -67,6 +68,9 @@ public class TelaDespesaBarERestaurante extends AppCompatActivity {
     TransicaoDeDadosEntreActivities objTr;
     List<UsuarioAutenticadoDoFirebase> usuariosCadastrados;
     List<Pessoa> integrantesSemCntaFechada;
+    ValueEventListener listenerDosIntegrantes;
+    ValueEventListener listenerDasDespesas;
+    ValueEventListener listenerDosUsuarios;
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -97,7 +101,7 @@ public class TelaDespesaBarERestaurante extends AppCompatActivity {
         btnAdicionaPessoa.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                dialogoCadastroPessoa();
+                dialogoPreCadastroDepessoa();
             }
         });
 
@@ -114,30 +118,24 @@ public class TelaDespesaBarERestaurante extends AppCompatActivity {
         lv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                //Chama a tela de pessoa, passando o id do usuário selecionado e
-                if(isOnline(TelaDespesaBarERestaurante.this)){
-                    try{
-                        objTr.pessoa = dados.get(position);
-                        String extra = gson.toJson(objTr);
-                        Intent it = new Intent(TelaDespesaBarERestaurante.this, TelaPessoaBarERestaurante.class);
-                        it.putExtra(EXTRA_UID, extra);
-                        startActivity(it);
-                    }catch (Exception e){
-                        //lidar com erro de conexao
-                    }
-                }else{
-                    //lidar  com erro de conexão
+            //Chama a tela de pessoa, passando o id do usuário selecionado e
+            if(isOnline(TelaDespesaBarERestaurante.this)){
+                try{
+                    objTr.pessoa = dados.get(position);
+                    String extra = gson.toJson(objTr);
+                    Intent it = new Intent(TelaDespesaBarERestaurante.this, TelaPessoaBarERestaurante.class);
+                    it.putExtra(EXTRA_UID, extra);
+                    startActivity(it);
+                }catch (Exception e){
+                    //lidar com erro de conexao
                 }
+            }else{
+                //lidar  com erro de conexão
+            }
             }
         });
-    }
 
-    @Override
-    protected void onStart() {
-        super.onStart();
-
-        //Carregando a list view sempre com os dados  de pessoa do banco
-        referencia.child(objTr.userUid).child(objTr.despesa.idDadosDespesa).child("Integrantes").addValueEventListener(new ValueEventListener() {
+        listenerDosIntegrantes = new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
 
@@ -175,23 +173,36 @@ public class TelaDespesaBarERestaurante extends AppCompatActivity {
             public void onCancelled(@NonNull DatabaseError databaseError) {
 
             }
-        });
+        };
 
-        referencia.child(objTr.userUid).child(objTr.despesa.idDadosDespesa).child("Despesa").addValueEventListener(new ValueEventListener() {
+        listenerDasDespesas = new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                objTr.despesa = dataSnapshot.getValue(Despesa.class);
+                Despesa despesaTemporaria = dataSnapshot.getValue(Despesa.class);
 
                 valorTotalContaComAcrescimo = 0.0;
 
-                valorTotalContaComAcrescimo += objTr.despesa.valorRoleAberto*1.1;
+                valorTotalContaComAcrescimo += despesaTemporaria.valorRoleAberto*1.1;
 
-                if(objTr.despesa.valorRoleAberto > 0.0){
+                if(despesaTemporaria.valorRoleAberto > 0.0){
                     valorFinalConta.setText("R$"+df.format(objTr.despesa.valorRoleAberto));
                     valorFinalContaComAcrescimo.setText("R$"+df.format(valorTotalContaComAcrescimo));
                 }else{
                     valorFinalConta.setText("R$00,00");
                     valorFinalContaComAcrescimo.setText("R$00,00");
+                }
+
+                if(despesaTemporaria.fechou!= objTr.despesa.fechou){
+                    objTr.despesa = despesaTemporaria;
+                    Toast toast = Toast.makeText(TelaDespesaBarERestaurante.this, "Despesa finalizada por outro integrante!", Toast.LENGTH_SHORT);
+                    toast.setGravity(Gravity.CENTER_HORIZONTAL | Gravity.BOTTOM, 0, 0);
+                    toast.show();
+
+                    Intent it  = new Intent(TelaDespesaBarERestaurante.this, TelaPrincipal.class);
+                    startActivity(it);
+                    finish();
+                }else{
+                    objTr.despesa = despesaTemporaria;
                 }
 
             }
@@ -200,9 +211,9 @@ public class TelaDespesaBarERestaurante extends AppCompatActivity {
             public void onCancelled(@NonNull DatabaseError databaseError) {
 
             }
-        });
+        };
 
-        referencia.child("AAAAAUSERS").addValueEventListener(new ValueEventListener() {
+        listenerDosUsuarios = new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 usuariosCadastrados = new ArrayList<>();
@@ -228,7 +239,7 @@ public class TelaDespesaBarERestaurante extends AppCompatActivity {
             public void onCancelled(@NonNull DatabaseError databaseError) {
 
             }
-        });
+        };
 
         btnFecharConta.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -238,8 +249,95 @@ public class TelaDespesaBarERestaurante extends AppCompatActivity {
         });
     }
 
-    private void dialogoCadastroPessoa() {
+    @Override
+    protected void onResume() {
+        super.onResume();
+        referencia.child(objTr.userUid).child(objTr.despesa.idDadosDespesa).child("Integrantes").addValueEventListener(listenerDosIntegrantes);
+        referencia.child(objTr.userUid).child(objTr.despesa.idDadosDespesa).child("Despesa").addValueEventListener(listenerDasDespesas);
+        referencia.child("AAAAAUSERS").addValueEventListener(listenerDosUsuarios);
+    }
 
+    @Override
+    protected void onPause() {
+        super.onPause();
+        referencia.child(objTr.userUid).child(objTr.despesa.idDadosDespesa).child("Integrantes").removeEventListener(listenerDosIntegrantes);
+        referencia.child(objTr.userUid).child(objTr.despesa.idDadosDespesa).child("Despesa").removeEventListener(listenerDasDespesas);
+        referencia.child("AAAAAUSERS").removeEventListener(listenerDosUsuarios);
+    }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        finish();
+    }
+
+    private void dialogoPreCadastroDepessoa(){
+        LinearLayout layout = new LinearLayout(TelaDespesaBarERestaurante.this);
+        layout.setOrientation(LinearLayout.VERTICAL);
+        layout.setPadding(80,40,80,10);
+
+        LinearLayout layoutButtonShareIt = new LinearLayout(TelaDespesaBarERestaurante.this);
+        layoutButtonShareIt.setOrientation(LinearLayout.VERTICAL);
+        layoutButtonShareIt.setPadding(0,0,0,20);
+
+        LinearLayout layoutButtonPadrao = new LinearLayout(TelaDespesaBarERestaurante.this);
+        layoutButtonPadrao.setOrientation(LinearLayout.VERTICAL);
+
+        Button usuarioShareIt = new Button(TelaDespesaBarERestaurante.this);
+        Button usuarioPadrao = new Button(TelaDespesaBarERestaurante.this);
+
+        usuarioShareIt.setBackgroundResource(R.drawable.button_shape_round_border_green);
+        usuarioShareIt.setTextColor(Color.WHITE);
+        usuarioShareIt.setTypeface(ResourcesCompat.getFont(this, R.font.cabin));
+        usuarioShareIt.setText("Usuário ShareIt");
+
+        usuarioPadrao.setBackgroundResource(R.drawable.button_shape_round_border_green);
+        usuarioPadrao.setTextColor(Color.WHITE);
+        usuarioPadrao.setTypeface(ResourcesCompat.getFont(this, R.font.cabin));
+        usuarioPadrao.setText("Usuário padrão");
+
+        layoutButtonShareIt.addView(usuarioShareIt);
+        layoutButtonPadrao.addView(usuarioPadrao);
+        layout.addView(layoutButtonShareIt);
+        layout.addView(layoutButtonPadrao);
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AlertDialogCustom);
+
+        //Define o título do diálogo
+        builder.setTitle("Quem será o novo integrante?");
+        builder.setIcon(R.drawable.ic_simbolo_verde1);
+
+        //Coloca a view criada no diálogo
+        builder.setView(layout);
+
+
+        usuarioShareIt.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                alerta.dismiss();
+                dialogoCadastroPessoaEmail();
+            }
+        });
+
+        usuarioPadrao.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                alerta.dismiss();
+                dialogoCadastroPessoaNome();
+            }
+        });
+
+        builder.setNegativeButton("Cancelar", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+            }
+        });
+
+        alerta = builder.create();
+        alerta.show();
+    }
+
+    public void dialogoCadastroPessoaNome(){
         LinearLayout layout = new LinearLayout(TelaDespesaBarERestaurante.this);
 
         layout.setOrientation(LinearLayout.VERTICAL);
@@ -279,6 +377,73 @@ public class TelaDespesaBarERestaurante extends AppCompatActivity {
                         try {
                             Pessoa novoParticipante = new Pessoa();
                             novoParticipante.nome = nomePessoa.getText().toString();
+                            novoParticipante.nome = novoParticipante.nome.substring(0,1).toUpperCase() + novoParticipante.nome.substring(1);
+                            novoParticipante.id = referencia.child(objTr.userUid).child(objTr.despesa.idDadosDespesa).child("Integrantes").push().getKey();
+                            for(int i = 0; i < objTr.despesa.uidIntegrantes.size(); i++){
+                                referencia.child(objTr.despesa.uidIntegrantes.get(i).uid).child(objTr.despesa.idDadosDespesa).child("Integrantes").child(novoParticipante.id).setValue(novoParticipante);
+                            }
+                        } catch (Exception e) {
+                            //Lidar com erro de conexão
+                        }
+                    }else{
+                        //Lidar com problemas de conexão
+                    }
+                }
+            }
+
+        });
+
+        builder.setNegativeButton("Cancelar", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+            }
+        });
+
+        alerta = builder.create();
+        alerta.show();
+    }
+
+    public void dialogoCadastroPessoaEmail() {
+
+        LinearLayout layout = new LinearLayout(TelaDespesaBarERestaurante.this);
+
+        layout.setOrientation(LinearLayout.VERTICAL);
+        layout.setPadding(60,30,60,0);
+
+        //Inicializa o Edit text que será  chamado no diálogo
+        nomePessoa = new EditText(TelaDespesaBarERestaurante.this);
+
+        //Seta o tipo de entrada aceitada pelo Edit Text
+        nomePessoa.setInputType(InputType.TYPE_CLASS_TEXT);
+        //Seta as dicas de cada Edit text criado
+        nomePessoa.setHint("Insira o email do novo integrante");
+
+        nomePessoa.setTypeface(ResourcesCompat.getFont(this, R.font.cabin));
+
+        //Adiciona os Edit Texts na nova view
+        layout.addView(nomePessoa);
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AlertDialogCustom);
+
+        //Define o título do diálogo
+        builder.setTitle("Novo integrante ShareIt");
+        builder.setIcon(R.drawable.ic_add_person);
+
+        //Coloca a view criada no diálogo
+        builder.setView(layout);
+
+        builder.setPositiveButton("Confirmar", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface arg0, int arg1) {
+                if(nomePessoa.getText().toString().equals("")){
+                    Toast toast = Toast.makeText(TelaDespesaBarERestaurante.this, "O nome do integrante não pode ser nulo!", Toast.LENGTH_SHORT);
+                    toast.setGravity(Gravity.CENTER_HORIZONTAL | Gravity.CENTER_VERTICAL, 0, 0);
+                    toast.show();
+                }else {
+                    //Adicionando novo cadastro ao banco da despesa
+                    if(isOnline(TelaDespesaBarERestaurante.this)) {
+                        try {
+                            Pessoa novoParticipante = new Pessoa();
+                            novoParticipante.nome = nomePessoa.getText().toString();
                             if(novoParticipante.nome.contains("@")){
                                 String uidIntegrantenovo = "";
                                 boolean achouUsuárioCadastrado = false;
@@ -294,12 +459,9 @@ public class TelaDespesaBarERestaurante extends AppCompatActivity {
                                     }
                                 }
                                 if(!achouUsuárioCadastrado){
-                                    novoParticipante.nome = novoParticipante.nome.split("@")[0];
-                                    novoParticipante.nome = novoParticipante.nome.substring(0,1).toUpperCase() + novoParticipante.nome.substring(1);
-                                    novoParticipante.id = referencia.child(objTr.userUid).child(objTr.despesa.idDadosDespesa).child("Integrantes").push().getKey();
-                                    for(int i = 0; i < objTr.despesa.uidIntegrantes.size(); i++){
-                                        referencia.child(objTr.despesa.uidIntegrantes.get(i).uid).child(objTr.despesa.idDadosDespesa).child("Integrantes").child(novoParticipante.id).setValue(novoParticipante);
-                                    }
+                                    Toast toast = Toast.makeText(TelaDespesaBarERestaurante.this, "Não foi encontrado nenhum usuário com o endereço de e-mail informado!", Toast.LENGTH_SHORT);
+                                    toast.setGravity(Gravity.CENTER_HORIZONTAL | Gravity.CENTER_VERTICAL, 0, 0);
+                                    toast.show();
                                 }else{
                                     for(int i = 0; i < objTr.despesa.uidIntegrantes.size(); i++){
                                         referencia.child(objTr.despesa.uidIntegrantes.get(i).uid).child(objTr.despesa.idDadosDespesa).child("Despesa").setValue(objTr.despesa);
@@ -312,11 +474,9 @@ public class TelaDespesaBarERestaurante extends AppCompatActivity {
                                     }
                                 }
                             }else{
-                                novoParticipante.nome = novoParticipante.nome.substring(0,1).toUpperCase() + novoParticipante.nome.substring(1);
-                                novoParticipante.id = referencia.child(objTr.userUid).child(objTr.despesa.idDadosDespesa).child("Integrantes").push().getKey();
-                                for(int i = 0; i < objTr.despesa.uidIntegrantes.size(); i++){
-                                    referencia.child(objTr.despesa.uidIntegrantes.get(i).uid).child(objTr.despesa.idDadosDespesa).child("Integrantes").child(novoParticipante.id).setValue(novoParticipante);
-                                }
+                                Toast toast = Toast.makeText(TelaDespesaBarERestaurante.this, "Insira um endereço de e-mail válido!", Toast.LENGTH_SHORT);
+                                toast.setGravity(Gravity.CENTER_HORIZONTAL | Gravity.CENTER_VERTICAL, 0, 0);
+                                toast.show();
                             }
                         } catch (Exception e) {
                             //Lidar com erro de conexão
@@ -363,19 +523,19 @@ public class TelaDespesaBarERestaurante extends AppCompatActivity {
         builder.setPositiveButton("Avançar", new DialogInterface.OnClickListener() {
 
             public void onClick(DialogInterface arg0, int arg1) {
-                boolean verificaSelecionado = false;
-                for(int i = 0; i < checados.length; i++){
-                    if(checados[i]){
-                        dialogoNovoItemDeGasto();
-                        verificaSelecionado = true;
-                        break;
-                    }
+            boolean verificaSelecionado = false;
+            for(int i = 0; i < checados.length; i++){
+                if(checados[i]){
+                    dialogoNovoItemDeGasto();
+                    verificaSelecionado = true;
+                    break;
                 }
-                if(!verificaSelecionado){
-                    Toast toast = Toast.makeText(TelaDespesaBarERestaurante.this, "Selecione ao menos uma pessoa que irá consumir o item", Toast.LENGTH_SHORT);
-                    toast.setGravity(Gravity.CENTER_HORIZONTAL | Gravity.CENTER_VERTICAL, 0, 0);
-                    toast.show();
-                }
+            }
+            if(!verificaSelecionado){
+                Toast toast = Toast.makeText(TelaDespesaBarERestaurante.this, "Selecione ao menos uma pessoa que irá consumir o item", Toast.LENGTH_SHORT);
+                toast.setGravity(Gravity.CENTER_HORIZONTAL | Gravity.CENTER_VERTICAL, 0, 0);
+                toast.show();
+            }
             }
         });
 
@@ -431,67 +591,66 @@ public class TelaDespesaBarERestaurante extends AppCompatActivity {
         builder.setPositiveButton("Adicionar novo item", new DialogInterface.OnClickListener() {
 
             public void onClick(DialogInterface arg0, int arg1) {
-                if (isOnline(TelaDespesaBarERestaurante.this)){
-                    try {
-                        int dividirParaPessoas = 0;
-                        ItemDeGasto novoItemDeGasto = new ItemDeGasto();
-                        for (int i = 0; i < checados.length; i++) {
-                            if (checados[i]) {
-                                ConsumidorItemDeGasto novoConsumidor = new ConsumidorItemDeGasto(dados.get(i).nome, dados.get(i).id);
-                                novoItemDeGasto.usuariosQueConsomemEsseitem.add(novoConsumidor);
-                                dividirParaPessoas++;
-                            }
+            if (isOnline(TelaDespesaBarERestaurante.this)){
+                try {
+                    int dividirParaPessoas = 0;
+                    ItemDeGasto novoItemDeGasto = new ItemDeGasto();
+                    for (int i = 0; i < checados.length; i++) {
+                        if (checados[i]) {
+                            ConsumidorItemDeGasto novoConsumidor = new ConsumidorItemDeGasto(dados.get(i).nome, dados.get(i).id);
+                            novoItemDeGasto.usuariosQueConsomemEsseitem.add(novoConsumidor);
+                            dividirParaPessoas++;
                         }
+                    }
 
-                        String[] verificadorDigito = valorItem.getText().toString().split(",");
-                        if (verificadorDigito.length == 2) {
-                            valorItem.setText(verificadorDigito[0] + "." + verificadorDigito[1]);
-                        }
-                        if (!valorItem.getText().toString().equals("")) {
-                            if (!nomeItem.getText().toString().equals("")) {
-                                Double valorPorPessoa = Double.valueOf(valorItem.getText().toString()) / dividirParaPessoas;
-                                novoItemDeGasto.id = referencia.child(objTr.userUid).child(objTr.despesa.idDadosDespesa).child("Integrantes").push().getKey();
-                                novoItemDeGasto.nome = nomeItem.getText().toString().substring(0,1).toUpperCase() + nomeItem.getText().toString().substring(1);
-                                novoItemDeGasto.valor = valorPorPessoa;
-                                objTr.despesa.valorRoleAberto += valorPorPessoa * dividirParaPessoas;
-                                for (int i = 0; i < checados.length; i++) {
-                                    if (checados[i]) {
-                                        for (int j = 0; j < dados.size(); j++) {
-                                            if (nomes[i].equals(dados.get(i).nome)) {
-                                                for(int k = 0; k < objTr.despesa.uidIntegrantes.size(); k++){
-                                                    if(dados.get(i).id.equals(objTr.despesa.uidIntegrantes.get(k).uid)){
-                                                        objTr.despesa.uidIntegrantes.get(k).gasto += valorPorPessoa;
-                                                        break;
-                                                    }
+                    String[] verificadorDigito = valorItem.getText().toString().split(",");
+                    if (verificadorDigito.length == 2) {
+                        valorItem.setText(verificadorDigito[0] + "." + verificadorDigito[1]);
+                    }
+                    if (!valorItem.getText().toString().equals("")) {
+                        if (!nomeItem.getText().toString().equals("")) {
+                            Double valorPorPessoa = Double.valueOf(valorItem.getText().toString()) / dividirParaPessoas;
+                            novoItemDeGasto.id = referencia.child(objTr.userUid).child(objTr.despesa.idDadosDespesa).child("Integrantes").push().getKey();
+                            novoItemDeGasto.nome = nomeItem.getText().toString().substring(0,1).toUpperCase() + nomeItem.getText().toString().substring(1);
+                            novoItemDeGasto.valor = valorPorPessoa;
+                            objTr.despesa.valorRoleAberto += valorPorPessoa * dividirParaPessoas;
+                            for (int i = 0; i < checados.length; i++) {
+                                if (checados[i]) {
+                                    for (int j = 0; j < dados.size(); j++) {
+                                        if (nomes[i].equals(dados.get(i).nome)) {
+                                            for(int k = 0; k < objTr.despesa.uidIntegrantes.size(); k++){
+                                                if(dados.get(i).id.equals(objTr.despesa.uidIntegrantes.get(k).uid)){
+                                                    objTr.despesa.uidIntegrantes.get(k).gasto += valorPorPessoa;
+                                                    break;
                                                 }
-                                                dados.get(i).valorTotal += valorPorPessoa;
-                                                dados.get(i).historicoItemDeGastos.add(novoItemDeGasto);
-                                                for(int k = 0; k < objTr.despesa.uidIntegrantes.size(); k++){
-                                                    referencia.child(objTr.despesa.uidIntegrantes.get(k).uid).child(objTr.despesa.idDadosDespesa).child("Despesa").setValue(objTr.despesa);
-                                                    referencia.child(objTr.despesa.uidIntegrantes.get(k).uid).child(objTr.despesa.idDadosDespesa).child("Integrantes").child(dados.get(i).id).setValue(dados.get(i));
-                                                }
-                                                //referencia.child(objTr.userUid).child(objTr.despesa.idDadosDespesa).child(objTr.despesa.idDadosPessoas).child(dados.get(i).id).setValue(dados.get(i));
-                                                nomes[i] = "";//Impede que uma mesma pessoa  seja contada mais de uma vez
                                             }
+                                            dados.get(i).valorTotal += valorPorPessoa;
+                                            dados.get(i).historicoItemDeGastos.add(novoItemDeGasto);
+                                            for(int k = 0; k < objTr.despesa.uidIntegrantes.size(); k++){
+                                                referencia.child(objTr.despesa.uidIntegrantes.get(k).uid).child(objTr.despesa.idDadosDespesa).child("Despesa").setValue(objTr.despesa);
+                                                referencia.child(objTr.despesa.uidIntegrantes.get(k).uid).child(objTr.despesa.idDadosDespesa).child("Integrantes").child(dados.get(i).id).setValue(dados.get(i));
+                                            }
+                                            nomes[i] = "";//Impede que uma mesma pessoa  seja contada mais de uma vez
                                         }
                                     }
                                 }
-                            } else {
-                                Toast toast = Toast.makeText(TelaDespesaBarERestaurante.this, "Insira um nome não nulo para o item", Toast.LENGTH_SHORT);
-                                toast.setGravity(Gravity.CENTER_HORIZONTAL | Gravity.CENTER_VERTICAL, 0, 0);
-                                toast.show();
                             }
                         } else {
-                            Toast toast = Toast.makeText(TelaDespesaBarERestaurante.this, "Insira um valor não nulo para o item", Toast.LENGTH_SHORT);
+                            Toast toast = Toast.makeText(TelaDespesaBarERestaurante.this, "Insira um nome não nulo para o item", Toast.LENGTH_SHORT);
                             toast.setGravity(Gravity.CENTER_HORIZONTAL | Gravity.CENTER_VERTICAL, 0, 0);
                             toast.show();
                         }
-                    }catch (Exception e){
-                        //Lidar com erro de conexão
+                    } else {
+                        Toast toast = Toast.makeText(TelaDespesaBarERestaurante.this, "Insira um valor não nulo para o item", Toast.LENGTH_SHORT);
+                        toast.setGravity(Gravity.CENTER_HORIZONTAL | Gravity.CENTER_VERTICAL, 0, 0);
+                        toast.show();
                     }
-                }else{
-                    //Lidar com problemas de conexão
+                }catch (Exception e){
+                    //Lidar com erro de conexão
                 }
+            }else{
+                //Lidar com problemas de conexão
+            }
             }
         });
         builder.setNegativeButton("Cancelar", new DialogInterface.OnClickListener() {
@@ -527,27 +686,26 @@ public class TelaDespesaBarERestaurante extends AppCompatActivity {
 
         builder.setPositiveButton("Confirmar Finalização", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface arg0, int arg1) {
-                if(isOnline(TelaDespesaBarERestaurante.this)) {
-                    try{
-                        //Apaga todos os dados da tabela
-                        objTr.despesa.fechou = true;
-                        for(int i = 0; i < objTr.despesa.uidIntegrantes.size(); i++){
-                            referencia.child(objTr.despesa.uidIntegrantes.get(i).uid).child(objTr.despesa.idDadosDespesa).child("Despesa").setValue(objTr.despesa);
-                        }
-                        //referencia.child(objTr.userUid).child(objTr.despesa.idDadosDespesa).child(objTr.despesa.idDadosDespesa).setValue(objTr.despesa);
-                        Toast toast = Toast.makeText(TelaDespesaBarERestaurante.this, "Conta finalizada com sucesso!", Toast.LENGTH_SHORT);
-                        toast.setGravity(Gravity.CENTER_HORIZONTAL | Gravity.CENTER_VERTICAL, 0, 0);
-                        toast.show();
-
-                        Intent it  = new Intent(TelaDespesaBarERestaurante.this, TelaPrincipal.class);
-                        startActivity(it);
-                        finish();
-                    }catch(Exception e){
-                        //Lidar com erro de conexão
+            if(isOnline(TelaDespesaBarERestaurante.this)) {
+                try{
+                    //Apaga todos os dados da tabela
+                    objTr.despesa.fechou = true;
+                    for(int i = 0; i < objTr.despesa.uidIntegrantes.size(); i++){
+                        referencia.child(objTr.despesa.uidIntegrantes.get(i).uid).child(objTr.despesa.idDadosDespesa).child("Despesa").setValue(objTr.despesa);
                     }
-                }else{
-                    //Lidar com problemas de conexão
+                    Toast toast = Toast.makeText(TelaDespesaBarERestaurante.this, "Conta finalizada com sucesso!", Toast.LENGTH_SHORT);
+                    toast.setGravity(Gravity.CENTER_HORIZONTAL | Gravity.BOTTOM, 0, 0);
+                    toast.show();
+
+                    Intent it  = new Intent(TelaDespesaBarERestaurante.this, TelaPrincipal.class);
+                    startActivity(it);
+                    finish();
+                }catch(Exception e){
+                    //Lidar com erro de conexão
                 }
+            }else{
+                //Lidar com problemas de conexão
+            }
             }
         });
 
@@ -559,12 +717,6 @@ public class TelaDespesaBarERestaurante extends AppCompatActivity {
 
         alerta = builder.create();
         alerta.show();
-    }
-
-    @Override
-    public void onBackPressed() {
-        super.onBackPressed();
-        finish();
     }
 
     public static boolean isOnline(Context context) {

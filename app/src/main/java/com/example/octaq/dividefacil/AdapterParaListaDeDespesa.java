@@ -11,10 +11,8 @@ import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-
 import androidx.appcompat.app.AlertDialog;
 import androidx.core.content.res.ResourcesCompat;
-
 import java.text.DecimalFormat;
 import java.util.List;
 
@@ -51,7 +49,7 @@ public class AdapterParaListaDeDespesa extends BaseAdapter {
     public View getView(int position, View view, ViewGroup parent) {
         LayoutInflater mInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
-        // cria uma view com o layout  do seu item
+        // Cria uma view com o layout  do seu item
         view = mInflater.inflate(R.layout.layout_lista_despesa, null);
 
         // Atribuição normal dos campos de uma view
@@ -176,10 +174,23 @@ public class AdapterParaListaDeDespesa extends BaseAdapter {
             public void onClick(DialogInterface arg0, int arg1) {
                 int tag = (Integer) view.getTag();
                 Despesa despesaTemp = lista.get(tag);
+                objTr.despesa = lista.get(tag);
                 despesaTemp.excluido =true;
                 if(isOnline(context)){
                     try{
                         referencia.child(objTr.userUid).child(despesaTemp.idDadosDespesa).child("Despesa").setValue(despesaTemp);
+
+                        //TESTE ---------------------
+                        for(int i = 0; i < objTr.despesa.uidIntegrantes.size(); i++){
+                            if(objTr.despesa.uidIntegrantes.get(i).uid.equals(objTr.userUid)) {
+                                objTr.despesa.uidIntegrantes.remove(i);
+                                break;
+                            }
+                        }
+                        for(int i = 0; i < objTr.despesa.uidIntegrantes.size(); i++){
+                            referencia.child(objTr.despesa.uidIntegrantes.get(i).uid).child(objTr.despesa.idDadosDespesa).child("Despesa").setValue(objTr.despesa);
+                        }
+                        //---------------------------
                     }catch (Exception e){
                         //Lidar com erro de conexão
                     }

@@ -67,6 +67,8 @@ public class FragmentHistoricoDeDespesas extends Fragment {
     private FloatingActionButton novaDespesa;
     private AdapterParaListaDeDespesa adapterParaListaDeDespesa;
 
+    ValueEventListener listenerDasDespesas;
+
     public FragmentHistoricoDeDespesas() {
         // Required empty public constructor
     }
@@ -97,7 +99,6 @@ public class FragmentHistoricoDeDespesas extends Fragment {
 
         novaDespesa = view.findViewById(R.id.fab_novo_role);
 
-        dialog = ProgressDialog.show(getActivity(), "","Carregando suas Despesas...", true);
         novaDespesa.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {  dialogoEscolhaDeTipoDeDespesa();
@@ -109,68 +110,56 @@ public class FragmentHistoricoDeDespesas extends Fragment {
         lv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                //Chama a tela de pessoa, passando o id do usuário selecionado e os  meios dde comunicação com o banco
-                //if(isOnline(getActivity().getApplicationContext())){
-                    try{
-                        objTr.despesa = despesas.get(position);
-                        Gson gson = new Gson();
-                        String extra = gson.toJson(objTr);
-                        if(!objTr.despesa.fechou){
-                            Intent it;
-                            if(objTr.despesa.tipoDeDespesa.equals("Bar e Restaurante")){
-                                it = new Intent(getContext(), TelaDespesaBarERestaurante.class);
-                            }else{
-                                it = new Intent(getContext(), TelaDespesa.class);
-                            }
-                            it.putExtra(EXTRA_UID, extra);
-                            startActivityForResult(it, 2);
-                        }else{
-                            Intent it;
-                            if(objTr.despesa.tipoDeDespesa.equals("Bar e Restaurante")){
-                                it = new Intent(getContext(), TelaDespesaBarERestauranteVisualizacao.class);
-                            }else{
-                                it = new Intent(getContext(), TelaDespesaVisualizacao.class);
-                            }
-                            it.putExtra(EXTRA_UID, extra);
-                            startActivityForResult(it, 2);
-                        }
-                    }catch (Exception e){
-                        //Lidar com problemas de conexão
+            try{
+                objTr.despesa = despesas.get(position);
+                Gson gson = new Gson();
+                String extra = gson.toJson(objTr);
+                if(!objTr.despesa.fechou){
+                    Intent it;
+                    if(objTr.despesa.tipoDeDespesa.equals("Bar e Restaurante")){
+                        it = new Intent(getContext(), TelaDespesaBarERestaurante.class);
+                    }else{
+                        it = new Intent(getContext(), TelaDespesa.class);
                     }
-                //}else{
-                    //Lidar com problemas de conexão
-                //}
+                    it.putExtra(EXTRA_UID, extra);
+                    startActivityForResult(it, 2);
+                }else{
+                    Intent it;
+                    if(objTr.despesa.tipoDeDespesa.equals("Bar e Restaurante")){
+                        it = new Intent(getContext(), TelaDespesaBarERestauranteVisualizacao.class);
+                    }else{
+                        it = new Intent(getContext(), TelaDespesaVisualizacao.class);
+                    }
+                    it.putExtra(EXTRA_UID, extra);
+                    startActivityForResult(it, 2);
+                }
+            }catch (Exception e){
+                //Lidar com problemas de conexão
+            }
             }
         });
 
-
         //Carregando a list view sempre com os dados do banco
-        referencia.child(objTr.userUid).addValueEventListener(new ValueEventListener() {
+        listenerDasDespesas = new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
 
-
-                dialog.show();
-
                 despesas = new ArrayList<>();
-                //if(isOnline(getContext())){
-                    try{
-                        for(DataSnapshot dadosDataSnapshot: dataSnapshot.getChildren()){
-                            Despesa despesaAtualizado = dadosDataSnapshot.child("Despesa").getValue(Despesa.class);
-                            if(despesaAtualizado != null) {
-                                if (!despesaAtualizado.excluido) {
-                                    despesas.add(despesaAtualizado);
-                                }
+
+                try{
+                    for(DataSnapshot dadosDataSnapshot: dataSnapshot.getChildren()){
+                        Despesa despesaAtualizado = dadosDataSnapshot.child("Despesa").getValue(Despesa.class);
+                        if(despesaAtualizado != null) {
+                            if (!despesaAtualizado.excluido) {
+                                despesas.add(despesaAtualizado);
                             }
                         }
-                    }catch (Exception e){
-                        //Lidar com erro de conexao
-                        despesas = new ArrayList<>();
                     }
-                //}else{
+                }catch (Exception e){
                     //Lidar com erro de conexao
-                //}
-                //Cria um adapter para a list View
+                    despesas = new ArrayList<>();
+                }
+
                 adapterParaListaDeDespesa = new AdapterParaListaDeDespesa(despesas, getContext(),objTr);
 
                 lv.setAdapter(adapterParaListaDeDespesa);
@@ -182,11 +171,28 @@ public class FragmentHistoricoDeDespesas extends Fragment {
             public void onCancelled(@NonNull DatabaseError databaseError) {
 
             }
-        });
+        };
+
         return view;
     }
 
+    @Override
+    public void onStart() {
+        super.onStart();
 
+        dialog = new ProgressDialog(getActivity());
+        dialog.setMessage("Carregando suas despesas...");
+        dialog.isIndeterminate();
+        dialog.show();
+
+        referencia.child(objTr.userUid).addValueEventListener(listenerDasDespesas);
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        referencia.child(objTr.userUid).removeEventListener(listenerDasDespesas);
+    }
 
     private void dialogoEscolhaDeTipoDeDespesa() {
 
@@ -251,23 +257,16 @@ public class FragmentHistoricoDeDespesas extends Fragment {
                     toast.setGravity(Gravity.CENTER_HORIZONTAL | Gravity.CENTER_VERTICAL, 0, 0);
                     toast.show();
                 }else{
-
                     //Pega a data atual formatada para o formato brasileiro
                     SimpleDateFormat formataData = new SimpleDateFormat("dd-MM-yyyy");
                     Date data = new Date();
                     String dataFormatada = formataData.format(data);
 
-                    //objTr = new TransicaoDeDadosEntreActivities();
-
-
                     objTr.pessoa = new Pessoa();
-
-                    //seta previamente dados sobre o rolê
-
                     objTr.despesa.dia = dataFormatada;
                     objTr.despesa.nome = nomeDespesa.getText().toString().substring(0,1).toUpperCase() + nomeDespesa.getText().toString().substring(1);
 
-                    //if(isOnline(getActivity().getApplicationContext())){
+                    if(isOnline(getActivity().getApplicationContext())){
                         try {
                             //Cria o despesa no banco e adiciona o novo integrante.
                             //Isso é  feito para evitar que rolês sejam criados sem nenhum integrante, caso o usuario chegue até essa tela e feche o app
@@ -308,9 +307,11 @@ public class FragmentHistoricoDeDespesas extends Fragment {
                         }catch (Exception e){
                             //Lidar  com o erro de conexão
                         }
-                    //}else{
-                        //Lidar com o erro de conexão
-                    //}
+                    }else{
+                        Toast toast = Toast.makeText(getActivity().getApplicationContext(), "Ocorreu um problema com a conexão à internet, por favor, tente novamente!", Toast.LENGTH_SHORT);
+                        toast.setGravity(Gravity.CENTER_HORIZONTAL | Gravity.CENTER_VERTICAL, 0, 0);
+                        toast.show();
+                    }
 
                 }
 
@@ -326,7 +327,7 @@ public class FragmentHistoricoDeDespesas extends Fragment {
         alerta = builder.create();
         alerta.show();
     }
-    /*
+
     public static boolean isOnline(Context context) {
         ConnectivityManager administradorDeConexao = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo informacoesDeConexao = administradorDeConexao.getActiveNetworkInfo();
@@ -335,5 +336,5 @@ public class FragmentHistoricoDeDespesas extends Fragment {
         else
             return false;
     }
-     */
+
 }

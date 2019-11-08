@@ -3,40 +3,31 @@ package com.example.octaq.dividefacil;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
-
 import android.content.Context;
 import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
+import android.view.Gravity;
 import android.view.View;
 import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.google.gson.Gson;
-
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 
 import static com.example.octaq.dividefacil.TelaLogin.EXTRA_UID;
+import static com.example.octaq.dividefacil.TelaLogin.referencia;
 
 public class TelaDespesaVisualizacao extends AppCompatActivity {
-
-    //Botões da tela
-    Button btnFecharConta;
-
-    //Variáveis de diálogo
-    Boolean nomeValor, selecao, adiciona, clique;
 
     //Edit Texts do Diálogo
     TextView valorFinalConta;
@@ -49,13 +40,12 @@ public class TelaDespesaVisualizacao extends AppCompatActivity {
 
     //Controlando o banco de dados
     ArrayList <Pessoa> dados;
-    FirebaseDatabase banco;
-    DatabaseReference referencia;
     Double valorTotalConta;
-    FirebaseAuth mAuth;
-    FirebaseUser currentUser;
     Gson gson;
     TransicaoDeDadosEntreActivities objTr;
+    ValueEventListener listenerDosIntegrantes;
+    ValueEventListener listenerDasDespesas;
+    ListView lv;
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -63,25 +53,6 @@ public class TelaDespesaVisualizacao extends AppCompatActivity {
 
         Window window = this.getWindow();
         window.setStatusBarColor(ContextCompat.getColor(TelaDespesaVisualizacao.this,R.color.colorPrimaryDark));
-    }
-
-    @Override
-    protected void onStart() {
-        super.onStart();
-
-        if(isOnline(TelaDespesaVisualizacao.this)){
-            try{
-                //Conectando o Firebase
-                banco = FirebaseDatabase.getInstance();
-                referencia = banco.getReference();
-                mAuth = FirebaseAuth.getInstance();
-                currentUser = mAuth.getCurrentUser();
-            }catch (Exception e){
-                //lidar com erro de conexao
-            }
-        }else{
-            //lidar com erro de conexao
-        }
 
         //Pega os dados referentes ao despesa atual
         String extra;
@@ -93,11 +64,9 @@ public class TelaDespesaVisualizacao extends AppCompatActivity {
 
         //Inicializando variáveis
         valorFinalConta = findViewById(R.id.valorTotal);
-        btnFecharConta = findViewById(R.id.btn_FecharConta);
         participantes = new ArrayList<>();
-        adiciona = clique = nomeValor = selecao = false;
 
-        ListView lv = findViewById(R.id.listaPessoasTelaConta);
+        lv = findViewById(R.id.listaPessoasTelaConta);
 
         //Configurando o clique no item da lista
         lv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -120,40 +89,24 @@ public class TelaDespesaVisualizacao extends AppCompatActivity {
             }
         });
 
-        //Carregando a list view sempre com os dados  de pessoa do banco
-        referencia.child(currentUser.getUid()).child(objTr.despesa.idDadosDespesa).child("Integrantes").addValueEventListener(new ValueEventListener() {
+        listenerDosIntegrantes = new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 dados = new ArrayList<>();
-                valorTotalConta = 0.0;
 
-                if(isOnline(TelaDespesaVisualizacao.this)){
+                if (isOnline(TelaDespesaVisualizacao.this)){
                     try{
                         for(DataSnapshot dadosDataSnapshot: dataSnapshot.getChildren()){
                             Pessoa pessoaCadastrada = dadosDataSnapshot.getValue(Pessoa.class);
                             dados.add(pessoaCadastrada);
                         }
-                    }catch (Exception e){
-                        //lidar com erro de conexao
+                    }catch (Exception  e){
+                        //Lidar com problemas de conexão
                     }
                 }else{
-                    //lidar com erro de coneexao
+                    //Lidar com problemas de conexão
                 }
 
-                nomeParticipantes = new String[dados.size()];
-
-                for(int i = 0; i<dados.size();i++){
-                    nomeParticipantes[i] = dados.get(i).nome;
-                    valorTotalConta+=dados.get(i).valorTotal;
-                }
-
-                if(valorTotalConta > 0.0){
-                    valorFinalConta.setText("R$"+df.format(valorTotalConta));
-                }else{
-                    valorFinalConta.setText("R$00,00");
-                }
-
-                //Inicializa array list, list view e cria um adapter para ela
                 ListView lv = findViewById(R.id.listaPessoasTelaConta);
 
                 AdapterParaListaDePessoa adapterPessoa = new AdapterParaListaDePessoa(dados,objTr, TelaDespesaVisualizacao.this);
@@ -165,7 +118,39 @@ public class TelaDespesaVisualizacao extends AppCompatActivity {
             public void onCancelled(@NonNull DatabaseError databaseError) {
 
             }
-        });
+        };
+
+        listenerDasDespesas = new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                objTr.despesa = dataSnapshot.getValue(Despesa.class);
+
+                if(objTr.despesa.valorRoleAberto > 0.0){
+                    valorFinalConta.setText("R$"+df.format(objTr.despesa.valorRoleAberto));
+                }else{
+                    valorFinalConta.setText("R$00,00");
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        };
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        referencia.child(objTr.userUid).child(objTr.despesa.idDadosDespesa).child("Integrantes").addValueEventListener(listenerDosIntegrantes);
+        referencia.child(objTr.userUid).child(objTr.despesa.idDadosDespesa).child("Despesa").addValueEventListener(listenerDasDespesas);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        referencia.child(objTr.userUid).child(objTr.despesa.idDadosDespesa).child("Integrantes").removeEventListener(listenerDosIntegrantes);
+        referencia.child(objTr.userUid).child(objTr.despesa.idDadosDespesa).child("Despesa").removeEventListener(listenerDasDespesas);
     }
 
     @Override

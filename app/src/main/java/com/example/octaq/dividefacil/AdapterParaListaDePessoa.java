@@ -8,11 +8,9 @@ import android.view.ViewGroup;
 import android.view.animation.OvershootInterpolator;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
-
 import com.hookedonplay.decoviewlib.DecoView;
 import com.hookedonplay.decoviewlib.charts.SeriesItem;
 import com.hookedonplay.decoviewlib.events.DecoEvent;
-
 import java.text.DecimalFormat;
 import java.util.List;
 
@@ -47,7 +45,7 @@ public class AdapterParaListaDePessoa extends BaseAdapter {
     public View getView(int position, View view, ViewGroup parent) {
         LayoutInflater mInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
-        // cria uma view com o layout  do seu item
+        // Cria uma view com o layout  do seu item
         view = mInflater.inflate(R.layout.layout_lista_estatisticas, null);
 
         // Atribuição normal dos campos de uma view
@@ -110,6 +108,5 @@ public class AdapterParaListaDePessoa extends BaseAdapter {
         arcView.addEvent(new DecoEvent.Builder((int)porcentagem).setIndex(series1Index).setDelay(250).build());
 
         return view;
-
     }
 }

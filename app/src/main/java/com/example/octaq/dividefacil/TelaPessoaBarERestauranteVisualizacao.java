@@ -8,22 +8,20 @@ import androidx.core.content.ContextCompat;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
+import android.view.Gravity;
 import android.view.Window;
 import android.widget.ListView;
 import android.widget.TextView;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
+import android.widget.Toast;
+
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.google.gson.Gson;
-
 import java.text.DecimalFormat;
 
-
 import static com.example.octaq.dividefacil.TelaLogin.EXTRA_UID;
+import static com.example.octaq.dividefacil.TelaLogin.referencia;
 
 public class TelaPessoaBarERestauranteVisualizacao extends AppCompatActivity {
 
@@ -31,12 +29,8 @@ public class TelaPessoaBarERestauranteVisualizacao extends AppCompatActivity {
     String[] nomeAlimentos;
 
     //Controlando o banco de dados
-    FirebaseDatabase banco;
-    DatabaseReference referencia;
     Double valorTotalComAcrescimo;
     Pessoa pessoaSelecionada;
-    FirebaseUser currentUser;
-    FirebaseAuth mAuth;
 
     //Controlando dados mostrados na tela
     TextView valorPessoalFinal;
@@ -45,6 +39,9 @@ public class TelaPessoaBarERestauranteVisualizacao extends AppCompatActivity {
     DecimalFormat df = new DecimalFormat("#,###.00");
     Gson gson;
     TransicaoDeDadosEntreActivities objTr;
+    ValueEventListener listenerDosIntegrantes;
+    ValueEventListener listenerDasDespesas;
+    ListView lv;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,20 +50,6 @@ public class TelaPessoaBarERestauranteVisualizacao extends AppCompatActivity {
 
         Window window = this.getWindow();
         window.setStatusBarColor(ContextCompat.getColor(TelaPessoaBarERestauranteVisualizacao.this,R.color.colorPrimaryDark));
-
-        if(isOnline(TelaPessoaBarERestauranteVisualizacao.this)){
-            try{
-                mAuth = FirebaseAuth.getInstance();
-                currentUser = mAuth.getCurrentUser();
-                //Conectando o Firebase
-                banco = FirebaseDatabase.getInstance();
-                referencia = banco.getReference();
-            }catch (Exception e){
-                //lidar com erro de conexão
-            }
-        }else {
-            //lidar com erro de conexão
-        }
 
         gson = new Gson();
 
@@ -79,7 +62,7 @@ public class TelaPessoaBarERestauranteVisualizacao extends AppCompatActivity {
         valorPessoalComAcrescimo = findViewById(R.id.valor10PorCentoPessoal);
         nome = findViewById(R.id.nomePessoaTelaPessoa);
 
-        referencia.child(currentUser.getUid()).child(objTr.despesa.idDadosDespesa).child("Integrantes").addValueEventListener(new ValueEventListener() {
+        listenerDosIntegrantes = new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 try {
@@ -99,23 +82,9 @@ public class TelaPessoaBarERestauranteVisualizacao extends AppCompatActivity {
                         //lidar com erro de conexao
                     }
 
-                    nomeAlimentos = new String[pessoaSelecionada.historicoItemDeGastos.size()];
-
-                    valorTotalComAcrescimo = 0.0;
-
                     nome.setText(pessoaSelecionada.nome);
 
-                    valorTotalComAcrescimo += pessoaSelecionada.valorTotal*1.1;
-
-                    if(pessoaSelecionada.valorTotal > 0.0){
-                        valorPessoalFinal.setText("R$"+df.format(pessoaSelecionada.valorTotal));
-                        valorPessoalComAcrescimo.setText("R$"+df.format(valorTotalComAcrescimo));
-                    }else{
-                        valorPessoalFinal.setText("R$00,00");
-                        valorPessoalComAcrescimo.setText("R$00,00");
-                    }
-                    //Inicializa array list, list view e cria um adapter para ela
-                    ListView lv = findViewById(R.id.listaAlimentosTelaPessoa);
+                    lv = findViewById(R.id.listaAlimentosTelaPessoa);
 
                     AdapterparaListaDeItemDeGastoVisualizacao adapterAlimento = new AdapterparaListaDeItemDeGastoVisualizacao(pessoaSelecionada.historicoItemDeGastos, TelaPessoaBarERestauranteVisualizacao.this);
 
@@ -129,7 +98,51 @@ public class TelaPessoaBarERestauranteVisualizacao extends AppCompatActivity {
             public void onCancelled(@NonNull DatabaseError databaseError) {
 
             }
-        });
+        };
+
+        listenerDasDespesas = new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                objTr.despesa = dataSnapshot.getValue(Despesa.class);
+
+                valorTotalComAcrescimo = 0.0;
+
+                valorTotalComAcrescimo += objTr.despesa.valorRoleAberto*1.1;
+
+                if(objTr.despesa.valorRoleAberto > 0.0){
+                    valorPessoalFinal.setText("R$"+df.format(objTr.despesa.valorRoleAberto));
+                    valorPessoalComAcrescimo.setText("R$"+df.format(valorTotalComAcrescimo));
+                }else{
+                    valorPessoalFinal.setText("R$00,00");
+                    valorPessoalComAcrescimo.setText("R$00,00");
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        };
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        referencia.child(objTr.userUid).child(objTr.despesa.idDadosDespesa).child("Integrantes").addValueEventListener(listenerDosIntegrantes);
+        referencia.child(objTr.userUid).child(objTr.despesa.idDadosDespesa).child("Despesa").addValueEventListener(listenerDasDespesas);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        referencia.child(objTr.userUid).child(objTr.despesa.idDadosDespesa).child("Integrantes").removeEventListener(listenerDosIntegrantes);
+        referencia.child(objTr.userUid).child(objTr.despesa.idDadosDespesa).child("Despesa").removeEventListener(listenerDasDespesas);
+    }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        finish();
     }
 
     public static boolean isOnline(Context context) {

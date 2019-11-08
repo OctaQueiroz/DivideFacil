@@ -6,9 +6,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
-
 import androidx.core.content.res.ResourcesCompat;
-
 import java.util.List;
 
 public class AdapterParaListaDeTipoDeDaltonismo extends BaseAdapter {
@@ -39,7 +37,7 @@ public class AdapterParaListaDeTipoDeDaltonismo extends BaseAdapter {
     public View getView(int position, View view, ViewGroup parent) {
         LayoutInflater mInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
-        // cria uma view com o layout  do seu item
+        // Cria uma view com o layout  do seu item
         view = mInflater.inflate(R.layout.layout_lista_tipos_de_daltonismo, null);
 
         // Atribuição normal dos campos de uma view

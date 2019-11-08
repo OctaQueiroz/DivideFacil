@@ -11,11 +11,14 @@ import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
+import android.view.Gravity;
 import android.view.View;
 import android.view.Window;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
+
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.ValueEventListener;
@@ -23,13 +26,11 @@ import com.google.gson.Gson;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
+
 import static com.example.octaq.dividefacil.TelaLogin.EXTRA_UID;
 import static com.example.octaq.dividefacil.TelaLogin.referencia;
 
 public class TelaPessoa extends AppCompatActivity {
-
-    //Para administrar a list view
-    String[] nomeAlimentos;
 
     //Controlando o banco de dados
     Pessoa pessoaSelecionada;
@@ -42,6 +43,12 @@ public class TelaPessoa extends AppCompatActivity {
     Gson gson;
     TransicaoDeDadosEntreActivities objTr;
     List<Pessoa> integrantes;
+
+    ValueEventListener listenerDosIntegrantes;
+    ValueEventListener listenerDasDespesas;
+    ValueEventListener listenerDosUsuarios;
+    ListView lv;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -60,7 +67,7 @@ public class TelaPessoa extends AppCompatActivity {
         nome = findViewById(R.id.nomePessoaTelaPessoa);
         integrantes = new ArrayList<>();
 
-        referencia.child(objTr.userUid).child(objTr.despesa.idDadosDespesa).child("Integrantes").addValueEventListener(new ValueEventListener() {
+        listenerDosIntegrantes = new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 try {
@@ -84,17 +91,10 @@ public class TelaPessoa extends AppCompatActivity {
                         //lidar com erro de conexao
                     }
 
-                    nomeAlimentos = new String[pessoaSelecionada.historicoItemDeGastos.size()];
-
                     nome.setText(pessoaSelecionada.nome);
 
-                    if(pessoaSelecionada.valorTotal > 0.0){
-                        valorPessoalFinal.setText("R$"+df.format(pessoaSelecionada.valorTotal));
-                    }else{
-                        valorPessoalFinal.setText("R$00,00");
-                    }
                     //Inicializa array list, list view e cria um adapter para ela
-                    ListView lv = findViewById(R.id.listaItemDeGastoTelaPessoa);
+                    lv = findViewById(R.id.listaItemDeGastoTelaPessoa);
 
                     AdapterParaListaDeItemDeGasto adapterAlimento = new AdapterParaListaDeItemDeGasto(pessoaSelecionada.historicoItemDeGastos, TelaPessoa.this);
 
@@ -108,10 +108,40 @@ public class TelaPessoa extends AppCompatActivity {
             public void onCancelled(@NonNull DatabaseError databaseError) {
 
             }
-        });
+        };
 
+        listenerDasDespesas = new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                Despesa despesaTemporaria = dataSnapshot.getValue(Despesa.class);
 
-        referencia.child("AAAAAUSERS").addValueEventListener(new ValueEventListener() {
+                if(despesaTemporaria.valorRoleAberto > 0.0){
+                    valorPessoalFinal.setText("R$"+df.format(despesaTemporaria.valorRoleAberto));
+                }else{
+                    valorPessoalFinal.setText("R$00,00");
+                }
+
+                if(despesaTemporaria.fechou!= objTr.despesa.fechou){
+                    objTr.despesa = despesaTemporaria;
+                    Toast toast = Toast.makeText(TelaPessoa.this, "Despesa finalizada por outro integrante!", Toast.LENGTH_SHORT);
+                    toast.setGravity(Gravity.CENTER_HORIZONTAL | Gravity.BOTTOM, 0, 0);
+                    toast.show();
+
+                    Intent it  = new Intent(TelaPessoa.this, TelaPrincipal.class);
+                    startActivity(it);
+                    finish();
+                }else{
+                    objTr.despesa = despesaTemporaria;
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        };
+
+        listenerDosUsuarios = new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 usuariosCadastrados = new ArrayList<>();
@@ -130,14 +160,35 @@ public class TelaPessoa extends AppCompatActivity {
                 }else{
                     //Lidar com erro de conexao
                 }
-
             }
 
             @Override
             public void onCancelled(@NonNull DatabaseError databaseError) {
 
             }
-        });
+        };
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        referencia.child(objTr.userUid).child(objTr.despesa.idDadosDespesa).child("Integrantes").addValueEventListener(listenerDosIntegrantes);
+        referencia.child(objTr.userUid).child(objTr.despesa.idDadosDespesa).child("Despesa").addValueEventListener(listenerDasDespesas);
+        referencia.child("AAAAAUSERS").addValueEventListener(listenerDosUsuarios);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        referencia.child(objTr.userUid).child(objTr.despesa.idDadosDespesa).child("Integrantes").removeEventListener(listenerDosIntegrantes);
+        referencia.child(objTr.userUid).child(objTr.despesa.idDadosDespesa).child("Despesa").removeEventListener(listenerDasDespesas);
+        referencia.child("AAAAAUSERS").removeEventListener(listenerDosUsuarios);
+    }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        finish();
     }
 
     public void deletarItemDeGasto(View v){
@@ -174,17 +225,14 @@ public class TelaPessoa extends AppCompatActivity {
         layout.addView(textoAlerta);
         builder.setView(layout);
 
-
         builder.setPositiveButton("Sim", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface arg0, int arg1) {
 
             int tag = (Integer) view.getTag();
             ItemDeGasto itemDeGastoASerDeletado = pessoaSelecionada.historicoItemDeGastos.get(tag);
 
-            //itemDeGastoASerDeletado.excluido =true;
             if(isOnline(TelaPessoa.this)){
                 try{
-                    //itemDeGastoASerDeletado.excluido =true;
                     for(int i = 0; i < itemDeGastoASerDeletado.usuariosQueConsomemEsseitem.size(); i++){
                         for(int j = 0; j < integrantes.size(); j++){
                             if (integrantes.get(j).id.equals(itemDeGastoASerDeletado.usuariosQueConsomemEsseitem.get(i).uidConsumidor)){
@@ -201,7 +249,6 @@ public class TelaPessoa extends AppCompatActivity {
                                 }
                                 break;
                             }
-
                         }
                     }
                     objTr.despesa.valorRoleAberto -= itemDeGastoASerDeletado.valor * itemDeGastoASerDeletado.usuariosQueConsomemEsseitem.size();

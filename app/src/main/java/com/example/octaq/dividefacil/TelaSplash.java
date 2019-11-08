@@ -14,7 +14,6 @@ import com.google.firebase.auth.FirebaseUser;
 
 public class TelaSplash extends AppCompatActivity {
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -50,6 +49,12 @@ public class TelaSplash extends AppCompatActivity {
         }
     }
 
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        finish();
+    }
+
     private void login(FirebaseUser usuario){
         if (usuario != null){
             Intent it  = new Intent(TelaSplash.this, TelaPrincipal.class);
@@ -61,6 +66,7 @@ public class TelaSplash extends AppCompatActivity {
             finish();
         }
     }
+
     public static boolean isOnline(Context context) {
         ConnectivityManager administradorDeConexao = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo informacoesDeConexao = administradorDeConexao.getActiveNetworkInfo();

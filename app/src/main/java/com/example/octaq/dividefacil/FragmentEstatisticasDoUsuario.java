@@ -4,8 +4,6 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.graphics.Color;
 import android.graphics.PointF;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.core.content.res.ResourcesCompat;
@@ -26,7 +24,6 @@ import com.hookedonplay.decoviewlib.charts.SeriesItem;
 import com.hookedonplay.decoviewlib.events.DecoEvent;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.List;
 
 import static com.example.octaq.dividefacil.TelaLogin.referencia;
@@ -47,7 +44,9 @@ public class FragmentEstatisticasDoUsuario extends Fragment {
     List<DadosDespesaParaGraficos> listaDadosDespesaParaGraficos;
     TextView textPercentage;
     double valorTotalGastoPessoal;
+    ValueEventListener listenerDasDespesas;
     DecimalFormat df = new DecimalFormat("#,###.00");
+
     public FragmentEstatisticasDoUsuario() {
         // Required empty public constructor
     }
@@ -62,6 +61,15 @@ public class FragmentEstatisticasDoUsuario extends Fragment {
         return fragment;
     }
 
+    public interface metodosFragmentEstatisticas{
+        public void plotaGraficos();
+    }
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        //dialog = ProgressDialog.show(getActivity(),"","Carregando suas despesas...",true);
+    }
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -69,33 +77,14 @@ public class FragmentEstatisticasDoUsuario extends Fragment {
             Gson gson = new Gson();
             objTr = gson.fromJson(getArguments().getString(ARG_PARAM), TransicaoDeDadosEntreActivities.class);
         }
-    }
 
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        final View view = inflater.inflate(R.layout.fragment_fragment_estatisticas_do_usuario, container, false);
 
-        arcView = view.findViewById(R.id.dynamicArcView);
-        lv = view.findViewById(R.id.lv_graficos_despesas);
-        textPercentage = view.findViewById(R.id.tv_graph);
-        textPercentage.setTypeface((ResourcesCompat.getFont(getContext(), R.font.cabin)));
-
-        dialog = ProgressDialog.show(getActivity(), "","Carregando suas Despesas...", true);
-
-        listaDadosDespesaParaGraficos = new ArrayList<>();
-
-        adapterParaListaEstatistica = new AdapterParaListaEstatistica(listaDadosDespesaParaGraficos, getContext());
-        lv.setAdapter(adapterParaListaEstatistica);
-
-        referencia.child(objTr.userUid).addValueEventListener(new ValueEventListener() {
+        listenerDasDespesas = new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
 
-
-                dialog.show();
-
                 despesas = new ArrayList<>();
+                listaDadosDespesaParaGraficos = new ArrayList<>();
 
                 try{
                     for(DataSnapshot dadosDataSnapshot: dataSnapshot.getChildren()){
@@ -144,9 +133,14 @@ public class FragmentEstatisticasDoUsuario extends Fragment {
 
                 ordenaListaDeDespesasporGasto();
 
-                adapterParaListaEstatistica.notifyDataSetChanged();
+                //adapterParaListaEstatistica.notifyDataSetChanged();
+                adapterParaListaEstatistica = new AdapterParaListaEstatistica(listaDadosDespesaParaGraficos, getContext());
+                lv.setAdapter(adapterParaListaEstatistica);
+
                 ajustaOTamanhoDaListViewParaOcuparTodaAScrollView(lv);
+
                 dialog.dismiss();
+
                 plotaGraficos();
             }
 
@@ -154,10 +148,40 @@ public class FragmentEstatisticasDoUsuario extends Fragment {
             public void onCancelled(@NonNull DatabaseError databaseError) {
 
             }
-        });
+        };
+    }
+
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
+        final View view = inflater.inflate(R.layout.fragment_fragment_estatisticas_do_usuario, container, false);
+
+        arcView = view.findViewById(R.id.dynamicArcView);
+        lv = view.findViewById(R.id.lv_graficos_despesas);
+        textPercentage = view.findViewById(R.id.tv_graph);
+        textPercentage.setTypeface((ResourcesCompat.getFont(getContext(), R.font.cabin)));
 
         return view;
     }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+
+        dialog = new ProgressDialog(getActivity());
+        dialog.setMessage("Carregando suas despesas...");
+        dialog.isIndeterminate();
+        dialog.show();
+
+        referencia.child(objTr.userUid).addValueEventListener(listenerDasDespesas);
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        referencia.child(objTr.userUid).removeEventListener(listenerDasDespesas);
+    }
+
 
     public float calculaPorcentagemGasto(double valor){
         return (float) ((valor/valorTotalGastoPessoal)*100);
@@ -372,10 +396,9 @@ public class FragmentEstatisticasDoUsuario extends Fragment {
             }
         }
 
-        //.setText("R$"+df.format(valorTotalGastoPessoal));
-
         arcView.configureAngles(360, 0);
     }
+
     public static void ajustaOTamanhoDaListViewParaOcuparTodaAScrollView(ListView listView) {
         ListAdapter listAdapter = listView.getAdapter();
         if (listAdapter == null) return;
@@ -399,12 +422,4 @@ public class FragmentEstatisticasDoUsuario extends Fragment {
         listView.requestLayout();
     }
 
-    public static boolean isOnline(Context context) {
-        ConnectivityManager administradorDeConexao = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo informacoesDeConexao = administradorDeConexao.getActiveNetworkInfo();
-        if (informacoesDeConexao != null && informacoesDeConexao.isConnected())
-            return true;
-        else
-            return false;
-        }
-    }
+}

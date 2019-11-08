@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="20dp">
+
+    <Button
+        android:id="@+id/button_usuario_share_it"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Usuário ShareIt"
+        android:textColor="#FFFF"
+        android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+        android:fontFamily="@font/cabin"
+        android:background="@drawable/button_shape_round_border_green"
+        android:layout_marginBottom="10dp" />
+
+    <Button
+        android:id="@+id/button_usuario_padrao"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Usuário padrão"
+        android:textColor="#FFFF"
+        android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+        android:fontFamily="@font/cabin"
+        android:background="@drawable/button_shape_round_border_green" />
+</LinearLayout>
