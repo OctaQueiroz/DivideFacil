@@ -46,6 +46,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Stack;
 
 import static com.example.octaq.dividefacil.TelaLogin.EXTRA_UID;
 import static com.example.octaq.dividefacil.TelaLogin.mAuth;
@@ -139,21 +140,27 @@ public class FragmentHistoricoDeDespesas extends Fragment {
             }
         });
 
-        //Carregando a list view sempre com os dados do banco
         listenerDasDespesas = new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
 
                 despesas = new ArrayList<>();
 
+                Stack pilhaDeDespesas = new Stack<Despesa>();
+
                 try{
                     for(DataSnapshot dadosDataSnapshot: dataSnapshot.getChildren()){
                         Despesa despesaAtualizado = dadosDataSnapshot.child("Despesa").getValue(Despesa.class);
                         if(despesaAtualizado != null) {
                             if (!despesaAtualizado.excluido) {
-                                despesas.add(despesaAtualizado);
+                                pilhaDeDespesas.push(despesaAtualizado);
                             }
                         }
+                    }
+                    Despesa despesaDapilha;
+                    while(!pilhaDeDespesas.empty()){
+                        despesaDapilha = (Despesa)pilhaDeDespesas.pop();
+                        despesas.add(despesaDapilha);
                     }
                 }catch (Exception e){
                     //Lidar com erro de conexao

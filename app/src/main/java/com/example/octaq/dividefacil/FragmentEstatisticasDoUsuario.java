@@ -2,16 +2,22 @@ package com.example.octaq.dividefacil;
 
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
 import android.graphics.Color;
+import android.graphics.Point;
 import android.graphics.PointF;
 import android.os.Bundle;
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.core.content.res.ResourcesCompat;
 import androidx.fragment.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.OvershootInterpolator;
+import android.widget.AdapterView;
+import android.widget.LinearLayout;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -33,11 +39,8 @@ public class FragmentEstatisticasDoUsuario extends Fragment {
     private static final String ARG_PARAM = "Dados do usuario";
     private TransicaoDeDadosEntreActivities objTr;
 
-    //Para administrar a list view
     List<Despesa> despesas;
     ProgressDialog dialog;
-
-    //Variáveis do dialogo para criar novo despesa
     ListView lv;
     AdapterParaListaEstatistica adapterParaListaEstatistica;
     DecoView arcView;
@@ -46,6 +49,7 @@ public class FragmentEstatisticasDoUsuario extends Fragment {
     double valorTotalGastoPessoal;
     ValueEventListener listenerDasDespesas;
     DecimalFormat df = new DecimalFormat("#,###.00");
+    private AlertDialog alerta;
 
     public FragmentEstatisticasDoUsuario() {
         // Required empty public constructor
@@ -398,6 +402,8 @@ public class FragmentEstatisticasDoUsuario extends Fragment {
 
         arcView.configureAngles(360, 0);
     }
+
+
 
     public static void ajustaOTamanhoDaListViewParaOcuparTodaAScrollView(ListView listView) {
         ListAdapter listAdapter = listView.getAdapter();
