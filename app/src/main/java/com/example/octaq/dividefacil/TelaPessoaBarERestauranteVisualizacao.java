@@ -1,5 +1,6 @@
 package com.example.octaq.dividefacil;
 
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import androidx.annotation.NonNull;
@@ -42,6 +43,7 @@ public class TelaPessoaBarERestauranteVisualizacao extends AppCompatActivity {
     ValueEventListener listenerDosIntegrantes;
     ValueEventListener listenerDasDespesas;
     ListView lv;
+    private ProgressDialog dialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -82,6 +84,18 @@ public class TelaPessoaBarERestauranteVisualizacao extends AppCompatActivity {
                         //lidar com erro de conexao
                     }
 
+                    valorTotalComAcrescimo = 0.0;
+
+                    valorTotalComAcrescimo += pessoaSelecionada.valorTotal*1.1;
+
+                    if(pessoaSelecionada.valorTotal > 0.0){
+                        valorPessoalFinal.setText("R$"+df.format(pessoaSelecionada.valorTotal));
+                        valorPessoalComAcrescimo.setText("R$"+df.format(valorTotalComAcrescimo));
+                    }else{
+                        valorPessoalFinal.setText("R$00,00");
+                        valorPessoalComAcrescimo.setText("R$00,00");
+                    }
+
                     nome.setText(pessoaSelecionada.nome);
 
                     lv = findViewById(R.id.listaAlimentosTelaPessoa);
@@ -92,29 +106,9 @@ public class TelaPessoaBarERestauranteVisualizacao extends AppCompatActivity {
                 }catch (Exception ex){
 
                 }
-            }
 
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-
-            }
-        };
-
-        listenerDasDespesas = new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                objTr.despesa = dataSnapshot.getValue(Despesa.class);
-
-                valorTotalComAcrescimo = 0.0;
-
-                valorTotalComAcrescimo += objTr.despesa.valorRoleAberto*1.1;
-
-                if(objTr.despesa.valorRoleAberto > 0.0){
-                    valorPessoalFinal.setText("R$"+df.format(objTr.despesa.valorRoleAberto));
-                    valorPessoalComAcrescimo.setText("R$"+df.format(valorTotalComAcrescimo));
-                }else{
-                    valorPessoalFinal.setText("R$00,00");
-                    valorPessoalComAcrescimo.setText("R$00,00");
+                if(dialog.isShowing()){
+                    dialog.dismiss();
                 }
             }
 
@@ -123,20 +117,22 @@ public class TelaPessoaBarERestauranteVisualizacao extends AppCompatActivity {
 
             }
         };
+
     }
 
     @Override
     protected void onResume() {
         super.onResume();
+
+        dialog = ProgressDialog.show(TelaPessoaBarERestauranteVisualizacao.this,"","Carregando dados...",true,false);
+
         referencia.child(objTr.userUid).child(objTr.despesa.idDadosDespesa).child("Integrantes").addValueEventListener(listenerDosIntegrantes);
-        referencia.child(objTr.userUid).child(objTr.despesa.idDadosDespesa).child("Despesa").addValueEventListener(listenerDasDespesas);
     }
 
     @Override
     protected void onPause() {
         super.onPause();
         referencia.child(objTr.userUid).child(objTr.despesa.idDadosDespesa).child("Integrantes").removeEventListener(listenerDosIntegrantes);
-        referencia.child(objTr.userUid).child(objTr.despesa.idDadosDespesa).child("Despesa").removeEventListener(listenerDasDespesas);
     }
 
     @Override

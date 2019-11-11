@@ -3,6 +3,8 @@ package com.example.octaq.dividefacil;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
+
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.net.ConnectivityManager;
@@ -46,6 +48,7 @@ public class TelaPessoaVisualizacao extends AppCompatActivity {
     ValueEventListener listenerDosIntegrantes;
     ValueEventListener listenerDasDespesas;
     ListView lv;
+    private ProgressDialog dialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -117,23 +120,9 @@ public class TelaPessoaVisualizacao extends AppCompatActivity {
                 }catch (Exception ex){
 
                 }
-            }
 
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-
-            }
-        };
-
-        listenerDasDespesas = new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                objTr.despesa = dataSnapshot.getValue(Despesa.class);
-
-                if(objTr.despesa.valorRoleAberto > 0.0){
-                    valorPessoalFinal.setText("R$"+df.format(objTr.despesa.valorRoleAberto));
-                }else{
-                    valorPessoalFinal.setText("R$00,00");
+                if(dialog.isShowing()){
+                    dialog.dismiss();
                 }
             }
 
@@ -142,20 +131,22 @@ public class TelaPessoaVisualizacao extends AppCompatActivity {
 
             }
         };
+
     }
 
     @Override
     protected void onResume() {
         super.onResume();
+
+        dialog = ProgressDialog.show(TelaPessoaVisualizacao.this,"","Carregando dados...",true,false);
+
         referencia.child(currentUser.getUid()).child(objTr.despesa.idDadosDespesa).child("Integrantes").addValueEventListener(listenerDosIntegrantes);
-        referencia.child(objTr.userUid).child(objTr.despesa.idDadosDespesa).child("Despesa").addValueEventListener(listenerDasDespesas);
     }
 
     @Override
     protected void onPause() {
         super.onPause();
         referencia.child(currentUser.getUid()).child(objTr.despesa.idDadosDespesa).child("Integrantes").removeEventListener(listenerDosIntegrantes);
-        referencia.child(objTr.userUid).child(objTr.despesa.idDadosDespesa).child("Despesa").removeEventListener(listenerDasDespesas);
     }
 
     @Override

@@ -3,6 +3,8 @@ package com.example.octaq.dividefacil;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
+
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.net.ConnectivityManager;
@@ -46,6 +48,7 @@ public class TelaDespesaVisualizacao extends AppCompatActivity {
     ValueEventListener listenerDosIntegrantes;
     ValueEventListener listenerDasDespesas;
     ListView lv;
+    private ProgressDialog dialog;
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -112,6 +115,10 @@ public class TelaDespesaVisualizacao extends AppCompatActivity {
                 AdapterParaListaDePessoa adapterPessoa = new AdapterParaListaDePessoa(dados,objTr, TelaDespesaVisualizacao.this);
 
                 lv.setAdapter(adapterPessoa);
+
+                if(dialog.isShowing()){
+                    dialog.dismiss();
+                }
             }
 
             @Override
@@ -130,6 +137,10 @@ public class TelaDespesaVisualizacao extends AppCompatActivity {
                 }else{
                     valorFinalConta.setText("R$00,00");
                 }
+
+                if(dialog.isShowing()){
+                    dialog.dismiss();
+                }
             }
 
             @Override
@@ -142,6 +153,9 @@ public class TelaDespesaVisualizacao extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
+
+        dialog = ProgressDialog.show(TelaDespesaVisualizacao.this,"","Carregando dados...",true,false);
+
         referencia.child(objTr.userUid).child(objTr.despesa.idDadosDespesa).child("Integrantes").addValueEventListener(listenerDosIntegrantes);
         referencia.child(objTr.userUid).child(objTr.despesa.idDadosDespesa).child("Despesa").addValueEventListener(listenerDasDespesas);
     }

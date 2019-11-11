@@ -70,6 +70,7 @@ public class TelaDespesa extends AppCompatActivity {
     ValueEventListener listenerDosIntegrantes;
     ValueEventListener listenerDasDespesas;
     ValueEventListener listenerDosUsuarios;
+    private ProgressDialog dialog;
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -155,6 +156,9 @@ public class TelaDespesa extends AppCompatActivity {
                 }else{
                     objTr.despesa = despesaTemporaria;
                 }
+                if(dialog.isShowing()){
+                    dialog.dismiss();
+                }
             }
 
             @Override
@@ -194,6 +198,9 @@ public class TelaDespesa extends AppCompatActivity {
 
                 lv.setAdapter(adapterPessoa);
 
+                if(dialog.isShowing()){
+                    dialog.dismiss();
+                }
             }
 
             @Override
@@ -221,6 +228,9 @@ public class TelaDespesa extends AppCompatActivity {
                 }else{
                     //Lidar com erro de conexao
                 }
+                if(dialog.isShowing()){
+                    dialog.dismiss();
+                }
             }
 
             @Override
@@ -240,6 +250,9 @@ public class TelaDespesa extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
+
+        dialog = ProgressDialog.show(TelaDespesa.this,"","Carregando dados...",true,false);
+
         referencia.child(objTr.userUid).child(objTr.despesa.idDadosDespesa).child("Integrantes").addValueEventListener(listenerDosIntegrantes);
         referencia.child(objTr.userUid).child(objTr.despesa.idDadosDespesa).child("Despesa").addValueEventListener(listenerDasDespesas);
         referencia.child("AAAAAUSERS").addValueEventListener(listenerDosUsuarios);

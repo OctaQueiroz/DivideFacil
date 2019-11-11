@@ -1,5 +1,6 @@
 package com.example.octaq.dividefacil;
 
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -48,6 +49,7 @@ public class TelaPessoaBarERestaurante extends AppCompatActivity {
     ValueEventListener listenerDasDespesas;
     ValueEventListener listenerDosUsuarios;
     ListView lv;
+    private ProgressDialog dialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -93,6 +95,18 @@ public class TelaPessoaBarERestaurante extends AppCompatActivity {
                         //lidar com erro de conexao
                     }
 
+                    valorTotalComAcrescimo = 0.0;
+
+                    valorTotalComAcrescimo += pessoaSelecionada.valorTotal*1.1;
+
+                    if(pessoaSelecionada.valorTotal > 0.0){
+                        valorPessoalFinal.setText("R$"+df.format(pessoaSelecionada.valorTotal));
+                        valorPessoalComAcrescimo.setText("R$"+df.format(valorTotalComAcrescimo));
+                    }else{
+                        valorPessoalFinal.setText("R$00,00");
+                        valorPessoalComAcrescimo.setText("R$00,00");
+                    }
+
                     nome.setText(pessoaSelecionada.nome);
 
                     lv = findViewById(R.id.listaItemDeGastoTelaPessoa);
@@ -102,6 +116,10 @@ public class TelaPessoaBarERestaurante extends AppCompatActivity {
                     lv.setAdapter(adapterAlimento);
                 }catch (Exception ex){
 
+                }
+
+                if(dialog.isShowing()){
+                    dialog.dismiss();
                 }
             }
 
@@ -116,18 +134,6 @@ public class TelaPessoaBarERestaurante extends AppCompatActivity {
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 Despesa despesaTemporaria = dataSnapshot.getValue(Despesa.class);
 
-                valorTotalComAcrescimo = 0.0;
-
-                valorTotalComAcrescimo += despesaTemporaria.valorRoleAberto*1.1;
-
-                if(despesaTemporaria.valorRoleAberto > 0.0){
-                    valorPessoalFinal.setText("R$"+df.format(despesaTemporaria.valorRoleAberto));
-                    valorPessoalComAcrescimo.setText("R$"+df.format(valorTotalComAcrescimo));
-                }else{
-                    valorPessoalFinal.setText("R$00,00");
-                    valorPessoalComAcrescimo.setText("R$00,00");
-                }
-
                 if(despesaTemporaria.fechou!= objTr.despesa.fechou){
                     objTr.despesa = despesaTemporaria;
                     Toast toast = Toast.makeText(TelaPessoaBarERestaurante.this, "Despesa finalizada por outro integrante!", Toast.LENGTH_SHORT);
@@ -139,6 +145,10 @@ public class TelaPessoaBarERestaurante extends AppCompatActivity {
                     finish();
                 }else{
                     objTr.despesa = despesaTemporaria;
+                }
+
+                if(dialog.isShowing()){
+                    dialog.dismiss();
                 }
             }
 
@@ -178,6 +188,9 @@ public class TelaPessoaBarERestaurante extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
+
+        dialog = ProgressDialog.show(TelaPessoaBarERestaurante.this,"","Carregando dados...",true,false);
+
         referencia.child(objTr.userUid).child(objTr.despesa.idDadosDespesa).child("Integrantes").addValueEventListener(listenerDosIntegrantes);
         referencia.child(objTr.userUid).child(objTr.despesa.idDadosDespesa).child("Despesa").addValueEventListener(listenerDasDespesas);
         referencia.child("AAAAAUSERS").addValueEventListener(listenerDosUsuarios);

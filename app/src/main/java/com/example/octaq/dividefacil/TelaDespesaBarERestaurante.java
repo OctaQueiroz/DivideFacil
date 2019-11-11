@@ -1,5 +1,6 @@
 package com.example.octaq.dividefacil;
 
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -71,6 +72,7 @@ public class TelaDespesaBarERestaurante extends AppCompatActivity {
     ValueEventListener listenerDosIntegrantes;
     ValueEventListener listenerDasDespesas;
     ValueEventListener listenerDosUsuarios;
+    private ProgressDialog dialog;
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -167,6 +169,10 @@ public class TelaDespesaBarERestaurante extends AppCompatActivity {
                 AdapterParaListaDePessoa adapterPessoa = new AdapterParaListaDePessoa(dados, objTr,TelaDespesaBarERestaurante.this);
 
                 lv.setAdapter(adapterPessoa);
+
+                if(dialog.isShowing()){
+                    dialog.dismiss();
+                }
             }
 
             @Override
@@ -179,6 +185,7 @@ public class TelaDespesaBarERestaurante extends AppCompatActivity {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 Despesa despesaTemporaria = dataSnapshot.getValue(Despesa.class);
+
 
                 valorTotalContaComAcrescimo = 0.0;
 
@@ -204,7 +211,9 @@ public class TelaDespesaBarERestaurante extends AppCompatActivity {
                 }else{
                     objTr.despesa = despesaTemporaria;
                 }
-
+                if(dialog.isShowing()){
+                    dialog.dismiss();
+                }
             }
 
             @Override
@@ -233,6 +242,9 @@ public class TelaDespesaBarERestaurante extends AppCompatActivity {
                     //Lidar com erro de conexao
                 }
 
+                if(dialog.isShowing()){
+                    dialog.dismiss();
+                }
             }
 
             @Override
@@ -252,6 +264,9 @@ public class TelaDespesaBarERestaurante extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
+
+        dialog = ProgressDialog.show(TelaDespesaBarERestaurante.this,"","Carregando dados...",true,false);
+
         referencia.child(objTr.userUid).child(objTr.despesa.idDadosDespesa).child("Integrantes").addValueEventListener(listenerDosIntegrantes);
         referencia.child(objTr.userUid).child(objTr.despesa.idDadosDespesa).child("Despesa").addValueEventListener(listenerDasDespesas);
         referencia.child("AAAAAUSERS").addValueEventListener(listenerDosUsuarios);

@@ -1,5 +1,6 @@
 package com.example.octaq.dividefacil;
 
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import androidx.annotation.NonNull;
@@ -57,6 +58,7 @@ public class TelaDespesaBarERestauranteVisualizacao extends AppCompatActivity {
     ValueEventListener listenerDosIntegrantes;
     ValueEventListener listenerDasDespesas;
     ListView lv;
+    private ProgressDialog dialog;
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -124,6 +126,10 @@ public class TelaDespesaBarERestauranteVisualizacao extends AppCompatActivity {
                 AdapterParaListaDePessoa adapterPessoa = new AdapterParaListaDePessoa(dados,objTr, TelaDespesaBarERestauranteVisualizacao.this);
 
                 lv.setAdapter(adapterPessoa);
+
+                if(dialog.isShowing()){
+                    dialog.dismiss();
+                }
             }
 
             @Override
@@ -148,6 +154,10 @@ public class TelaDespesaBarERestauranteVisualizacao extends AppCompatActivity {
                     valorFinalConta.setText("R$00,00");
                     valorFinalContaComAcrescimo.setText("R$00,00");
                 }
+
+                if(dialog.isShowing()){
+                    dialog.dismiss();
+                }
             }
 
             @Override
@@ -160,6 +170,9 @@ public class TelaDespesaBarERestauranteVisualizacao extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
+
+        dialog = ProgressDialog.show(TelaDespesaBarERestauranteVisualizacao.this,"","Carregando dados...",true,false);
+
         referencia.child(objTr.userUid).child(objTr.despesa.idDadosDespesa).child("Integrantes").addValueEventListener(listenerDosIntegrantes);
         referencia.child(objTr.userUid).child(objTr.despesa.idDadosDespesa).child("Despesa").addValueEventListener(listenerDasDespesas);
     }
