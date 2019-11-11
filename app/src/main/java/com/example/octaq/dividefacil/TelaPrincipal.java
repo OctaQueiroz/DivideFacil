@@ -65,8 +65,31 @@ public class TelaPrincipal extends AppCompatActivity {
 
         objTr = new TransicaoDeDadosEntreActivities();
 
-       objTr.userUid = mAuth.getCurrentUser().getUid();
+        objTr.userUid = mAuth.getCurrentUser().getUid();
         objTr.userEmail = mAuth.getCurrentUser().getEmail();
+
+        SharedPreferences preferences = getSharedPreferences("Daltonismo", MODE_PRIVATE);
+        try{
+            if(preferences.getString("Daltonismo","").equals("Nenhum")){
+                objTr.daltonismo = "Nenhum";
+            }else if(preferences.getString("Daltonismo","").equals("Protanopia")){
+                objTr.daltonismo = "Protanopia";
+            }else if(preferences.getString("Daltonismo","").equals("Deuteranopia")){
+                objTr.daltonismo = "Deuteranopia";
+            }else if(preferences.getString("Daltonismo","").equals("Tritanopia")){
+                objTr.daltonismo = "Tritanopia";
+            }else{
+                SharedPreferences.Editor editor = preferences.edit();
+                editor.putString("Daltonismo", "Nenhum");
+                editor.apply();
+            }
+        }catch (Exception e){
+            SharedPreferences.Editor editor = preferences.edit();
+            editor.putString("Daltonismo", "Nenhum");
+            editor.apply();
+        }
+
+
         String[] nomeUsuarioAtual = mAuth.getCurrentUser().getDisplayName().split(" ");
         String nomeASerSalvo;
         if (nomeUsuarioAtual.length > 1) {
@@ -202,7 +225,23 @@ public class TelaPrincipal extends AppCompatActivity {
 
         builder.setSingleChoiceItems(adapter, 0, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface arg0, int arg1) {
+
                 objTr.daltonismo = listaDeDaltonismos.get(arg1);
+
+                SharedPreferences preferences = getSharedPreferences("Daltonismo", MODE_PRIVATE);
+                SharedPreferences.Editor editor = preferences.edit();
+
+                if(objTr.daltonismo.equals("Nenhum")){
+                    editor.putString("Daltonismo", "Nenhum");
+                }else if(objTr.daltonismo.equals("Protanopia")){
+                    editor.putString("Daltonismo", "Protanopia");
+                }else if(objTr.daltonismo.equals("Deuteranopia")){
+                    editor.putString("Daltonismo", "Deuteranopia");
+                }else if(objTr.daltonismo.equals("Tritanopia")){
+                    editor.putString("Daltonismo", "Tritanopia");
+                }
+                editor.apply();
+
                 alerta.dismiss();
 
                 FragmentManager fragmentManager = getSupportFragmentManager();

@@ -187,10 +187,7 @@ public class FragmentHistoricoDeDespesas extends Fragment {
     public void onStart() {
         super.onStart();
 
-        dialog = new ProgressDialog(getActivity());
-        dialog.setMessage("Carregando suas despesas...");
-        dialog.isIndeterminate();
-        dialog.show();
+        dialog = ProgressDialog.show(getActivity(),"","Carregando suas despesas...",true,false);
 
         referencia.child(objTr.userUid).addValueEventListener(listenerDasDespesas);
     }
